@@ -1115,6 +1115,7 @@ end
         
         axis ij
         [i_temp,j_temp] = myginput(1,'circle');
+        handles.activeCamData.drawMap = 0;
         % call button_down_function to select movieScreen before marker adding
         button_down_function(handles.activeCamData.screen);
     	
