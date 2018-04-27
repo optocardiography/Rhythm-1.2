@@ -234,11 +234,11 @@ guidata(riseTimeGroup, handles);
           RT_min = mean(RiseTime(isfinite(RiseTime))) - 2*std(RiseTime(isfinite(RiseTime)));
           RT_max = mean(RiseTime(isfinite(RiseTime))) + 2*std(RiseTime(isfinite(RiseTime)));
 
-          %G =real2rgb(bg, 'gray');
-          %J=real2rgb(Mask2,'jet',[RT_min RT_max]);
-          %A=real2rgb(Mask,'gray');
-          %I = J .* A + G .* (1-A);
-          I= Mask2 .*Mask+bg .* (1-Mask);
+          G =real2rgb(bg, 'gray');
+          J=real2rgb(Mask2,'jet',[RT_min RT_max]);
+          A=real2rgb(Mask,'gray');
+          I = J .* A + G .* (1-A);
+          %I= Mask2 .*Mask+bg .* (1-Mask);
           handles.activeCamData.saveData = I;
           
           %Plot Rise Time Map and Histogram
