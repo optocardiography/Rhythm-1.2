@@ -1,0 +1,318 @@
+function GUI_conditionParameters(conditionParametersGroup, handles, signal_scrn1, signal_scrn2, signal_scrn3, signal_scrn4, signal_scrn5)
+% New pushbutton with callback definition.
+% Signal Conditioning Button Group and Buttons
+fontSize=9;
+
+removeBG_button = uicontrol('Parent',conditionParametersGroup,...
+                            'Style','checkbox','FontSize',fontSize,...
+                            'String','Remove Background',...
+                            'Units','normalized',...
+                            'Position',[0.01 0.9 0.9 0.1]);
+
+bg_thresh_label = uicontrol('Parent',conditionParametersGroup, ...
+                            'Style','text','FontSize',fontSize,...
+                            'String','BG Threshold',...
+                            'Units','normalized',...
+                            'Position',[0.1 0.8 0.6 0.1]);
+bg_thresh_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
+                           'FontSize',fontSize,'String','0.3',...
+                           'Units','normalized',...
+                           'Position',[0.7 0.8 0.3 0.1]);
+                       
+perc_ex_label = uicontrol('Parent',conditionParametersGroup,'Style','text',...
+                          'FontSize',fontSize,'String','EX Threshold',...
+                          'Units','normalized',...
+                          'Position',[0.1 0.7 0.6 0.1]);
+perc_ex_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
+                         'FontSize',fontSize,'String','0.5',...
+                         'Units','normalized',...
+                         'Position',[0.7 0.7 0.3 0.1]);
+
+bin_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
+                        'FontSize',fontSize,'String','Bin',...
+                        'Units','normalized',...
+                         'Position',[0 0.6 0.5 0.1]);
+filt_button = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
+                        'FontSize',fontSize,'String','Filter',...
+                        'Units','normalized',...
+                        'Position',[0 0.5 0.5 0.1]);
+removeDrift_button = uicontrol('Parent',conditionParametersGroup,...
+                        'Style','checkbox','FontSize',10,'String','Drift',...
+                        'Units','normalized',...
+                        'Position',[0 0.4 0.5 0.1]);
+norm_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
+                        'FontSize',fontSize,'String','Normalize',...
+                        'Units','normalized',...
+                        'Position',[0 0.3 1 0.1]);
+denoise_button = uicontrol('Parent',conditionParametersGroup,...
+                           'Style','checkbox','FontSize',fontSize,...
+                           'String','Denoise (BETA)',...
+                           'Units','normalized',...
+                         'Position',[0 0.2 1 0.1]);
+apply_button = uicontrol('Parent',conditionParametersGroup,...
+                         'Style','pushbutton','FontSize',fontSize,...
+                         'String','Apply',...
+                         'Units','normalized',...
+                         'Position',[0 0 1 0.1],'Callback',@cond_sig_selcbk);
+%Pop-up menu options
+bin_popup = uicontrol('Parent',conditionParametersGroup,...
+                      'Style','popupmenu','FontSize',fontSize,...
+                      'String',{'3 x 3', '5 x 5', '7 x 7'},...
+                      'Units','normalized',...
+                      'Position',[0.5 0.6 0.5 0.1]);
+filt_popup = uicontrol('Parent',conditionParametersGroup,...
+                       'Style','popupmenu','FontSize',fontSize,...
+                       'String',{'[0 50]','[0 75]', '[0 100]', '[0 150]'},...
+                       'Units','normalized',...
+                       'Position',[0.5 0.5 0.5 0.1]);
+drift_popup = uicontrol('Parent',conditionParametersGroup,...
+                        'Style','popupmenu','FontSize',fontSize,...
+                        'String',{'1st Order','2nd Order', '3rd Order', '4th Order'},...
+                        'Units','normalized',...
+                        'Position',[0.5 0.4 0.5 0.1]);
+set(filt_popup,'Value',3)
+
+guidata(conditionParametersGroup, handles);
+
+% Condition Signals Selection Change Callback
+    function cond_sig_selcbk(hObject,~)
+        % Read check box
+        removeBG_state =get(removeBG_button,'Value');
+        bin_state = get(bin_button,'Value');
+        filt_state = get(filt_button,'Value');
+        drift_state = get(removeDrift_button,'Value');
+        norm_state = get(norm_button,'Value');
+        denoise_state = get(denoise_button,'Value');
+        % Grab pop up box values
+        bin_pop_state = get(bin_popup,'Value');
+        
+        % Create variable for tracking conditioning progress
+        trackProg = [removeBG_state filt_state bin_state drift_state norm_state denoise_state];
+        trackProg = sum(trackProg);
+        counter = 0;
+        g1 = waitbar(counter,'Conditioning Signal');
+        
+        % Return to raw unfiltered cmos data
+        
+        handles.normflag = 0; % Initialize normflag
+        handles.activeCamData.cmosData = handles.activeCamData.cmosRawData;
+        
+        % Condition Signals
+        % Remove Background
+        if removeBG_state == 1
+            % Update counter % progress bar
+            counter = counter + 1;
+            waitbar(counter/trackProg,g1,'Removing Background');
+            bg_thresh = str2double(get(bg_thresh_edit,'String'));
+            perc_ex = str2double(get(perc_ex_edit,'String'));
+            handles.activeCamData.cmosData = remove_BKGRD(handles.activeCamData.cmosData,handles.activeCamData.bg,bg_thresh,perc_ex);
+        end
+        % Bin Data
+        if bin_state == 1
+            % Update counter % progress bar
+            counter = counter + 1;
+            waitbar(counter/trackProg,g1,'Binning Data');
+            if bin_pop_state == 3
+                bin_size = 7;
+            elseif bin_pop_state == 2
+                bin_size = 5;
+            else
+                bin_size = 3;
+            end
+            handles.activeCamData.cmosData = binning(handles.activeCamData.cmosData,bin_size);
+        end
+        % Filter Data
+        if filt_state == 1
+            % Update counter % progress bar
+            counter = counter + 1;
+            waitbar(counter/trackProg,g1,'Filtering Data');
+            filt_pop_state = get(filt_popup,'Value');
+            if filt_pop_state == 4
+                or = 100;
+                lb = 0.5;
+                hb = 150;
+            elseif filt_pop_state == 3
+                or = 100;
+                lb = 0.5;
+                hb = 100;
+            elseif filt_pop_state == 2
+                or = 100;
+                lb = 0.5;
+                hb = 75;
+            else
+                or = 100;
+                lb = 0.5;
+                hb = 50;
+            end
+            handles.activeCamData.cmosData = filter_data(handles.activeCamData.cmosData,handles.activeCamData.Fs, or, lb, hb);
+        end
+        % Remove Drift
+        if drift_state == 1
+            % Update counter % progress bar
+            counter = counter + 1;
+            waitbar(counter/trackProg,g1,'Removing Drift');
+            % Gather drift values and adjust for drift
+            ord_val = get(drift_popup,'Value');
+            ord_str = get(drift_popup,'String');
+            handles.activeCamData.cmosData = remove_Drift(handles.activeCamData.cmosData,ord_str(ord_val));
+        end
+        % Normalize Data
+        if norm_state == 1
+            % Update counter % progress bar
+            counter = counter + 1;
+            waitbar(counter/trackProg,g1,'Normalizing Data');
+            % Normalize data
+            handles.activeCamData.cmosData = normalize_data(handles.activeCamData.cmosData);
+            
+            handles.normflag = 1;
+        end
+        % Denoise Data
+        if denoise_state == 1
+            % Update counter % progress bar
+            counter = counter + 1;
+            waitbar(counter/trackProg,g1,'Denoising Data');
+            % Denoise data
+            handles.activeCamData.cmosData = denoise_data(handles.activeCamData.cmosData,handles.activeCamData.Fs,handles.activeCamData.bg);
+        end
+        
+        % Delete the progress bar 
+        delete(g1)
+        % Save conditioned signal
+        hObject.UserData = handles.activeCamData.cmosData;
+
+% Save handles in figure with handle f.
+        guidata(conditionParametersGroup, handles);
+        guidata(handles.activeScreen, handles);
+        if isempty(handles.activeCamData.cmosData)
+            msgbox('Warning: No data selected','Title','warn')
+        else
+            cla(handles.activeScreen);
+            handles.matrixMax = .9 * max(handles.activeCamData.cmosData(:));
+            currentframe = handles.frame;
+            if handles.normflag == 0
+                drawFrame(currentframe, handles.activeScreenNo);
+                hold on
+            else
+                drawFrame(currentframe, handles.activeScreenNo);
+                caxis([0 1])
+                hold on
+            end
+            set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
+        end
+        
+        
+    function drawFrame(frame, camNo)
+        for i=1:4
+            handles.allCamData(i).screen.XColor = 'black';
+            handles.allCamData(i).screen.YColor = 'black';
+        end
+        handles.activeScreen.XColor = 'red';
+        handles.activeScreen.YColor = 'red';
+
+        if handles.allCamData(camNo).isloaded==1
+
+            G = handles.allCamData(camNo).bgRGB;
+            if (frame <= handles.allCamData(camNo).maxFrame)
+                Mframe = handles.allCamData(camNo).cmosData(:,:,frame);
+            else
+                Mframe = handles.allCamData(camNo).cmosData(:,:,end);
+            end
+            if handles.normflag == 0
+                Mmax = handles.matrixMax;
+                Mmin = handles.minVisible;
+                numcol = size(jet,1);
+                J = ind2rgb(round((Mframe - Mmin) ./ (Mmax - Mmin) * (numcol - 1)), 'jet');
+                A = real2rgb(Mframe >= handles.minVisible, 'gray');
+            else
+                J = real2rgb(Mframe, 'jet');
+                A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
+            end
+
+            I = J .* A + G .* (1 - A);
+
+            image(I,'Parent',handles.allCamData(camNo).screen);
+
+            if handles.bounds(camNo) == 1
+                M = handles.markers1;
+            elseif handles.bounds(camNo) == 2
+                M = handles.markers2;
+            else
+                M = handles.allCamData(camNo).markers;
+            end
+            [a,~]=size(M);
+            hold(handles.allCamData(camNo).screen,'on')
+            image(I,'Parent',handles.allCamData(camNo).screen);
+                
+            for xx=1:a
+                plot(M(xx,1),M(xx,2),'wp','MarkerSize',12,'MarkerFaceColor',...
+                    handles.markerColors(xx),'MarkerEdgeColor','w','Parent',handles.allCamData(camNo).screen);
+
+                set(handles.allCamData(camNo).screen,'YTick',[],'XTick',[]);% Hide tick markes
+            end
+            hold(handles.allCamData(camNo).screen,'off')
+            
+        end
+        % redraw signal screens
+        if handles.bounds(handles.activeScreenNo) == 0
+            for i_cam=1:5
+                cla(handles.signalScreens(i_cam));
+            end
+            M = handles.activeCamData.markers; [a,~]=size(M);
+            hold on
+            for x=1:a
+                plot(handles.time(1:handles.activeCamData.maxFrame),...
+                    squeeze(handles.activeCamData.cmosData(M(x,1),M(x,2),:)),...
+                            handles.markerColors(x),'LineWidth',2,'Parent',handles.signalScreens(x));
+                set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
+            end
+            hold off
+        elseif handles.bounds(handles.activeScreenNo) == 1
+            % draw signal screens for the screen group 1
+            
+            for i_marker=1:5
+                for i_cam = 1:4
+                    cla(handles.signalGroup(i_marker).signalScreen(i_cam));
+                end
+            end
+            
+            M = handles.markers1;
+            msize = size(handles.markers1,1);
+            hold on
+            for i_marker=1:msize
+                for i_cam = 1:4
+                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
+                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
+                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,1),M(i_marker,2),:)),...
+                            handles.markerColors(i_marker),'LineWidth',2,...
+                            'Parent',handles.signalGroup(i_marker).signalScreen(i_cam))
+                    end
+                end
+            end
+            hold off
+        elseif handles.bounds(handles.activeScreenNo) == 2
+            % draw signal screens for the screen group 2
+            for i_marker=1:5
+                for i_cam = 1:4
+                    cla(handles.signalGroup(i_marker).signalScreen(i_cam));
+                end
+            end
+            
+            M = handles.markers2;
+            msize = size(handles.markers2,1);
+            hold on
+            for i_marker=1:msize
+                for i_cam = 1:4
+                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 2)
+                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
+                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,1),M(i_marker,2),:)),...
+                            handles.markerColors(i_marker),'LineWidth',2,...
+                            'Parent',handles.signalGroup(i_marker).signalScreen(i_cam))
+                    end
+                end
+            end
+            hold off
+        end
+    end
+end
+guidata(conditionParametersGroup, handles);
+end
