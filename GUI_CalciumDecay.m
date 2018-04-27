@@ -231,11 +231,13 @@ function calcTau_callback(~,~)
     handles.activeCamData.saveData = I;
           
           %Plot Rise Time Map and Histogram
-          axes(handles.activeScreen);
+          cla(handles.activeCamData.screen);
+          set(handles.activeCamData.screen,'YTick',[],'XTick',[]);
           image(I);
           colormap(jet);
-          axis image;
-          set(gca,'XTick',[],'YTick',[],'Xlim',[0 size(cmosData,1)],'YLim',[0 size(cmosData,2)]);
+          axis(handles.activeCamData.screen,'off')
+          %axis image;
+          %set(gca,'XTick',[],'YTick',[],'Xlim',[0 size(cmosData,1)],'YLim',[0 size(cmosData,2)]);
     handles.activeCamData.drawMap = 1;
     % Output results
      handles.activeCamData.meanresults = sprintf('Mean: %0.3f',Tau_mean);
