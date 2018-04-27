@@ -221,11 +221,11 @@ function calcTau_callback(~,~)
     Mask2=zeros(size(bg));
     Mask2(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3))=Tau2;
     %Set limits and Build Image
-    T_min = mean(Tau2(isfinite(Tau2))) - 2*Tau_std;
-    T_max = mean(Tau2(isfinite(Tau2))) + 2*Tau_std;
+    handles.T_min = mean(Tau2(isfinite(Tau2))) - 2*Tau_std;
+    handles.T_max = mean(Tau2(isfinite(Tau2))) + 2*Tau_std;
 
     G =real2rgb(bg, 'gray');
-    J=real2rgb(Mask2,'jet',[T_min T_max]);
+    J=real2rgb(Mask2,'jet',[handles.T_min handles.T_max]);
     A=real2rgb(Mask,'gray');
     I = J .* A + G .* (1-A);
     handles.activeCamData.saveData = I;
@@ -265,7 +265,7 @@ end
         figure;
             image (handles.activeCamData.saveData);
         colormap jet;
-        c=colorbar;
+        colorbar('Ticks',[0:0.2:5],'TickLabels', [handles.T_min:(handles.T_max-handles.T_min)/5:handles.T_max]);
         
        end
     end

@@ -83,5 +83,11 @@ classdef rhythmHandles < handle
         SDresults=[];
         num_members_results=[];
         angleresults=[];
+        
+        %Limits for colorbar in RiseTime and CalciumDecay function
+        RT_max=0;
+        RT_min=0;
+        T_min=0;
+        T_max=0;
     end
 end

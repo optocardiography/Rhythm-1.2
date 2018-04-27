@@ -231,28 +231,31 @@ guidata(riseTimeGroup, handles);
           Mask2(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3))=RiseTime;
           
           %Set limits and Build Image
-          RT_min = mean(RiseTime(isfinite(RiseTime))) - 2*std(RiseTime(isfinite(RiseTime)));
-          RT_max = mean(RiseTime(isfinite(RiseTime))) + 2*std(RiseTime(isfinite(RiseTime)));
+          handles.RT_min = mean(RiseTime(isfinite(RiseTime))) - 2*std(RiseTime(isfinite(RiseTime)));
+          handles.RT_max = mean(RiseTime(isfinite(RiseTime))) + 2*std(RiseTime(isfinite(RiseTime)));
 
           G =real2rgb(bg, 'gray');
-          J=real2rgb(Mask2,'jet',[RT_min RT_max]);
+          J=real2rgb(Mask2,'jet',[handles.RT_min handles.RT_max]);
           A=real2rgb(Mask,'gray');
           I = J .* A + G .* (1-A);
-          %I= Mask2 .*Mask+bg .* (1-Mask);
           handles.activeCamData.saveData = I;
           
           %Plot Rise Time Map and Histogram
 %          axes(handles.activeScreen);
-          cla(handles.activeCamData.screen);
+          %cla(handles.activeCamData.screen);
           set(handles.activeCamData.screen,'YTick',[],'XTick',[]);
+          
+          %imagesc( handles.activeCamData.screen,G);
           imagesc( handles.activeCamData.screen,I);
+       
+         
           colormap(jet);
           axis(handles.activeCamData.screen,'off')
           %axis image;
           %set(gca,'XTick',[],'YTick',[],'Xlim',[0 size(cmosData,1)],'YLim',[0 size(cmosData,2)]);
           %axis(movie_scrn,'off')
           figure('Name','Histogram of RiseTime')
-          hist(reshape(RiseTime,[],1),floor(RT_max-RT_min)*2)
+          hist(reshape(RiseTime,[],1),floor(handles.RT_max-handles.RT_min)*2)
         
      end
 
@@ -276,7 +279,7 @@ guidata(riseTimeGroup, handles);
         figure;
             image (handles.activeCamData.saveData);
         colormap jet;
-        colorbar;
+        colorbar('Ticks',[0:0.2:5],'TickLabels', [handles.RT_min:(handles.RT_max-handles.RT_min)/5:handles.RT_max]);
        end
     end
 end
