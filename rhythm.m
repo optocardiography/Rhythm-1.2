@@ -1110,7 +1110,8 @@ end
         handles.dispWaveClicked = 1;
         %set input point
         for i=1:4
-             assert(strcmp(get(handles.allCamData(i).screen,'YDir'),'reverse'));            
+             assert(strcmp(get(handles.allCamData(i).screen,'YDir'),'reverse'));  
+             handles.allCamData(i).drawMap=0;
         end
         
         axis ij
