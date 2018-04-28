@@ -1,5 +1,6 @@
 
-% This is the example/template of a GUI program. It should consist of two
+% This is the example/template of a GUI program by Alexander Zolotarev and 
+% Roman Pryamonosov. It should consist of two
 % parts. First is the painting of all texts, edits, popup-menu and buttons.
 % Any button should have button function which runs after clicking on this
 % button. This is second part.

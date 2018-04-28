@@ -1,13 +1,13 @@
 
 function rhythm
 close all; clc;
-%% RHYTHM 1.2 (28/4/2018)
+%% RHYTHM (01/27/2012)
 % Matlab software for analyzing optical mapping data
 %
-% Previous version by Matt Sulkin, Jake Laughner, Xinyuan Sophia Cui, Jed Jackoway
+% By Matt Sulkin, Jake Laughner, Xinyuan Sophia Cui, Jed Jackoway
 % Washington University in St. Louis -- Efimov Lab
 %
-% GUI functional and current version by: Roman Syunyaev, Roman Pryamonosov, and Alexander
+% GUI functional by: Roman Syunyaev, Roman Pryamonosov, and Alexander
 % Zolotarev.
 %
 % For any questions and suggestions, please email us at:
@@ -182,7 +182,7 @@ map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',10,...
                        'Position',[3 320 140 25], 'Callback',{@mapPopUp_callback});
 
 set(map_popup,'Value',1);
-set(map_popup,'Enable','off')
+
 % syncBox = uicontrol('Parent',p1,'Style','checkbox','FontSize',10,...
 %     'String','ScreenSync','Units','normalized','Position',[0.9 0 0.1 0.1],...
 %     'Callback',{@syncBox_callback});
@@ -370,16 +370,16 @@ function mapPopUp_callback(~,~)
     switch get(map_popup,'Value')
         case 1
             % Conduction Velocity Map
-            GUI_conditionParameters(map, handles); 
+            GUI_conditionParameters(map, handles, signal_scrn1, signal_scrn2, signal_scrn3, signal_scrn4, signal_scrn5); 
         case 2
              % New Conduction Velocity Map
-            GUI_NewConductionVelocity(map, handles, f);
+            GUI_NewConductionVelocity(map, handles, starttimemap_edit,endtimemap_edit, f);
         case 3
             %activationMap
-            GUI_ActivationMap(map, handles, f);
+            GUI_ActivationMap(map, handles, f,starttimemap_edit,endtimemap_edit);
         case 4
             % APD Map
-            GUI_ActionPotentialDurationMap(map, handles, f);
+            GUI_ActionPotentialDurationMap(map, handles, f, starttimemap_edit,endtimemap_edit);
         case 5
             % Rise Time Map
             GUI_RiseTime(map, handles, f);
@@ -736,7 +736,6 @@ end
                     break;
                 end
             end
-            set(map_popup,'Enable','on');
             % Clear off all images from previous set of data
             cla(handles.activeScreen); 
             for i_cam=1:5

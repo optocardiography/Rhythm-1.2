@@ -1,5 +1,12 @@
+% GUI for new conduction velocity analysis
+% Inputs: 
+% NewconductionVelocityGroup -- pannel to draw on
+% handles     -- rhythm handles
+% f           -- figure of the main rhythm window
+% 
+% by Roman Pryamonosov, Roman Syunyaev, and Alexander Zolotarev
 
-function GUI_NewConductionVelocity(NewconductionVelocityGroup, handles, starttimemap_edit,endtimemap_edit, f)
+function GUI_NewConductionVelocity(NewconductionVelocityGroup, handles, f)
 % New pushbutton with callback definition.
 
 calc_CV = uicontrol('Parent',NewconductionVelocityGroup,'Style','pushbutton',...

@@ -1,4 +1,11 @@
-function GUI_ActionPotentialDurationMap(apdMapGroup, handles, f, starttimemap_edit,endtimemap_edit)
+% GUI for Action Potentioal Duration analysis
+% Inputs: 
+% apdMapGroup -- pannel to draw on
+% handles     -- rhythm handles
+% f           -- figure of the main rhythm window
+% 
+% by Roman Pryamonosov, Roman Syunyaev, and Alexander Zolotarev 
+function GUI_ActionPotentialDurationMap(apdMapGroup, handles, f)
 handles.objectToDrawOn = apdMapGroup;
 
 starttime_apdmap_text = uicontrol('Parent',apdMapGroup, ...

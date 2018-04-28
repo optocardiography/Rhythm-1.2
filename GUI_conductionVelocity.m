@@ -1,4 +1,12 @@
-function GUI_conductionVelocity(conductionVelocityGroup, handles, starttimemap_edit,endtimemap_edit, f)
+% GUI for Conduction Velosity Analysis
+% Inputs: 
+% conductionVelocityGroup -- pannel to draw on
+% handles     -- rhythm handles
+% f           -- figure of the main rhythm window
+% 
+% by Roman Pryamonosov, Roman Syunyaev, and Alexander Zolotarev
+
+function GUI_conductionVelocity(conductionVelocityGroup, handles, f)
 % New pushbutton with callback definition.
 starttimecmap_text = uicontrol('Parent',conductionVelocityGroup, ...
                                        'Style','text','FontSize',10, ...

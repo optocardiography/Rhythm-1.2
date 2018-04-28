@@ -1,4 +1,11 @@
-function GUI_conditionParameters(conditionParametersGroup, handles, signal_scrn1, signal_scrn2, signal_scrn3, signal_scrn4, signal_scrn5)
+% Signal Processing instruments
+% Inputs:  
+% conditionParametersGroup -- pannel to draw on
+% handles                  -- rhythm handles
+% 
+% by Roman Pryamonosov, Roman Syunyaev, and Alexander Zolotarev
+
+function GUI_conditionParameters(conditionParametersGroup, handles)
 % New pushbutton with callback definition.
 % Signal Conditioning Button Group and Buttons
 fontSize=9;
