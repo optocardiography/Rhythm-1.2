@@ -144,7 +144,7 @@ function calcTau_callback(~,~)
     % Grab selected portion of trace and smooth it
     for i = 1:size(temp,1)
         for j = 1:size(temp,2)
-            newtemp = -temp(i,j,:);     % make transients positive
+            newtemp = temp(i,j,:);     % make transients positive
             tempmin = min(temp(i,j,:));        % remove baseline drift
             newtemp1 = newtemp - tempmin;
             Enddiastolic = round(median(newtemp(end-25:end)));

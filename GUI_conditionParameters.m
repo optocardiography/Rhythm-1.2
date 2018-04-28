@@ -44,9 +44,9 @@ norm_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',..
                         'FontSize',fontSize,'String','Normalize',...
                         'Units','normalized',...
                         'Position',[0 0.3 1 0.1]);
-denoise_button = uicontrol('Parent',conditionParametersGroup,...
+inverse_button = uicontrol('Parent',conditionParametersGroup,...
                            'Style','checkbox','FontSize',fontSize,...
-                           'String','Denoise (BETA)',...
+                           'String','Inverse signal',...
                            'Units','normalized',...
                          'Position',[0 0.2 1 0.1]);
 apply_button = uicontrol('Parent',conditionParametersGroup,...
@@ -82,12 +82,13 @@ guidata(conditionParametersGroup, handles);
         filt_state = get(filt_button,'Value');
         drift_state = get(removeDrift_button,'Value');
         norm_state = get(norm_button,'Value');
-        denoise_state = get(denoise_button,'Value');
+        inverse_state = get(inverse_button,'Value'); 
+        %denoise_state = get(denoise_button,'Value');
         % Grab pop up box values
         bin_pop_state = get(bin_popup,'Value');
         
         % Create variable for tracking conditioning progress
-        trackProg = [removeBG_state filt_state bin_state drift_state norm_state denoise_state];
+        trackProg = [removeBG_state filt_state bin_state drift_state norm_state inverse_state];
         trackProg = sum(trackProg);
         counter = 0;
         g1 = waitbar(counter,'Conditioning Signal');
@@ -166,14 +167,20 @@ guidata(conditionParametersGroup, handles);
             
             handles.normflag = 1;
         end
-        % Denoise Data
-        if denoise_state == 1
-            % Update counter % progress bar
+        %Inverse Data
+        if inverse_state==1
             counter = counter + 1;
-            waitbar(counter/trackProg,g1,'Denoising Data');
-            % Denoise data
-            handles.activeCamData.cmosData = denoise_data(handles.activeCamData.cmosData,handles.activeCamData.Fs,handles.activeCamData.bg);
+            waitbar(counter/trackProg,g1,'Inversing Data');
+            handles.activeCamData.cmosData=-handles.activeCamData.cmosData+max(handles.activeCamData.cmosData(:))+min(handles.activeCamData.cmosData(:));
         end
+        % Denoise Data
+        %if denoise_state == 1
+            % Update counter % progress bar
+        %    counter = counter + 1;
+        %    waitbar(counter/trackProg,g1,'Denoising Data');
+            % Denoise data
+        %    handles.activeCamData.cmosData = denoise_data(handles.activeCamData.cmosData,handles.activeCamData.Fs,handles.activeCamData.bg);
+        %end
         
         % Delete the progress bar 
         delete(g1)
