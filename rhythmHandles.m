@@ -1,3 +1,6 @@
+% rhythm handle class
+% by Roman Syunyaev
+
 classdef rhythmHandles < handle
     properties
         filename = [];

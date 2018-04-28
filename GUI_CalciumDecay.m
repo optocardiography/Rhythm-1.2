@@ -1,7 +1,10 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%Calcium Decay Analysis
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% GUI for Calcium Decay Analysis
+% Inputs: 
+% CalciumDecayGroup -- pannel to draw on
+% handles           -- rhythm handles
+% f                 -- figure of the main rhythm window
+% 
+% by Roman Pryamonosov, Roman Syunyaev, and Alexander Zolotarev
 function GUI_CalciumDecay(CalciumDecayGroup, handles, f)
 
 starttimecalc_text = uicontrol('Parent',CalciumDecayGroup, ...

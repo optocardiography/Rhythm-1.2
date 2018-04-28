@@ -1,3 +1,11 @@
+% GUI for Rise Time analysis
+% Inputs: 
+% riseTimeGroup -- pannel to draw on
+% handles       -- rhythm handles
+% f             -- figure of the main rhythm window
+% 
+% by Roman Pryamonosov, Roman Syunyaev, and Alexander Zolotarev
+
 function GUI_RiseTime(riseTimeGroup,handles, f)
 starttime_rtmap_text = uicontrol('Parent',riseTimeGroup, ...
                                        'Style','text','FontSize',10, ...

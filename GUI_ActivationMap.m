@@ -1,4 +1,12 @@
-function GUI_ActivationMap(activationMapGroup,handles, f, starttimemap_edit,endtimemap_edit)
+% GUI for Activation Map 
+% Inputs: 
+% activationMapGroup -- pannel to draw on
+% handles     -- rhythm handles
+% f           -- figure of the main rhythm window
+% 
+% by Roman Pryamonosov, Roman Syunyaev, and Alexander Zolotarev
+
+function GUI_ActivationMap(activationMapGroup,handles, f)
 starttimeamap_text = uicontrol('Parent',activationMapGroup, ...
                                        'Style','text','FontSize',10, ...
                                        'String','Start Time',...
