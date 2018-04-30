@@ -184,6 +184,8 @@ startTime_callback(starttimeapdmap_edit);
          % Read APD Parameters
          %apdmaptime_edit_callback();
          handles.activeCamData.drawMap = 1;
+         handles.apd_start = str2double(get(starttimeapdmap_edit,'String'));
+         handles.apd_end = str2double(get(endtimeapdmap_edit,'String'));
          handles.percentAPD = str2double(get(percentapd_edit,'String'));
          handles.maxapd = str2double(get(maxapd_edit,'String'));
          handles.minapd = str2double(get(minapd_edit,'String'));
