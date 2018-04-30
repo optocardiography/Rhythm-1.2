@@ -61,6 +61,11 @@ classdef cameraData < handle
         SDresults = sprintf('S.D.:');
         num_membersresults =sprintf('#Members:');
         angleresults =sprintf('Angle:');
+        
+        %resolution. Used for CV now, probably we should use it for
+        %different functions as well.
+        xres=0;
+        yres=0;
          
         
         drawMap = 0;

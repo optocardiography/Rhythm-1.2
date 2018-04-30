@@ -158,8 +158,8 @@ startTime_callback(starttimevolt_edit);
         handles.c_start = c_start;
         handles.c_end = c_end;
         
-        xres = str2double(get(xdist_edit,'String'));
-        yres = str2double(get(ydist_edit,'String'));
+        handles.activeCamData.xres = str2double(get(xdist_edit,'String'));
+        handles.activeCamData.yres = str2double(get(ydist_edit,'String'));
         set(f,'CurrentAxes',handles.activeScreen);        
         axis([0 100 0 100])
         rect = getrect(handles.activeScreen);
@@ -208,7 +208,7 @@ end
        V = [X Y];      
        PixDist = 5;                   %All points within this distance (in pixels) will be included
        VecAngleNew =[];
-       VecMagNew=[];
+       VecMagNew=zeros(size(VecMag));
        
        % For all pixels within range of line
        for row = min(Y1)-PixDist:1:max(Y1)+PixDist
@@ -219,10 +219,10 @@ end
                if dist<PixDist & dot(P1-P2,point-P2)>=0 & dot(P1-P2,point-P2)<=dot(P1-P2,P1-P2) % Is the distance withtin PixDist & point within range in P1-P2 direction?
                         Pixel=[col row];
                else
-                        Pixel=[-1 -1];
+                        Pixel=[-1 -1]; 
                end
                              
-               TempChan = find((V(:,1)==Pixel(1) & V(:,2)==Pixel(2)));
+               TempChan = find((V(:,1)==Pixel(1) & V(:,2)==(size(handles.activeCamData.cmosData,1)+1-Pixel(2))));
                if ~isempty(TempChan) 
 %                    if ((Vx(TempChan)<0 & Vy(TempChan)>0)) | ((Vx(TempChan)>0 & Vy(TempChan)<0))
 %                        VecAngle = 180/pi*(atan2(-Vy(TempChan),Vx(TempChan)))+360;
@@ -249,18 +249,28 @@ end
                     a=VecAngle;
 
                     if lowlineangle<a & a<highlineangle
-                        VecAngleNew(row,col) = VecAngle;
-                        VecMagNew(row,col) = VecMag(TempChan);
+                        VecAngleNew(TempChan) = VecAngle;
+                        VecMagNew(TempChan) = VecMag(TempChan);
                         %Analysismap('Marker',VecMap,Pixel); %
                     end
                end
            end
        end
        handles.activeCamData.drawMap = 1;
+       %higlight quivers included in calculation by black
+       quiver( handles.activeScreen, X, Y,Vx, -1.0 * Vy,'b');
+       hold on
+       Vx(VecMag~=VecMagNew)=0;
+       Vy(VecMag~=VecMagNew)=0;
+       quiver( handles.activeScreen, X, Y,Vx, -1.0 * Vy,'r');
+       xlim(handles.activeScreen,[0 100]);
+       ylim(handles.activeScreen,[0 100]);
+       axis (handles.activeScreen,'off')
+
        
        % Calculate Statistics
        %VecMagNew(VecMagNew==0)=NaN;
-       
+       %cla( handles.activeScreen);       
        CVmag_mean=nanmean(nonzeros(VecMagNew(:)));
        CVmag_std=nanstd(nonzeros(VecMagNew(:)));
        CVmag_median=nanmedian(nonzeros(VecMagNew(:)));

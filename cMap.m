@@ -178,34 +178,50 @@ Z(Z==0) = nan;
 % Find Gradient of Polynomial Surface
 [Tx,Ty] = gradient(Z);
 % Calculate Conduction Velocity
-Vx = Tx./(Tx.^2+Ty.^2);
-Vy = -Ty./(Tx.^2+Ty.^2);
+Vx = Tx./(Tx.^2+Ty.^2)*handles.activeCamData.xres;
+Vy = -Ty./(Tx.^2+Ty.^2)*handles.activeCamData.yres;
 V = sqrt(Vx.^2 + Vy.^2);
+bad=(V>100); %exclude CV above 100 m/s
+Vx(bad)=NaN;
+Vy(bad)=NaN;
+V(bad)=NaN;
+
 
 rect = round(abs(rect));
 temp_Vx = Vx(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 temp_Vy = Vy(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 temp_V = V(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 
-
 % Display the regional statistics
 disp('Regional conduction velocity statistics:')
-medV = median(median(temp_V(isfinite(temp_V))));
-disp(['The median value is ' num2str(medV) ' pixels/ms.'])
+meanV=nanmean(temp_V(isfinite(temp_V)));
+disp(['The mean value is ' num2str(meanV) ' m/s.'])
+medV = median(temp_V(isfinite(temp_V)));
+disp(['The median value is ' num2str(medV) ' m/s.'])
 stdV = std2(temp_V(isfinite(temp_V)));
 disp(['The standard deviation is ' num2str(stdV) '.'])
-medAng = median(median(atan2(temp_Vy(isfinite(temp_Vy)),temp_Vx(isfinite(temp_Vy))).*180/pi));
+meanAng = mean(atan2(temp_Vy(isfinite(temp_Vy)),temp_Vx(isfinite(temp_Vy))).*180/pi);
+disp(['The mean angle is ' num2str(meanAng) ' degrees.'])
+medAng = median(atan2(temp_Vy(isfinite(temp_Vy)),temp_Vx(isfinite(temp_Vy))).*180/pi);
 disp(['The median angle is ' num2str(medAng) ' degrees.'])
 stdAng = std2(atan2(temp_Vy(isfinite(temp_Vy)),temp_Vx(isfinite(temp_Vy))).*180/pi);
 disp(['The standard deviation of the angle is ' num2str(stdAng) '.'])
 num_vectors = numel(temp_V(isfinite(temp_V)));
 disp(['The number of vectors is ' num2str(num_vectors) '.'])
 
-          handles.activeCamData.meanresults = sprintf('Mean:');
-          handles.activeCamData.medianresults = sprintf('Median:');
-          handles.activeCamData.SDresults = sprintf('S.D.:');
-          handles.activeCamData.num_membersresults = sprintf('#Members:');
-          handles.activeCamData.angleresults =sprintf('Angle:');
+        % statistics window
+       handles.activeCamData.meanresults = sprintf('Mean: %0.3f',meanV);
+       handles.activeCamData.medianresults  = sprintf('Median: %0.3f',medV);
+       handles.activeCamData.SDresults = sprintf('S.D.: %0.3f',stdV);
+       handles.activeCamData.num_membersresults = sprintf('#Members: %d',num_vectors);
+       handles.activeCamData.angleresults = sprintf('Angle: %d',meanAng);
+       
+       set(handles.meanresults,'String',handles.activeCamData.meanresults);
+       set(handles.medianresults,'String',handles.activeCamData.medianresults);
+       set(handles.SDresults,'String',handles.activeCamData.SDresults);
+       set(handles.num_members_results,'String',handles.activeCamData.num_membersresults);
+       set(handles.angleresults,'String',handles.activeCamData.angleresults);
+       
 handles.activeCamData.saveData = actMap1;
 % Plot Results
 cla(movie_scrn); 
@@ -228,7 +244,7 @@ Vx_plot(abs(Vx_plot) > 5) = 5.*sign(Vx_plot(abs(Vx_plot) > 5));
 Vy_plot = Vy(isfinite(Z));
 Vy_plot(abs(Vy_plot) > 5) = 5.*sign(Vy_plot(abs(Vy_plot) > 5));
 V = sqrt(Vx_plot.^2 + Vy_plot.^2);
-imageHeight = 100;
+imageHeight = 100; %!!!2DO Hardcoded resolution should not be here.
 
 %Create Vector Array to pass to following functions
 VecArray = [X_plot Y_plot Vx_plot Vy_plot V];
@@ -247,7 +263,7 @@ handles.activeCamData.saveVy_plot = Vy_plot;
 %        Vx_plot(bad)=[];Vy_plot(bad)=[];X_plot(bad)=[];Y_plot(bad)=[];;V(bad)=[];
         
 % plot vector field
-quiver(movie_scrn, X_plot, imageHeight - Y_plot,Vx_plot, -1.0 * Vy_plot,'r')
+quiver(movie_scrn, X_plot, size(data,1)+1  - Y_plot,Vx_plot, -1.0 * Vy_plot,'r')
 
 hold (movie_scrn,'off');
 
