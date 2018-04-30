@@ -291,12 +291,12 @@ end
  
             startp = round(handles.c_start*handles.activeCamData.Fs);
             endp = round(handles.activeCamData.Fs*handles.c_end);
-            contourf(flipud(handles.activeCamData.saveData),(endp-startp)/2,'LineColor','none');
+            contourf(flipud(handles.activeCamData.saveData),(endp-startp)/2,'LineColor','k');
             hold on;
-            quiver(handles.activeCamData.saveX_plot, handles.activeCamData.saveY_plot,handles.activeCamData.saveVx_plot, handles.activeCamData.saveVy_plot,3,'r')
+            quiver(handles.activeCamData.saveX_plot, handles.activeCamData.saveY_plot,handles.activeCamData.saveVx_plot, handles.activeCamData.saveVy_plot,'r')
             hold off;
 
-        colormap jet;
+        colormap bone;
         colorbar;
        end
     end

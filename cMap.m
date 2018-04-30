@@ -210,10 +210,14 @@ handles.activeCamData.saveData = actMap1;
 % Plot Results
 cla(movie_scrn); 
 %compute isolines
+
 contourf(movie_scrn, actMap1,(endp-stat)/2,'LineColor','k');
-% colorbar(movie_scrn)
+%caxis(movie_scrn,[stat endp]);
+contourcmap('bone','SourceObject', movie_scrn);
+%colorbar(movie_scrn);
 set(movie_scrn,'YTick',[],'XTick',[]);
 set(movie_scrn,'YDir','reverse');
+
 
 hold (movie_scrn,'on')
 
@@ -235,9 +239,15 @@ handles.activeCamData.saveY_plot = Y_plot;
 handles.activeCamData.saveVx_plot = Vx_plot;
 handles.activeCamData.saveVy_plot = Vy_plot;
 
-
+ % Check for bad vectors
+%        badNaN=(isnan(Vx_plot)|isnan(Vy_plot));
+%        bad1=(XYT(:,10)>0.8);
+%        bad3=(V>10);
+%        bad=find(bad3|badNaN);
+%        Vx_plot(bad)=[];Vy_plot(bad)=[];X_plot(bad)=[];Y_plot(bad)=[];;V(bad)=[];
+        
 % plot vector field
-quiver(movie_scrn, X_plot, imageHeight - Y_plot,Vx_plot, -1.0 * Vy_plot,3,'r')
+quiver(movie_scrn, X_plot, imageHeight - Y_plot,Vx_plot, -1.0 * Vy_plot,'r')
 
 hold (movie_scrn,'off');
 
