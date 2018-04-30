@@ -1218,8 +1218,8 @@ end
         
         % Grab start and stop time times and convert to index values by
         % multiplying by frequency, add one to shift from zero
-        start = str2double(get(starttimemap_edit,'String'))*handles.Fs+1;   
-        fin = str2double(get(endtimemap_edit,'String'))*handles.Fs+1;
+        start = str2double(get(starttimemap_edit,'String'))*handles.activeCamData.Fs+1;   
+        fin = str2double(get(endtimemap_edit,'String'))*handles.activeCamData.Fs+1;
         % Designate the resolution of the video: ex. 5 = every fifth frame
         step = 2;
         for i = start:step:fin
@@ -1234,7 +1234,7 @@ end
             % Plot ecg data on bottom subplot
             subplot('Position',[0.05, 0.1, 0.9,0.15])
             % Create a variable for the endtime index
-            endtime = round(handles.endtime*handles.Fs);
+            endtime = round(handles.endtime*handles.activeCamData.Fs);
             % Plot the desired
             %plot(handles.time(start:endtime),handles.ecg(start:endtime));
             plot(handles.time(start:endtime),squeeze(handles.activeCamData.cmosData(60,62,start:endtime)), 'LineWidth',1.5);
