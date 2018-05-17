@@ -1,4 +1,4 @@
-function [cMap] = cMap(data,stat,endp,Fs,bg,rect, f, movie_scrn, handles)
+function [cMap] = cMap(data,stat,endp,Fs,bg,rect, f, movie_scrn, contour_state, handles)
 %% cMap is the central function for creating conduction velocity maps
 % [cMap] = cMap(data,stat,endp,Fs,bg,rect) calculates the conduction
 % velocity map for a single action potential upstroke by fitting a
@@ -227,16 +227,18 @@ handles.activeCamData.saveData = actMap1;
 cla(movie_scrn); 
 %compute isolines
 
-contourf(movie_scrn, actMap1,(endp-stat)/2,'LineColor','k');
-%caxis(movie_scrn,[stat endp]);
-contourcmap('bone','SourceObject', movie_scrn);
-%colorbar(movie_scrn);
+if contour_state == 1 
+    contourf(movie_scrn, actMap1,(endp-stat)/2,'LineColor','k');
+    %caxis(movie_scrn,[stat endp]);
+    contourcmap('bone','SourceObject', movie_scrn);
+    %colorbar(movie_scrn);
+    set(movie_scrn,'YTick',[],'XTick',[]);
+    set(movie_scrn,'YDir','reverse');
+    hold (movie_scrn,'on')
+end
+
 set(movie_scrn,'YTick',[],'XTick',[]);
 set(movie_scrn,'YDir','reverse');
-
-
-hold (movie_scrn,'on')
-
 Y_plot = size(data,1)+1 - y(isfinite(Z));
 X_plot = x(isfinite(Z));
 Vx_plot = Vx(isfinite(Z));
@@ -266,7 +268,8 @@ handles.activeCamData.saveVy_plot = Vy_plot;
 quiver(movie_scrn, X_plot, size(data,1)+1  - Y_plot,Vx_plot, -1.0 * Vy_plot,'r')
 
 hold (movie_scrn,'off');
-
+set(movie_scrn,'YTick',[],'XTick',[]);
+set(movie_scrn,'YDir','reverse');
 % rect_plot = [rect(1) (size(data,1) + 1 - rect(2)-rect(4)) rect(3) rect(4)];
 % rectangle(movie_scrn, 'Position',rect_plot,'EdgeColor','c')
 axis (movie_scrn,'off')

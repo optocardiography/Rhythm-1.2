@@ -41,6 +41,7 @@ classdef rhythmHandles < handle
         
         c_start = 0;
         c_end = 0;
+        contour_state = 0;
         a_start = 0;
         a_end = 0;
         

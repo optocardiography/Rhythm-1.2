@@ -58,6 +58,11 @@ ydist_edit = uicontrol('Parent',NewconductionVelocityGroup,'Style','edit',...
     'FontSize',10,'Units','normalized','Position',[0.75 0.5 .2 .09],...
     'Visible','on');
 
+contour_button  = uicontrol('Parent',NewconductionVelocityGroup,'Style','checkbox',...
+                        'FontSize',10,'String','Contour',...
+                        'Units','normalized',...
+                        'Position',[0 0.1 .9 0.09]);  
+
 export_icon = imread('icon.png');
 export_icon = imresize(export_icon, [20, 20]);                           
 export_button = uicontrol('Parent',NewconductionVelocityGroup,'Style','pushbutton',...
@@ -70,6 +75,8 @@ set(starttimevolt_edit, 'String', '0.3');
 set(endtimevolt_edit, 'String', '0.35');
 set(xdist_edit, 'String', '0.01');
 set(ydist_edit, 'String', '0.01');
+set(draw_line, 'Enable', 'off');
+set(calc_CV, 'Enable', 'off');
 startTime_callback(starttimevolt_edit);
     % Save handles in figure with handle f.
     guidata(NewconductionVelocityGroup, handles);
@@ -149,14 +156,16 @@ startTime_callback(starttimevolt_edit);
 
 
     %% Calculate CV and Generate Vector Map
-    function gen_vecmap_callback(~,~)
+  function gen_vecmap_callback(~,~)
         % get the bounds of the conduction velocity window
         c_start = str2double(get(starttimevolt_edit,'String'));
         c_end = str2double(get(endtimevolt_edit,'String'));
+        contour_state = get(contour_button,'Value');
         
         drawTimeLines(c_start, c_end, handles, f);
         handles.c_start = c_start;
         handles.c_end = c_end;
+        handles.contour_state = contour_state;
         
         handles.activeCamData.xres = str2double(get(xdist_edit,'String'));
         handles.activeCamData.yres = str2double(get(ydist_edit,'String'));
@@ -166,11 +175,12 @@ startTime_callback(starttimevolt_edit);
         gg=msgbox('Building Conduction Velocity Map...');
         cMap(handles.activeCamData.cmosData,handles.c_start,handles.c_end,...
             handles.activeCamData.Fs,handles.activeCamData.bg,rect, f,...
-            handles.activeScreen, handles);
+            handles.activeScreen, handles.contour_state, handles);
         handles.activeCamData.drawMap=1;
         close(gg)
-
-end
+        set(draw_line, 'Enable', 'on');
+        set(calc_CV, 'Enable', 'on');
+ end
 
 %% Draw line to select vectors
     function draw_line_callback(~,~)
@@ -256,13 +266,32 @@ end
                end
            end
        end
+       
        handles.activeCamData.drawMap = 1;
+       cla(handles.activeScreen);
+       contour_state = get(contour_button,'Value');
+       c_start = str2double(get(starttimevolt_edit,'String'));
+       c_end = str2double(get(endtimevolt_edit,'String'));
+       startp = round(handles.c_start*handles.activeCamData.Fs);
+       endp = round(handles.activeCamData.Fs*handles.c_end);
+       if contour_state == 1 
+            contourf(handles.activeScreen, handles.activeCamData.saveData,(endp-startp)/2,'LineColor','k');
+            %caxis(movie_scrn,[stat endp]);
+           contourcmap('bone','SourceObject', handles.activeScreen);
+            %colorbar(movie_scrn);
+            set(handles.activeScreen,'YTick',[],'XTick',[]);
+            set(handles.activeScreen,'YDir','reverse');
+            hold (handles.activeScreen,'on')
+       end
+       set(handles.activeScreen,'YDir','reverse');
        %higlight quivers included in calculation by black
-       quiver( handles.activeScreen, X, Y,Vx, -1.0 * Vy,'b');
+       quiver( handles.activeScreen, X, size(handles.activeCamData.saveData,1)+1  -Y,Vx, -1.0 * Vy,'b');
+       set(handles.activeScreen,'YTick',[],'XTick',[]);
        hold on
        Vx(VecMag~=VecMagNew)=0;
        Vy(VecMag~=VecMagNew)=0;
-       quiver( handles.activeScreen, X, Y,Vx, -1.0 * Vy,'r');
+       quiver( handles.activeScreen, X, size(handles.activeCamData.saveData,1)+1-Y,Vx, -1.0 * Vy,'r');
+
        xlim(handles.activeScreen,[0 100]);
        ylim(handles.activeScreen,[0 100]);
        axis (handles.activeScreen,'off')
@@ -298,11 +327,15 @@ end
            return
        else
         figure;
- 
             startp = round(handles.c_start*handles.activeCamData.Fs);
             endp = round(handles.activeCamData.Fs*handles.c_end);
-            contourf(flipud(handles.activeCamData.saveData),(endp-startp)/2,'LineColor','k');
-            hold on;
+            if handles.contour_state == 1 
+                contourf(flipud(handles.activeCamData.saveData),(endp-startp)/2,'LineColor','k');
+                %caxis(movie_scrn,[stat endp]);
+                contourcmap('bone');
+                %colorbar(movie_scrn);
+                hold on;
+            end
             quiver(handles.activeCamData.saveX_plot, handles.activeCamData.saveY_plot,handles.activeCamData.saveVx_plot, handles.activeCamData.saveVy_plot,'r')
             hold off;
 

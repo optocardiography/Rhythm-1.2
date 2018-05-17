@@ -1,4 +1,4 @@
-function [apdC] = apdCalc(data,start,endp,Fs,percent,maxAPD,minAPD,motion,coordinate,bg,cmap)
+function [apdC] = apdCalc(handles, data,start,endp,Fs,percent,maxAPD,minAPD,motion,coordinate,bg,cmap)
 
 % The function [actC] = apdCalc() calculates the mean APD and the standard
 %deviation in the area selected. 
@@ -113,5 +113,12 @@ disp(['The median APD in the region is ' num2str(apd_median) '.'])
           handles.activeCamData.SDresults = sprintf('S.D.: %0.3f',apd_std);
           handles.activeCamData.num_membersresults = sprintf('#Members:');
           handles.activeCamData.angleresults =sprintf('Angle:');
+          
+          set(handles.meanresults,'String',handles.activeCamData.meanresults);
+          set(handles.medianresults,'String',handles.activeCamData.medianresults);
+          set(handles.SDresults,'String',handles.activeCamData.SDresults);
+          set(handles.num_members_results,'String',handles.activeCamData.num_membersresults);
+          set(handles.angleresults,'String',handles.activeCamData.angleresults);
+
 
 end
