@@ -90,23 +90,25 @@ actMap1 = actMap1/Fs*1000; %% time in ms
 
 %% Find Conduction Velocity Map - Bayly Method
 % Isolate ROI Specified by RECT
-% rect = round(rect);
-% temp = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
+rect = round(rect);
+temp = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 % Fit Activation Map with 3rd-order Polynomial
-% cind = isfinite(temp);
-% [x y]= meshgrid(rect(1):rect(1)+rect(3),rect(2):rect(2)+rect(4));
-% x = reshape(x,[],1);
-% y = reshape(y,[],1);
-% z = reshape(temp,[],1);
-% X = x(cind);
-% Y = y(cind);
-% Z = z(cind);
-% A = [X.^3 Y.^3 X.*Y.^2 Y.*X.^2 X.^2 Y.^2 X.*Y X Y ones(size(X,1),1)];
-% a = A\Z;
-% Z_fit = A*a;
-% Z_fit = reshape(Z_fit,size(cind));
+ cind = isfinite(temp);
+ [x y]= meshgrid(rect(1):rect(1)+rect(3),rect(2):rect(2)+rect(4));
+ x = reshape(x,[],1);
+ y = reshape(y,[],1);
+ z = reshape(temp,[],1);
+ X = x(cind);
+ Y = y(cind);
+ Z = z(cind);
+ A = [X.^3 Y.^3 X.*Y.^2 Y.*X.^2 X.^2 Y.^2 X.*Y X Y ones(size(X,1),1)];
+ a = A\Z;
+ %Z_fit = A*a;
+ %Z_fit = reshape(Z_fit,size(cind));
+ Z_fit=nan(size(cind));
+ Z_fit(cind)=A*a;
 % Find Gradient of Polynomial Surface
-% [Tx Ty] = gradient(Z_fit);
+ [Tx Ty] = gradient(Z_fit);
 % Calculate Conduction Velocity
 % Vx = -Tx./(Tx.^2+Ty.^2);
 % Vy = -Ty./(Tx.^2+Ty.^2);
@@ -156,27 +158,27 @@ actMap1 = actMap1/Fs*1000; %% time in ms
 
 %% Find Conduction Velocity Map - Efimov Method
 % Fit Activation Map with New Surface based on Kernel Smoothing
-cind = isfinite(actMap1);
-[x,y]= meshgrid(1:size(data,2),1:size(data,1));
-x = reshape(x,[],1);
-y = reshape(y,[],1);
-z = reshape(actMap1,[],1);
-X = x(cind);
-Y = y(cind);
-k_size = 3;
-h = fspecial('average',[k_size k_size]);
-Z_fit = filter2(h,actMap1);
+%cind = isfinite(actMap1);
+%[x,y]= meshgrid(1:size(data,2),1:size(data,1));
+%x = reshape(x,[],1);
+%y = reshape(y,[],1);
+%z = reshape(actMap1,[],1);
+%X = x(cind);
+%Y = y(cind);
+%k_size = 3;
+%h = fspecial('average',[k_size k_size]);
+%Z_fit = filter2(h,actMap1);
 % Remove Edge Effect Introduced from Kernel
-seD = strel('diamond',k_size-2);
-mask = imerode(cind,seD);
-mask(1,:) = 0;
-mask(end,:) = 0;
-mask(:,1) = 0;
-mask(:,end) = 0;
-Z = Z_fit.*mask;
-Z(Z==0) = nan;
+%seD = strel('diamond',k_size-2);
+%mask = imerode(cind,seD);
+%mask(1,:) = 0;
+%mask(end,:) = 0;
+%mask(:,1) = 0;
+%mask(:,end) = 0;
+%Z = Z_fit.*mask;
+%Z(Z==0) = nan;
 % Find Gradient of Polynomial Surface
-[Tx,Ty] = gradient(Z);
+%[Tx,Ty] = gradient(Z);
 % Calculate Conduction Velocity
 Vx = Tx./(Tx.^2+Ty.^2)*handles.activeCamData.xres;
 Vy = -Ty./(Tx.^2+Ty.^2)*handles.activeCamData.yres;
@@ -187,26 +189,26 @@ Vy(bad)=NaN;
 V(bad)=NaN;
 
 
-rect = round(abs(rect));
-temp_Vx = Vx(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
-temp_Vy = Vy(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
-temp_V = V(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
+%rect = round(abs(rect));
+%temp_Vx = Vx(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
+%temp_Vy = Vy(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
+%temp_V = V(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 
 % Display the regional statistics
 disp('Regional conduction velocity statistics:')
-meanV=nanmean(temp_V(isfinite(temp_V)));
+meanV=nanmean(V(isfinite(V)));
 disp(['The mean value is ' num2str(meanV) ' m/s.'])
-medV = median(temp_V(isfinite(temp_V)));
+medV = median(V(isfinite(V)));
 disp(['The median value is ' num2str(medV) ' m/s.'])
-stdV = std2(temp_V(isfinite(temp_V)));
+stdV = std2(V(isfinite(V)));
 disp(['The standard deviation is ' num2str(stdV) '.'])
-meanAng = mean(atan2(temp_Vy(isfinite(temp_Vy)),temp_Vx(isfinite(temp_Vy))).*180/pi);
+meanAng = mean(atan2(Vy(isfinite(Vy)),Vx(isfinite(Vy))).*180/pi);
 disp(['The mean angle is ' num2str(meanAng) ' degrees.'])
-medAng = median(atan2(temp_Vy(isfinite(temp_Vy)),temp_Vx(isfinite(temp_Vy))).*180/pi);
+medAng = median(atan2(Vy(isfinite(Vy)),Vx(isfinite(Vy))).*180/pi);
 disp(['The median angle is ' num2str(medAng) ' degrees.'])
-stdAng = std2(atan2(temp_Vy(isfinite(temp_Vy)),temp_Vx(isfinite(temp_Vy))).*180/pi);
+stdAng = std2(atan2(Vy(isfinite(Vy)),Vx(isfinite(Vy))).*180/pi);
 disp(['The standard deviation of the angle is ' num2str(stdAng) '.'])
-num_vectors = numel(temp_V(isfinite(temp_V)));
+num_vectors = numel(V(isfinite(V)));
 disp(['The number of vectors is ' num2str(num_vectors) '.'])
 
         % statistics window
@@ -232,19 +234,18 @@ contourf(movie_scrn, actMap1,(endp-stat)/2,'LineColor','k');
 contourcmap('bone','SourceObject', movie_scrn);
 %colorbar(movie_scrn);
 set(movie_scrn,'YTick',[],'XTick',[]);
-set(movie_scrn,'YDir','reverse');
 
 
 hold (movie_scrn,'on')
 
-Y_plot = size(data,1)+1 - y(isfinite(Z));
-X_plot = x(isfinite(Z));
-Vx_plot = Vx(isfinite(Z));
+%Y_plot = size(data,1)+1 - y(isfinite(Z_fit));
+Y_plot = y(isfinite(Z_fit));
+X_plot = x(isfinite(Z_fit));
+Vx_plot = Vx(isfinite(Z_fit));
 Vx_plot(abs(Vx_plot) > 5) = 5.*sign(Vx_plot(abs(Vx_plot) > 5));
-Vy_plot = Vy(isfinite(Z));
+Vy_plot = Vy(isfinite(Z_fit));
 Vy_plot(abs(Vy_plot) > 5) = 5.*sign(Vy_plot(abs(Vy_plot) > 5));
 V = sqrt(Vx_plot.^2 + Vy_plot.^2);
-imageHeight = 100; %!!!2DO Hardcoded resolution should not be here.
 
 %Create Vector Array to pass to following functions
 VecArray = [X_plot Y_plot Vx_plot Vy_plot V];
@@ -263,12 +264,13 @@ handles.activeCamData.saveVy_plot = Vy_plot;
 %        Vx_plot(bad)=[];Vy_plot(bad)=[];X_plot(bad)=[];Y_plot(bad)=[];;V(bad)=[];
         
 % plot vector field
-quiver(movie_scrn, X_plot, size(data,1)+1  - Y_plot,Vx_plot, -1.0 * Vy_plot,'r')
+quiver(movie_scrn, X_plot, Y_plot,Vx_plot, -1.0 * Vy_plot,'r');
+set(movie_scrn,'YDir','reverse');
 
 hold (movie_scrn,'off');
 
 % rect_plot = [rect(1) (size(data,1) + 1 - rect(2)-rect(4)) rect(3) rect(4)];
 % rectangle(movie_scrn, 'Position',rect_plot,'EdgeColor','c')
-axis (movie_scrn,'off')
+%axis (movie_scrn,'off')
 end
 
