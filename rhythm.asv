@@ -1,13 +1,13 @@
 
 function rhythm
 close all; clc;
-%% RHYTHM (01/27/2012)
+%% RHYTHM 1.2 (28/4/2018)
 % Matlab software for analyzing optical mapping data
 %
-% By Matt Sulkin, Jake Laughner, Xinyuan Sophia Cui, Jed Jackoway
+% Previous version by Matt Sulkin, Jake Laughner, Xinyuan Sophia Cui, Jed Jackoway
 % Washington University in St. Louis -- Efimov Lab
 %
-% GUI functional by: Roman Syunyaev, Roman Pryamonosov, and Alexander
+% GUI functional and current version by: Roman Syunyaev, Roman Pryamonosov, and Alexander
 % Zolotarev.
 %
 % For any questions and suggestions, please email us at:
@@ -170,19 +170,22 @@ handles.angleresults = uicontrol('Parent',results,'Style','text','FontSize',10,'
           
 %% Optical Action Potential Analysis Button Group and Buttons
 % Create Button Group
-anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',12,'Position',[0.001 0.25 0.13 0.5]);
+anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',12,'Position',[0.001 0.15 0.13 0.6]);
 
 % Invert Color Map Option
 invert_cmap = uicontrol('Parent',anal_data,'Style','checkbox','FontSize',10,'String','Invert Colormaps','Position',[3 350 140 25],'Callback',{@invert_cmap_callback});
 
-map = uibuttongroup('Parent',anal_data,'Title','Parameters', 'FontSize',12,'Position',[0.001 0.001 .98 .8]);
+map = uibuttongroup('Parent',anal_data,'Title','Parameters', 'FontSize',12,'Position',[0.001 0.001 .98 .9]);
 
 map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',10,...
-                       'String',{'Condition Parameters','CV map', 'Activation map', 'APD\CaT map', 'Rise Time', 'Calcium Decay'},...
-                       'Position',[3 320 140 25], 'Callback',{@mapPopUp_callback});
+                       'String',{'Condition Parameters','CV map', 'Activation map',...
+                       'APD\CaT map', 'Rise Time', 'Calcium Decay'},...
+                       'Units','normalized','Position',[0 0.9 1.0 0.1], 'Callback',{@mapPopUp_callback});
 
 set(map_popup,'Value',1);
+set(map_popup,'Enable','off')
 
+GUI_conditionParameters(map, handles); %Make signal condition default
 % syncBox = uicontrol('Parent',p1,'Style','checkbox','FontSize',10,...
 %     'String','ScreenSync','Units','normalized','Position',[0.9 0 0.1 0.1],...
 %     'Callback',{@syncBox_callback});
@@ -365,21 +368,21 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
 % Callback for map menu
 function mapPopUp_callback(~,~)
     map = uibuttongroup('Parent',anal_data,'Title','Parameters',...
-                        'FontSize',10,'Position',[0.001 0.001 .98 .8]);
+                        'Units','normalized','FontSize',10,'Position',[0.001 0.0 .98 .9]);
 
     switch get(map_popup,'Value')
         case 1
             % Conduction Velocity Map
-            GUI_conditionParameters(map, handles, signal_scrn1, signal_scrn2, signal_scrn3, signal_scrn4, signal_scrn5); 
+            GUI_conditionParameters(map, handles); 
         case 2
              % New Conduction Velocity Map
-            GUI_NewConductionVelocity(map, handles, starttimemap_edit,endtimemap_edit, f);
+            GUI_NewConductionVelocity(map, handles, f);
         case 3
             %activationMap
-            GUI_ActivationMap(map, handles, f,starttimemap_edit,endtimemap_edit);
+            GUI_ActivationMap(map, handles, f);
         case 4
             % APD Map
-            GUI_ActionPotentialDurationMap(map, handles, f, starttimemap_edit,endtimemap_edit);
+            GUI_ActionPotentialDurationMap(map, handles, f);
         case 5
             % Rise Time Map
             GUI_RiseTime(map, handles, f);
@@ -587,7 +590,7 @@ end
             hold on
             for x=1:a
                 plot(handles.time(1:handles.activeCamData.maxFrame),...
-                    squeeze(handles.activeCamData.cmosData(M(x,1),M(x,2),:)),...
+                    squeeze(handles.activeCamData.cmosData(M(x,2),M(x,1),:)),...
                             handles.markerColors(x),'LineWidth',2,'Parent',handles.signalScreens(x));
                 set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
             end
@@ -608,7 +611,7 @@ end
                 for i_cam = 1:4
                     if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
                         plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,1),M(i_marker,2),:)),...
+                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
                             handles.markerColors(i_marker),'LineWidth',2,...
                             'Parent',signalGroup(i_marker).signalScreen(i_cam))
                     end
@@ -631,7 +634,7 @@ end
                 for i_cam = 1:4
                     if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 2)
                         plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,1),M(i_marker,2),:)),...
+                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
                             handles.markerColors(i_marker),'LineWidth',2,...
                             'Parent',signalGroup(i_marker).signalScreen(i_cam))
                     end
@@ -736,6 +739,7 @@ end
                     break;
                 end
             end
+            set(map_popup,'Enable','on');
             % Clear off all images from previous set of data
             cla(handles.activeScreen); 
             for i_cam=1:5
@@ -968,7 +972,7 @@ function drawFrame(frame, camNo)
             end
 
             I = J .* A + G .* (1 - A);
-
+cla(handles.allCamData(camNo).screen);
             image(I,'Parent',handles.allCamData(camNo).screen);
         end
         
@@ -1127,7 +1131,8 @@ end
 
                 for i_cam = 1:4
                     if handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1
-                       plot(handles.time(1:handles.allCamData(i_cam).maxFrame), squeeze(handles.allCamData(i_cam).cmosData(j,i,:)),...
+                       plot(handles.time(1:handles.allCamData(i_cam).maxFrame), ...
+                                squeeze(handles.allCamData(i_cam).cmosData(j,i,:)),...
                                 handles.markerColors(wave_window),'LineWidth',2, ...
                                 'Parent',signalGroup(wave_window).signalScreen(i_cam));
                     end
@@ -1216,8 +1221,8 @@ end
         
         % Grab start and stop time times and convert to index values by
         % multiplying by frequency, add one to shift from zero
-        start = str2double(get(starttimemap_edit,'String'))*handles.Fs+1;   
-        fin = str2double(get(endtimemap_edit,'String'))*handles.Fs+1;
+        start = str2double(get(starttimemap_edit,'String'))*handles.activeCamData.Fs+1;   
+        fin = str2double(get(endtimemap_edit,'String'))*handles.activeCamData.Fs+1;
         % Designate the resolution of the video: ex. 5 = every fifth frame
         step = 2;
         for i = start:step:fin
@@ -1232,7 +1237,7 @@ end
             % Plot ecg data on bottom subplot
             subplot('Position',[0.05, 0.1, 0.9,0.15])
             % Create a variable for the endtime index
-            endtime = round(handles.endtime*handles.Fs);
+            endtime = round(handles.endtime*handles.activeCamData.Fs);
             % Plot the desired
             %plot(handles.time(start:endtime),handles.ecg(start:endtime));
             plot(handles.time(start:endtime),squeeze(handles.activeCamData.cmosData(60,62,start:endtime)), 'LineWidth',1.5);
@@ -1381,7 +1386,7 @@ end
                         if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
                             subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
                             plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,1),M(i_marker,2),:)),...
+                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
                                 handles.markerColors(i_marker),'LineWidth',2)
                             %hold on
                             movegui(w,'center')
@@ -1406,7 +1411,7 @@ end
                         if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
                             subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
                             plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,1),M(i_marker,2),:)),...
+                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
                                 handles.markerColors(i_marker),'LineWidth',2)
                             %hold on
                             movegui(w,'center')

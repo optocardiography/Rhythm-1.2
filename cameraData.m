@@ -67,6 +67,8 @@ classdef cameraData < handle
         xres=0;
         yres=0;
          
+        xFlip = 0;
+        yFlip = 0;
         
         drawMap = 0;
         lastMapMode=0;
