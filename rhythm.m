@@ -368,13 +368,14 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
 function mapPopUp_callback(~,~)
     map = uibuttongroup('Parent',anal_data,'Title','Parameters',...
                         'FontSize',10,'Position',[0.001 0.001 .98 .8]);
-
+    colormap jet;
     switch get(map_popup,'Value')
         case 1
             % Conduction Velocity Map
             GUI_conditionParameters(map, handles); 
         case 2
-             % New Conduction Velocity Map
+            colormap bone;
+            % New Conduction Velocity Map
             GUI_NewConductionVelocity(map, handles, f);
         case 3
             %activationMap
@@ -1202,7 +1203,7 @@ end
         end
         filename = char(filename);
         % Create path to file
-        movname = fullfile(handles.dir,strcat(filename,'_movie.avi'));
+        movname = fullfile(dir,strcat(filename,'_movie.avi'));
         % Create the figure to be filmed        
         fig=figure('Name',[filename ' movie'],'NextPlot','replacechildren','NumberTitle','off',...
             'Visible','off','OuterPosition',[170, 140, 556,715]);
@@ -1227,9 +1228,8 @@ end
         for i = start:step:fin
             % Plot sweep bar on bottom subplot
             subplot('Position',[0.05, 0.1, 0.9,0.15])
-            a = [[(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale]];
-            %b = [min(handles.ecg) max(handles.ecg)];
-            %b = [min(squeeze(handles.cmosData(60,62))) max(squeeze(handles.cmosData(60,62)))];
+            a = [handles.time(i) handles.time(i)];
+            
             b = [-50 50];
             cla
             plot(a,b,'r','LineWidth',1.5,'linestyle','--');hold on

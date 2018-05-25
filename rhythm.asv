@@ -366,14 +366,20 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
 function mapPopUp_callback(~,~)
     map = uibuttongroup('Parent',anal_data,'Title','Parameters',...
                         'FontSize',10,'Position',[0.001 0.001 .98 .8]);
-
+    colormap jet;
     switch get(map_popup,'Value')
         case 1
             % Conduction Velocity Map
             GUI_conditionParameters(map, handles, signal_scrn1, signal_scrn2, signal_scrn3, signal_scrn4, signal_scrn5); 
         case 2
+<<<<<<< HEAD
+            
+            % New Conduction Velocity Map
+            GUI_NewConductionVelocity(map, handles, f);
+=======
              % New Conduction Velocity Map
             GUI_NewConductionVelocity(map, handles, starttimemap_edit,endtimemap_edit, f);
+>>>>>>> parent of 04cadc4... fix for movie export
         case 3
             %activationMap
             GUI_ActivationMap(map, handles, f,starttimemap_edit,endtimemap_edit);
@@ -1223,9 +1229,13 @@ end
         for i = start:step:fin
             % Plot sweep bar on bottom subplot
             subplot('Position',[0.05, 0.1, 0.9,0.15])
+<<<<<<< HEAD
+            a = [handles.time(i) handles.time(i)];
+=======
             a = [[(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale]];
             %b = [min(handles.ecg) max(handles.ecg)];
             %b = [min(squeeze(handles.cmosData(60,62))) max(squeeze(handles.cmosData(60,62)))];
+>>>>>>> parent of 04cadc4... fix for movie export
             b = [-50 50];
             cla
             plot(a,b,'r','LineWidth',1.5,'linestyle','--');hold on
