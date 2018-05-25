@@ -306,7 +306,7 @@ end
             quiver(handles.activeCamData.saveX_plot, handles.activeCamData.saveY_plot,handles.activeCamData.saveVx_plot, handles.activeCamData.saveVy_plot,'r')
             hold off;
 
-        colormap bone;
+        colormap (handles.activeCamData.screen, bone );
         colorbar;
        end
     end

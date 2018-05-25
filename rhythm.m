@@ -368,13 +368,14 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
 function mapPopUp_callback(~,~)
     map = uibuttongroup('Parent',anal_data,'Title','Parameters',...
                         'FontSize',10,'Position',[0.001 0.001 .98 .8]);
-    colormap jet;
+    
+    colormap(handles.activeScreen, jet);
     switch get(map_popup,'Value')
         case 1
             % Conduction Velocity Map
             GUI_conditionParameters(map, handles); 
         case 2
-            colormap bone;
+            colormap(handles.activeScreen, bone);
             % New Conduction Velocity Map
             GUI_NewConductionVelocity(map, handles, f);
         case 3
