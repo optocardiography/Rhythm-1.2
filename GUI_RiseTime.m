@@ -247,7 +247,8 @@ guidata(riseTimeGroup, handles);
           A=real2rgb(Mask,'gray');
           I = J .* A + G .* (1-A);
           handles.activeCamData.saveData = I;
-          
+          handles.activeCamData.drawMap=1;
+
           %Plot Rise Time Map and Histogram
 %          axes(handles.activeScreen);
           %cla(handles.activeCamData.screen);
