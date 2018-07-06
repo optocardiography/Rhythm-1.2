@@ -799,7 +799,7 @@ end
                     handles.activeCamData.isloaded = 1;
                     
                     % Save out the frequency, cameras alternate, divide by 2
-                    handles.activeCamData.Fs = double(Data.frequency)/2;
+                    handles.activeCamData.Fs = double(Data.frequency);
                     % Save out pacing spike. Note: Data.channel1 is not
                     % necessarily the ecg channel. Correspondes to analog1
                     % input to SciMedia box
