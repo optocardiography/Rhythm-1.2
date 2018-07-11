@@ -318,7 +318,8 @@ end
             endp = round(handles.activeCamData.Fs*handles.c_end);
             contourf(flipud(handles.activeCamData.saveData),(endp-startp)/2,'LineColor','k');
             hold on;
-            quiver(handles.activeCamData.saveX_plot, handles.activeCamData.saveY_plot,handles.activeCamData.saveVx_plot, handles.activeCamData.saveVy_plot,'r')
+            sz=size(handles.activeCamData.saveData);
+            quiver(handles.activeCamData.saveX_plot, sz(2)-handles.activeCamData.saveY_plot,handles.activeCamData.saveVx_plot, handles.activeCamData.saveVy_plot,'r')
             hold off;
 
             colormap (handles.activeCamData.screen, bone ); 
