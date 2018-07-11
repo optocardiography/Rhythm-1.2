@@ -59,7 +59,7 @@ if strcmp(oldfilename(end-2:end),'rsh')
     
     % Save the frequency to put it in the .m file
     if dual ~= 0 && strcmp(fstr(3),'U')
-        frequency = (1000/acqFreq)/2;
+        frequency = (1000/acqFreq);
     else
         frequency = 1000/acqFreq;
     end

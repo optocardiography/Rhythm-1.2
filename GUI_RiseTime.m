@@ -32,7 +32,7 @@ percent_start_rt_text= uicontrol('Parent',riseTimeGroup,'Style','text',...
                                 'Units','normalized',...
                                 'Position',[.01 .7 .4 .09]);
 percent_start_rt_edit= uicontrol('Parent',riseTimeGroup,'Style','edit',...
-                                'FontSize',10,'String','0.8',...
+                                'FontSize',10,'String','0.2',...
                                 'Units','normalized',...
                                 'Position',[.42 .7 .25 .09],...
                                 'callback',{@percent_rt_edit_callback}); 
@@ -164,28 +164,34 @@ guidata(riseTimeGroup, handles);
           temp = cmosData(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3),round(APstart*Fs):round(APend*Fs));
 
           %Re-Normalize Data
-          if size(temp,3) == 1
-            min_data = repmat(min(temp,[],2),[1 size(temp,2)]);
-            diff_data = repmat(max(temp,[],2)-min(temp,[],2),[1 size(temp,2)]);
-            normData = (temp-min_data)./(diff_data);
-            temp = normData;
-          else
-            min_data = repmat(min(temp,[],3),[1 1 size(temp,3)]);
-            diff_data = repmat(max(temp,[],3)-min(temp,[],3),[1 1 size(temp,3)]);
-            normData = (temp-min_data)./(diff_data);
-            temp = normData;
-          end
+          %if size(temp,3) == 1
+          %  min_data = repmat(min(temp,[],2),[1 size(temp,2)]);
+          %  diff_data = repmat(max(temp,[],2)-min(temp,[],2),[1 size(temp,2)]);
+          %  normData = (temp-min_data)./(diff_data);
+          %  temp = normData;
+          %else
+          %  min_data = repmat(min(temp,[],3),[1 1 size(temp,3)]);
+          %  diff_data = repmat(max(temp,[],3)-min(temp,[],3),[1 1 size(temp,3)]);
+          %  normData = (temp-min_data)./(diff_data);
+          %  temp = normData;
+          %end
 
           %Calculate time points of percent start and end
-          [~,maxAmpTime] = max(temp,[],3);
+          [maxdata,maxAmpTime] = max(temp,[],3);
+          for i = 1:size(temp,1)
+            for j = 1:size(temp,2)
+                [mindata(i,j),minTime(i,j)]=min(temp(i,j,1:maxAmpTime(i,j)));
+            end
+          end
+          diff_data=maxdata-mindata;
           TempStart = zeros(size(temp,1),size(temp,2));
           TempEnd = zeros(size(temp,1),size(temp,2));
 
           %Start Percent Time
           for i = 1:size(temp,1)
             for j = 1:size(temp,2)
-                for k = 1:maxAmpTime(i,j)
-                    if temp(i,j,k) >= PercentStart
+                for k = minTime(i,j):maxAmpTime(i,j)
+                    if temp(i,j,k) >= mindata(i,j)+PercentStart*diff_data(i,j);
                         TempStart(i,j) = k; %Save the index when the Start Percent is reached
                         break;
                     end
@@ -196,8 +202,8 @@ guidata(riseTimeGroup, handles);
           %End Percent Time
           for i = 1:size(temp,1)
             for j = 1:size(temp,2)
-                for k = 1:maxAmpTime(i,j)
-                    if temp(i,j,k) >= PercentEnd
+                for k =  minTime(i,j):maxAmpTime(i,j)
+                    if temp(i,j,k) >= mindata(i,j)+PercentEnd*diff_data(i,j);
                         TempEnd(i,j) = k; %Save the index when the End Percent is reached
                         break;
                     end
@@ -247,7 +253,8 @@ guidata(riseTimeGroup, handles);
           A=real2rgb(Mask,'gray');
           I = J .* A + G .* (1-A);
           handles.activeCamData.saveData = I;
-          
+          handles.activeCamData.drawMap=1;
+
           %Plot Rise Time Map and Histogram
 %          axes(handles.activeScreen);
           %cla(handles.activeCamData.screen);
