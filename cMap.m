@@ -92,23 +92,37 @@ actMap1 = actMap1/Fs*1000; %% time in ms
 % Isolate ROI Specified by RECT
 rect = round(rect);
 temp = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
+%Exclude everything, but activation front
+exclude=zeros(rect(4)+1,rect(3)+1);
+%exclude(2:end-1,2:end-1)=abs(temp(1:end-2,2:end-1)-temp(3:end,2:end-1))+abs(temp(2:end-1,1:end-2)-temp(2:end-1,3:end))
+exclude(2:end-1,2:end-1)=((temp(2:end-1,2:end-1)<temp(3:end,2:end-1))|(temp(2:end-1,2:end-1))<temp(1:end-2,2:end-1)|(temp(2:end-1,2:end-1)<temp(2:end-1,3:end))|(temp(2:end-1,2:end-1))<temp(2:end-1,1:end-2));
+temp(exclude==0)=NaN;
+
 % Fit Activation Map with 3rd-order Polynomial
  cind = isfinite(temp);
  [x y]= meshgrid(rect(1):rect(1)+rect(3),rect(2):rect(2)+rect(4));
  x = reshape(x,[],1);
  y = reshape(y,[],1);
  z = reshape(temp,[],1);
+ a = [x.^3 y.^3 x.*y.^2 y.*x.^2 x.^2 y.^2 x.*y x y ones(size(x,1),1)];
  X = x(cind);
  Y = y(cind);
  Z = z(cind);
  A = [X.^3 Y.^3 X.*Y.^2 Y.*X.^2 X.^2 Y.^2 X.*Y X Y ones(size(X,1),1)];
- a = A\Z;
- %Z_fit = A*a;
- %Z_fit = reshape(Z_fit,size(cind));
- Z_fit=nan(size(cind));
- Z_fit(cind)=A*a;
+ solution = A\Z;
+ Z_fit = a*solution;
+ Z_fit = reshape(Z_fit,size(cind));
+ %Z_fit=nan(size(cind));
+ %Z_fit(cind)=A*a;
+% zres=reshape(Z_fit,[],1)-Z;
+% SSres=sum(zres.^2);
+% SStot=(length(Z)-1)*var(Z);
+% rsq=1-SSres/SStot;
+% disp(['rsq of fit is ' num2str(rsq)]);
 % Find Gradient of Polynomial Surface
  [Tx Ty] = gradient(Z_fit);
+ Tx=Tx/handles.activeCamData.xres;
+ Ty=Ty/handles.activeCamData.yres;
 % Calculate Conduction Velocity
 % Vx = -Tx./(Tx.^2+Ty.^2);
 % Vy = -Ty./(Tx.^2+Ty.^2);
@@ -180,10 +194,10 @@ temp = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 % Find Gradient of Polynomial Surface
 %[Tx,Ty] = gradient(Z);
 % Calculate Conduction Velocity
-Vx = Tx./(Tx.^2+Ty.^2)*handles.activeCamData.xres;
-Vy = -Ty./(Tx.^2+Ty.^2)*handles.activeCamData.yres;
+Vx = Tx./(Tx.^2+Ty.^2);
+Vy = -Ty./(Tx.^2+Ty.^2);
 V = sqrt(Vx.^2 + Vy.^2);
-bad=(V>100); %exclude CV above 100 m/s
+bad=(V>4); %exclude CV above 4 m/s
 Vx(bad)=NaN;
 Vy(bad)=NaN;
 V(bad)=NaN;
