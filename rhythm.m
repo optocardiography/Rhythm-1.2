@@ -170,17 +170,16 @@ handles.angleresults = uicontrol('Parent',results,'Style','text','FontSize',10,'
           
 %% Optical Action Potential Analysis Button Group and Buttons
 % Create Button Group
-anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',12,'Position',[0.001 0.15 0.13 0.6]);
+anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',12,'Position',[0.001 0.25 0.13 0.5]);
 
 % Invert Color Map Option
 invert_cmap = uicontrol('Parent',anal_data,'Style','checkbox','FontSize',10,'String','Invert Colormaps','Position',[3 350 140 25],'Callback',{@invert_cmap_callback});
 
-map = uibuttongroup('Parent',anal_data,'Title','Parameters', 'FontSize',12,'Position',[0.001 0.001 .98 .9]);
+map = uibuttongroup('Parent',anal_data,'Title','Parameters', 'FontSize',12,'Position',[0.001 0.001 .98 .8]);
 
 map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',10,...
-                       'String',{'Condition Parameters','CV map', 'Activation map',...
-                       'APD\CaT map', 'Rise Time', 'Calcium Decay'},...
-                       'Units','normalized','Position',[0 0.9 1.0 0.1], 'Callback',{@mapPopUp_callback});
+                       'String',{'Condition Parameters','CV map', 'Activation map', 'APD\CaT map', 'Rise Time', 'Calcium Decay'},...
+                       'Position',[3 320 140 25], 'Callback',{@mapPopUp_callback});
 
 set(map_popup,'Value',1);
 set(map_popup,'Enable','off')
@@ -965,17 +964,16 @@ function drawFrame(frame, camNo)
             if handles.normflag == 0
                 Mmax = handles.matrixMax;
                 Mmin = handles.minVisible;
-                numcol = size(jet,1);    
+                numcol = size(jet,1);
                 J = ind2rgb(round((Mframe - Mmin) ./ (Mmax - Mmin) * (numcol - 1)), 'jet');
                 A = real2rgb(Mframe >= handles.minVisible, 'gray');
             else
                 J = real2rgb(Mframe, 'jet');
                 A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
             end
-%             G for background
-%             J for rgb map
+
             I = J .* A + G .* (1 - A);
-cla(handles.allCamData(camNo).screen);
+
             image(I,'Parent',handles.allCamData(camNo).screen);
         end
         
