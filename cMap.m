@@ -110,32 +110,32 @@ if use_window
     xyt = [xx yy t];
     
     M=size(xyt,1);
-    XYT=zeros(M,13);
+    XYT=zeros(M,17);
     
-    space_window_width = 2. / handles.activeCamData.xres; % mm space frame 
+    space_window_width =  2./ handles.activeCamData.xres; % mm space frame 
     time_window_width = 5 * handles.Fs / 1000; % time frame 
     how_many = 12; % why???
     for i=1:M
-       % находим массивы отклонений i-той точки от всех остальных
+       % пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ i-пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
        dx=abs(xyt(:,1)-xyt(i,1));
        dy=abs(xyt(:,2)-xyt(i,2));
        dt=abs(xyt(:,3)-xyt(i,3));
        %find dx dy dt 
        %------------------------------------------------------------------------
 
-       near=find((dx<=space_window_width)&(dy<=space_window_width)&(dt<=time_window_width | isfinite(xyt(:,3))));
+       near=find((sqrt(dx.^2+dy.^2)<=space_window_width)&(isfinite(xyt(:,3))));
        len=length(near);
        %specify the points by using the points that are close enough
        %------------------------------------------------------------------------
 
        if len>how_many
-            xytn=xyt(near,:)-ones(len,1)*xyt(i,:); % centered around the i-th point
-            x=xytn(:,1)*handles.activeCamData.xres/1000;%unit of X,Y are mM
-            y=xytn(:,2)*handles.activeCamData.yres/1000;
-            t=xytn(:,3);
+            xyn=xyt(near,1:2)-ones(len,1)*xyt(i,1:2); % centered around the i-th point
+            x=xyn(:,1)*handles.activeCamData.xres/1000;%unit of X,Y are mM
+            y=xyn(:,2)*handles.activeCamData.yres/1000;
+            t=xyt(near,3);
             %find dx dy dt of the specific points that are acceptable
             %------------------------------------------------------------------------
-            fit     = [ones(len,1) x y x.^2 y.^2 x.*y]; % on the windowed area
+            fit     = [ones(len,1) x y x.^2 y.^2 x.*y x.^3 y.^3 x.*y.^2 y.*x.^2]; % on the windowed area
             coefs   = fit\t;
             resi    = sqrt(sum((t-fit*coefs).^2)/sum(t.^2));
             resilin = sqrt(sum((t-fit(:,1:3)*coefs(1:3)).^2)/sum(t.^2));
@@ -151,6 +151,7 @@ if use_window
     Vx=(XYT(:,5)./(XYT(:,5).^2 + XYT(:,6).^2))*1000;%handles.activeCamData.xres; 
     % coef_y / (coef_y^2 + coef_y^2) * TODO multiplier????
     Vy=-(XYT(:,6)./(XYT(:,5).^2 + XYT(:,6).^2))*1000;%handles.activeCamData.yres; 
+    
     V=sqrt(Vx.^2+Vy.^2);
 end         
 
@@ -262,7 +263,7 @@ if ~use_window
     Vy = -Ty./(Tx.^2+Ty.^2);
     V = sqrt(Vx.^2 + Vy.^2);
 else
-    bad=(V>4); %includeMask CV above 4 m/s
+    bad=(V>1); %includeMask CV above 2 m/s
     Vx(bad)=NaN;
     Vy(bad)=NaN;
     V(bad)=NaN;
