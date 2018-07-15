@@ -78,7 +78,7 @@ mask_id = CC.PixelIdxList{idx};
 mask2(mask_id) = 1;
 
 % Find First Derivative and time of maxium
-derivatives = diff(temp,1,3); % first derivative
+derivatives = diff(dataCroppedInTime,1,3); % first derivative
 [~,max_i] = max(derivatives,[],3); % find location of max derivative
 
 % Create Activation Map
@@ -96,12 +96,12 @@ croppedAmap = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 
 use_window=1; % use windowed least-squares fitting
 
-if ~use_window
+% if ~use_window
     includeMask=zeros(rect(4)+1,rect(3)+1);
     includeMask(2:end-1,2:end-1)=abs(croppedAmap(1:end-2,2:end-1)-croppedAmap(3:end,2:end-1))+abs(croppedAmap(2:end-1,1:end-2)-croppedAmap(2:end-1,3:end))
     includeMask(2:end-1,2:end-1)=((croppedAmap(2:end-1,2:end-1)<croppedAmap(3:end,2:end-1))|(croppedAmap(2:end-1,2:end-1))<croppedAmap(1:end-2,2:end-1)|(croppedAmap(2:end-1,2:end-1)<croppedAmap(2:end-1,3:end))|(croppedAmap(2:end-1,2:end-1))<croppedAmap(2:end-1,1:end-2));
     croppedAmap(includeMask==0)=NaN;
-end
+% end
 if use_window
     [xx yy]= meshgrid(rect(1):rect(1)+rect(3),rect(2):rect(2)+rect(4));
     xx = reshape(xx,[],1);
@@ -112,8 +112,8 @@ if use_window
     M=size(xyt,1);
     XYT=zeros(M,13);
     
-    space_window_width = 2. / handles.activeCamData.xres; % 4mm space frame 
-    time_window_width = 0.005 * handles.Fs ; % time frame 
+    space_window_width = 2. / handles.activeCamData.xres; % mm space frame 
+    time_window_width = 5 * handles.Fs / 1000; % time frame 
     how_many = 12; % why???
     for i=1:M
        % находим массивы отклонений i-той точки от всех остальных
@@ -123,7 +123,7 @@ if use_window
        %find dx dy dt 
        %------------------------------------------------------------------------
 
-       near=find((dx<=space_window_width)&(dy<=space_window_width)&(dt<=time_window_width));
+       near=find((dx<=space_window_width)&(dy<=space_window_width)&(dt<=time_window_width | isfinite(xyt(:,3))));
        len=length(near);
        %specify the points by using the points that are close enough
        %------------------------------------------------------------------------
@@ -322,9 +322,9 @@ if ~use_window
     X_plot = x(isfinite(Z_fit));
     Vx_plot = Vx(isfinite(Z_fit));
 else
-    Y_plot = yy;%(was_fitted,1);
-    X_plot = xx;%(was_fitted,1);
-    Vx_plot = Vx;%(was_fitted,1);
+    Y_plot = yy(was_fitted);
+    X_plot = xx(was_fitted);
+    Vx_plot = Vx;
 end
 Vx_plot(abs(Vx_plot) > 5) = 5.*sign(Vx_plot(abs(Vx_plot) > 5));
 if ~use_window
