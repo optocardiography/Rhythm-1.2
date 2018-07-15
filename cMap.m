@@ -62,13 +62,13 @@ stat=round(stat*Fs)+1;
 endp=round(endp*Fs)+1;
 actMap = zeros(size(data,1),size(data,2));
 mask2 = zeros(size(data,1),size(data,2));
-temp = data(:,:,stat:endp); % truncate data
+dataCroppedInTime = data(:,:,stat:endp); % truncate data
 
 % Re-normalize data in case of drift
-temp = normalize_data(temp);
+dataCroppedInTime = normalize_data(dataCroppedInTime);
 
 % identify channels that have been zero-ed out due to noise
-mask = max(temp,[],3) > 0;
+mask = max(dataCroppedInTime,[],3) > 0;
 
 % Remove non-connected artifacts
 CC = bwconncomp(mask,4);
@@ -78,8 +78,8 @@ mask_id = CC.PixelIdxList{idx};
 mask2(mask_id) = 1;
 
 % Find First Derivative and time of maxium
-temp2 = diff(temp,1,3); % first derivative
-[~,max_i] = max(temp2,[],3); % find location of max derivative
+derivatives = diff(temp,1,3); % first derivative
+[~,max_i] = max(derivatives,[],3); % find location of max derivative
 
 % Create Activation Map
 actMap1 = max_i.*mask;
@@ -91,28 +91,88 @@ actMap1 = actMap1/Fs*1000; %% time in ms
 %% Find Conduction Velocity Map - Bayly Method
 % Isolate ROI Specified by RECT
 rect = round(rect);
-temp = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
-%Exclude everything, but activation front
-exclude=zeros(rect(4)+1,rect(3)+1);
-%exclude(2:end-1,2:end-1)=abs(temp(1:end-2,2:end-1)-temp(3:end,2:end-1))+abs(temp(2:end-1,1:end-2)-temp(2:end-1,3:end))
-exclude(2:end-1,2:end-1)=((temp(2:end-1,2:end-1)<temp(3:end,2:end-1))|(temp(2:end-1,2:end-1))<temp(1:end-2,2:end-1)|(temp(2:end-1,2:end-1)<temp(2:end-1,3:end))|(temp(2:end-1,2:end-1))<temp(2:end-1,1:end-2));
-temp(exclude==0)=NaN;
+croppedAmap = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
+%exclude everything, but activation front
+
+use_window=1; % use windowed least-squares fitting
+
+if ~use_window
+    includeMask=zeros(rect(4)+1,rect(3)+1);
+    includeMask(2:end-1,2:end-1)=abs(croppedAmap(1:end-2,2:end-1)-croppedAmap(3:end,2:end-1))+abs(croppedAmap(2:end-1,1:end-2)-croppedAmap(2:end-1,3:end))
+    includeMask(2:end-1,2:end-1)=((croppedAmap(2:end-1,2:end-1)<croppedAmap(3:end,2:end-1))|(croppedAmap(2:end-1,2:end-1))<croppedAmap(1:end-2,2:end-1)|(croppedAmap(2:end-1,2:end-1)<croppedAmap(2:end-1,3:end))|(croppedAmap(2:end-1,2:end-1))<croppedAmap(2:end-1,1:end-2));
+    croppedAmap(includeMask==0)=NaN;
+end
+if use_window
+    [xx yy]= meshgrid(rect(1):rect(1)+rect(3),rect(2):rect(2)+rect(4));
+    xx = reshape(xx,[],1);
+    yy = reshape(yy,[],1);
+    t = reshape(croppedAmap,[],1);
+    xyt = [xx yy t];
+    
+    M=size(xyt,1);
+    XYT=zeros(M,13);
+    
+    space_window_width = 2. / handles.activeCamData.xres; % 4mm space frame 
+    time_window_width = 0.005 * handles.Fs ; % time frame 
+    how_many = 12; % why???
+    for i=1:M
+       % находим массивы отклонений i-той точки от всех остальных
+       dx=abs(xyt(:,1)-xyt(i,1));
+       dy=abs(xyt(:,2)-xyt(i,2));
+       dt=abs(xyt(:,3)-xyt(i,3));
+       %find dx dy dt 
+       %------------------------------------------------------------------------
+
+       near=find((dx<=space_window_width)&(dy<=space_window_width)&(dt<=time_window_width));
+       len=length(near);
+       %specify the points by using the points that are close enough
+       %------------------------------------------------------------------------
+
+       if len>how_many
+            xytn=xyt(near,:)-ones(len,1)*xyt(i,:); % centered around the i-th point
+            x=xytn(:,1)*handles.activeCamData.xres/1000;%unit of X,Y are mM
+            y=xytn(:,2)*handles.activeCamData.yres/1000;
+            t=xytn(:,3);
+            %find dx dy dt of the specific points that are acceptable
+            %------------------------------------------------------------------------
+            fit     = [ones(len,1) x y x.^2 y.^2 x.*y]; % on the windowed area
+            coefs   = fit\t;
+            resi    = sqrt(sum((t-fit*coefs).^2)/sum(t.^2));
+            resilin = sqrt(sum((t-fit(:,1:3)*coefs(1:3)).^2)/sum(t.^2));
+            XYT(i,:)= [xyt(i,:),coefs',resi,len,cond(fit),resilin];
+        end
+    end
+            
+    
+    was_fitted=find( (XYT(:,1)~=0) & (XYT(:,2)~=0)); % if XYT was not filled    
+    XYT=XYT(was_fitted,:);
+    
+    % coef_x / (coef_x^2 + coef_y^2) * TODO multiplier????
+    Vx=(XYT(:,5)./(XYT(:,5).^2 + XYT(:,6).^2))*1000;%handles.activeCamData.xres; 
+    % coef_y / (coef_y^2 + coef_y^2) * TODO multiplier????
+    Vy=-(XYT(:,6)./(XYT(:,5).^2 + XYT(:,6).^2))*1000;%handles.activeCamData.yres; 
+    V=sqrt(Vx.^2+Vy.^2);
+end         
+
+
 
 % Fit Activation Map with 3rd-order Polynomial
- cind = isfinite(temp);
- [x y]= meshgrid(rect(1):rect(1)+rect(3),rect(2):rect(2)+rect(4));
- x = reshape(x,[],1);
- y = reshape(y,[],1);
- z = reshape(temp,[],1);
- a = [x.^3 y.^3 x.*y.^2 y.*x.^2 x.^2 y.^2 x.*y x y ones(size(x,1),1)];
- X = x(cind);
- Y = y(cind);
- Z = z(cind);
- A = [X.^3 Y.^3 X.*Y.^2 Y.*X.^2 X.^2 Y.^2 X.*Y X Y ones(size(X,1),1)];
- solution = A\Z;
- Z_fit = a*solution;
- Z_fit = reshape(Z_fit,size(cind));
- %Z_fit=nan(size(cind));
+if ~use_window
+    cind = isfinite(croppedAmap);
+    [x y]= meshgrid(rect(1):rect(1)+rect(3),rect(2):rect(2)+rect(4));
+    x = reshape(x,[],1);
+    y = reshape(y,[],1);
+    z = reshape(croppedAmap,[],1);
+    a = [x.^3 y.^3 x.*y.^2 y.*x.^2 x.^2 y.^2 x.*y x y ones(size(x,1),1)]; % for the whole rectangle
+    X = x(cind);
+    Y = y(cind);
+    Z = z(cind);
+    A = [X.^3 Y.^3 X.*Y.^2 Y.*X.^2 X.^2 Y.^2 X.*Y X Y ones(size(X,1),1)]; % for the active front
+    solution = A\Z; % solution is the set of coefficients
+    Z_fit = a*solution; % Z_fit is a polynome surface on the whole rectangle
+    Z_fit = reshape(Z_fit,size(cind)); % reshape Z_fit to be rectangle shaped
+end
+%Z_fit=nan(size(cind));
  %Z_fit(cind)=A*a;
 % zres=reshape(Z_fit,[],1)-Z;
 % SSres=sum(zres.^2);
@@ -120,10 +180,12 @@ temp(exclude==0)=NaN;
 % rsq=1-SSres/SStot;
 % disp(['rsq of fit is ' num2str(rsq)]);
 % Find Gradient of Polynomial Surface
- [Tx Ty] = gradient(Z_fit);
- Tx=Tx/handles.activeCamData.xres;
- Ty=Ty/handles.activeCamData.yres;
-% Calculate Conduction Velocity
+if ~use_window
+    [Tx Ty] = gradient(Z_fit);
+    Tx=Tx/handles.activeCamData.xres;
+    Ty=Ty/handles.activeCamData.yres;
+end
+ % Calculate Conduction Velocity
 % Vx = -Tx./(Tx.^2+Ty.^2);
 % Vy = -Ty./(Tx.^2+Ty.^2);
 % V = sqrt(Vx.^2 + Vy.^2);
@@ -193,16 +255,18 @@ temp(exclude==0)=NaN;
 %Z(Z==0) = nan;
 % Find Gradient of Polynomial Surface
 %[Tx,Ty] = gradient(Z);
+
 % Calculate Conduction Velocity
-Vx = Tx./(Tx.^2+Ty.^2);
-Vy = -Ty./(Tx.^2+Ty.^2);
-V = sqrt(Vx.^2 + Vy.^2);
-bad=(V>4); %exclude CV above 4 m/s
-Vx(bad)=NaN;
-Vy(bad)=NaN;
-V(bad)=NaN;
-
-
+if ~use_window
+    Vx = Tx./(Tx.^2+Ty.^2);
+    Vy = -Ty./(Tx.^2+Ty.^2);
+    V = sqrt(Vx.^2 + Vy.^2);
+else
+    bad=(V>4); %includeMask CV above 4 m/s
+    Vx(bad)=NaN;
+    Vy(bad)=NaN;
+    V(bad)=NaN;
+end
 %rect = round(abs(rect));
 %temp_Vx = Vx(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
 %temp_Vy = Vy(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
@@ -253,11 +317,21 @@ set(movie_scrn,'YTick',[],'XTick',[]);
 hold (movie_scrn,'on')
 
 %Y_plot = size(data,1)+1 - y(isfinite(Z_fit));
-Y_plot = y(isfinite(Z_fit));
-X_plot = x(isfinite(Z_fit));
-Vx_plot = Vx(isfinite(Z_fit));
+if ~use_window
+    Y_plot = y(isfinite(Z_fit));
+    X_plot = x(isfinite(Z_fit));
+    Vx_plot = Vx(isfinite(Z_fit));
+else
+    Y_plot = yy;%(was_fitted,1);
+    X_plot = xx;%(was_fitted,1);
+    Vx_plot = Vx;%(was_fitted,1);
+end
 Vx_plot(abs(Vx_plot) > 5) = 5.*sign(Vx_plot(abs(Vx_plot) > 5));
-Vy_plot = Vy(isfinite(Z_fit));
+if ~use_window
+    Vy_plot = Vy(isfinite(Z_fit));
+else
+    Vy_plot = Vy;%(was_fitted,1);
+end
 Vy_plot(abs(Vy_plot) > 5) = 5.*sign(Vy_plot(abs(Vy_plot) > 5));
 V = sqrt(Vx_plot.^2 + Vy_plot.^2);
 
