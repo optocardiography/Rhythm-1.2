@@ -783,7 +783,7 @@ end
             
                 % Check for dual camera data
                 if isfield(Data,'cmosData2')
-                    disp("dual camera");
+                    disp('dual camera');
                     %pop-up window for camera choice
                     questdual=questdlg('Please choose a camera', 'Camera Choice', 'Camera1', 'Camera2', 'Camera1');
                     % Load Camera1 data

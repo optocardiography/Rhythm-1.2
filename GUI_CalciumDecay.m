@@ -159,7 +159,7 @@ function calcTau_callback(~,~)
             % Determine Start and end of trace to be fitted
             [maxamp maxamptime] = max(CT);          % Determine peak time
             [firstamp firstamptime] = find(CT(maxamptime:end)<PercentSplit*maxamp);      %determine time of percent split amplitude
-            [secondamp secondamptime] = find(CT(maxamptime:end)<0.10*maxamp);     % determine time of 10% amplitude
+            [secondamp secondamptime] = find(CT(maxamptime:end)<0.20*maxamp);     % determine time of 20% amplitude
             
             if length(firstamptime)>1 
             firstamptime=firstamptime(1);
@@ -196,7 +196,7 @@ function calcTau_callback(~,~)
 %                 Tau2(i,j) = nan;
 %             end
             
-            if i ==50 && j == 50
+            if i == 1 && j == 1
                 %Plot Fit
                 Lam = -1/Tau2(i,j);
                 figure()
