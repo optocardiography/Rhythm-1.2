@@ -111,6 +111,9 @@ xlabel('Time (sec)');
 expwave_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,...
                             'String','Export OAPs','Units','normalized','Position',[0.9 0.14 0.08 0.04],...
                             'Callback',{@expwave_button_callback});
+exptofile_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,...
+                            'String','Export to file','Units','normalized','Position',[0.9 0.10 0.08 0.04],...
+                            'Callback',{@exptofile_button_callback});
 starttimemap_text = uicontrol('Parent',p1,'Style','text','FontSize',10,...
                             'String','Start Time','Units','normalized','Position',[0.68 0.14 0.07 0.04]);
 starttimemap_edit = uicontrol('Parent',p1,'Style','edit','FontSize',14,...
@@ -146,7 +149,7 @@ expmov_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
                          'Callback',{@expmov_button_callback});
 %% Statistical Results
 %create button group- will display results for both voltage and calcium
-results = uibuttongroup('Parent',p1,'Title','Statistics','FontSize',10,'Units','normalized','Position',[0.01 0.01 .95 .1]);
+results = uibuttongroup('Parent',p1,'Title','Statistics','FontSize',10,'Units','normalized','Position',[0.01 0.01 .95 0.09]);
 
 handles.meanresults = uicontrol('Parent',results,'Style','text','FontSize',10,'String','Mean:','Units','normalized',...
     'Position',[0.01 0.01 .13 0.9],'HorizontalAlignment','Left','Visible','on');
@@ -329,14 +332,14 @@ set([f,p1,filelist,selectdir,loadfile,...
     signal_scrn1,signal_scrn2,signal_scrn3,...
     signal_scrn4,signal_scrn5,...
     sweep_bar,dispwave_button,play_button,stop_button,...
-    expmov_button,expwave_button,...
+    expmov_button,expwave_button,exptofile_button...
     map,anal_data,starttimemap_text,starttimemap_edit...
     endtimemap_text,endtimemap_edit,...
     invert_cmap, map_popup],'Units','normalized');
 
 % Disable buttons that will not be needed until data is loaded
 set([play_button,stop_button,dispwave_button,expmov_button,starttimemap_edit,endtimemap_edit,...
-    expwave_button,invert_cmap],'Enable','off')
+    expwave_button,exptofile_button,invert_cmap],'Enable','off')
 
 % Center GUI on screen
 movegui(f,'center')
@@ -875,7 +878,7 @@ end
                     set(movie_slider,'Value',0)
                     drawFrame(1, handles.activeScreenNo);
                     set([play_button,stop_button,dispwave_button,expmov_button,...
-                        starttimemap_edit,endtimemap_edit,expwave_button,invert_cmap],'Enable','on')
+                        starttimemap_edit,endtimemap_edit,expwave_button,exptofile_button,invert_cmap],'Enable','on')
                 else
                     drawFrame(handles.frame, handles.activeScreenNo);
                     redrawWaveScreens();
@@ -1351,7 +1354,7 @@ end
             msgbox('No wave to export. Please use "Display Wave" button to select pixels on movie screen.','Icon','help')
         else
             w=figure('Name','Signal Waves','NextPlot','add','NumberTitle','off',...
-                'Visible','off','OuterPosition',[100, 50, 555,120*a+80]);
+                'Visible','on','OuterPosition',[100, 50, 555,120*a+80]);
         end
         if handles.bounds(handles.activeScreenNo) == 0
             for x = 1:a
@@ -1365,11 +1368,11 @@ end
                     set(gca,'XTick',[])
                 end
             end
-            %set(signal_scrn5,'XLim',[min(handles.time) max(handles.time)])
+            set(signal_scrn5,'XLim',[min(handles.time) max(handles.time)])
             xlabel('Time (sec)')
             hold off
             movegui(w,'center')
-            set(w,'Visible','on')
+            %set(w,'Visible','on')
         elseif handles.bounds(handles.activeScreenNo) == 1
             M = handles.markers1;
             msize = size(handles.markers1,1);
@@ -1422,7 +1425,47 @@ end
                 end
         end
 
-end
+    end
+
+%% Export signal waves to file
+function exptofile_button_callback(~,~)
+        M = handles.activeCamData.markers; [a,~]=size(M);
+        if isempty(M)&&isempty(handles.markers1)
+            msgbox('No wave to export. Please use "Display Wave" button to select pixels on movie screen.','Icon','help')
+        else
+            if handles.bounds(handles.activeScreenNo) == 0 % case for ungrouped screen
+                A = zeros(handles.activeCamData.maxFrame,a+1);
+                for x = 1:a
+                    for t = 1:handles.activeCamData.maxFrame
+                        A(t,1) = handles.time(t);
+                        A(t,x+1) = handles.activeCamData.cmosData(M(x,2),M(x,1),t);
+                    end
+                end
+            else % here case for both screen groups 1 or 2
+                if handles.bounds(handles.activeScreenNo) == 1
+                    M = handles.markers1;
+                elseif handles.bounds(handles.activeScreenNo) == 2
+                    M = handles.markers2;
+                end
+                msize = size(M,1);
+                A = zeros(handles.activeCamData.maxFrame, 4*msize+1);
+                
+                for i_marker=1:msize
+                    for i_cam = 1:4
+                        if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == handles.bounds(handles.activeScreenNo))
+                            for t = 1:handles.allCamData(i_cam).maxFrame
+                                A(t,(i_marker-1)*4+i_cam+1) = handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),t);
+                                A(t,1) = handles.time(t);
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        [filename, path] = uiputfile('output.txt');
+        dlmwrite(strcat(path,filename), A,'\t');
+    end
+
 
 % INVERT COLORMAP: inverts the colormaps for all isochrone maps
     function invert_cmap_callback(~,~)
