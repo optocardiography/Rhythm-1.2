@@ -81,7 +81,7 @@ if strcmp(oldfilename(end-2:end),'rsh')
         else
             dataPaths{n} = fstr(lineBreaksInd(n)+1:lineBreaksInd(n+1));
         end
-        charCheck = repmat((1:32)',[1 length(dataPaths{n})]);
+        charCheck = repmat((1:31)',[1 length(dataPaths{n})]);
         tmp = repmat(dataPaths{n},[size(charCheck,1) 1]);
         tmp = sum(charCheck == tmp);
         tmp = (1:length(tmp)).*tmp;
