@@ -189,12 +189,8 @@ guidata(activationMapGroup, handles);
         figure;
             startp = round(handles.a_start*handles.activeCamData.Fs);
             endp = round(handles.activeCamData.Fs*handles.a_end);
-            isDrawIsolines = get(isolinesCheckBox,'Value');
-            if isDrawIsolines
-                contourf(flipud(handles.activeCamData.saveData),handles.numOfContourLevels-1,'LineColor','k');
-            else
-                contourf(flipud(handles.activeCamData.saveData),handles.numOfContourLevels-1,'LineColor','none');
-            end
+            isDrawIsolines = isolinesCheckBox,'Value');
+            contourf(flipud(handles.activeCamData.saveData),handles.numOfContourLevels,'LineColor','none');
         colormap jet;
         colorbar;
        end
