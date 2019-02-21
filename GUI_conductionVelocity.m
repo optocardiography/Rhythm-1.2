@@ -156,11 +156,20 @@ function startTime_callback(source,~)
             startp = round(handles.c_start*handles.activeCamData.Fs);
             endp = round(handles.activeCamData.Fs*handles.c_end);
             contourf(flipud(handles.activeCamData.saveData),(endp-startp)/2,'LineColor','none');
+            contourcmap('copper','SourceObject', movie_scrn, 'ColorAlignment', 'center');
             hold on;
-            quiver(handles.activeCamData.saveX_plot, handles.activeCamData.saveY_plot,handles.activeCamData.saveVx_plot, handles.activeCamData.saveVy_plot,3,'r')
+            quiver_step = 2;
+            q = quiver(handles.activeCamData.saveX_plot(1:quiver_step:end), ...
+                   handles.activeCamData.saveY_plot(1:quiver_step:end), ...
+                   handles.activeCamData.saveVx_plot(1:quiver_step:end), ...
+                   handles.activeCamData.saveVy_plot(1:quiver_step:end),3,'w');
+             
+            q.LineWidth = 2;
+            q.AutoScaleFactor = 2;
             hold off;
 
-        colormap jet;
+        %colormap jet;
+        colormap copper;
         colorbar;
        end
     end

@@ -72,5 +72,6 @@ classdef cameraData < handle
         
         drawMap = 0;
         lastMapMode=0;
+        %numOfContourLevels = 1;
     end
 end

@@ -378,7 +378,8 @@ function mapPopUp_callback(~,~)
             % Conduction Velocity Map
             GUI_conditionParameters(map, handles); 
         case 2
-            colormap(handles.activeScreen, bone);
+            %colormap(handles.activeScreen, bone);
+            colormap(handles.activeScreen, copper);
             % New Conduction Velocity Map
             GUI_NewConductionVelocity(map, handles, f);
         case 3

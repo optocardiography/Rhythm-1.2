@@ -308,18 +308,19 @@ handles.activeCamData.saveData = actMap1;
 cla(movie_scrn); 
 %compute isolines
 
-[C,h] = contourf(movie_scrn, actMap1,(endp-stat)/2, 'LineColor','k');
+[C,h] = contourf(movie_scrn, actMap1,(endp-stat)/2,'LineColor','r');
 
-% 
-% allH = allchild(h);
-%  valueToHide = 1;
-%  patchValues = cell2mat(get(allH,'UserData'));
-%  patchesToHide = patchValues == valueToHide;
-%  set(allH(patchesToHide),'FaceColor','r','FaceAlpha',0);
+h.LineWidth = 0.2;
+
+allH = allchild(h);
+ valueToHide = 1;
+ patchValues = cell2mat(get(allH,'UserData'));
+ patchesToHide = patchValues == valueToHide;
+ set(allH(patchesToHide),'FaceColor','r','FaceAlpha',0);
 
 
 %caxis(movie_scrn,[stat endp]);
-contourcmap('copper','SourceObject', movie_scrn, 'ColorAlignment', 'center');
+%contourcmap('bone','SourceObject', movie_scrn);
 %colorbar(movie_scrn);
 set(movie_scrn,'YTick',[],'XTick',[]);
 
@@ -362,12 +363,7 @@ handles.activeCamData.saveVy_plot = Vy_plot;
 %        Vx_plot(bad)=[];Vy_plot(bad)=[];X_plot(bad)=[];Y_plot(bad)=[];;V(bad)=[];
         
 % plot vector field
-quiver_step = 2;
-q = quiver(movie_scrn, X_plot(1:quiver_step:end),...
-           Y_plot(1:quiver_step:end),Vx_plot(1:quiver_step:end),...
-           -1.0 * Vy_plot(1:quiver_step:end),'w');
-q.LineWidth = 2;
-q.AutoScaleFactor = 2;
+quiver(movie_scrn, X_plot, Y_plot,Vx_plot, -1.0 * Vy_plot,'r');
 set(movie_scrn,'YDir','reverse');
 
 hold (movie_scrn,'off');

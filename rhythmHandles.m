@@ -94,6 +94,7 @@ classdef rhythmHandles < handle
         T_min=0;
         T_max=0;
         
+        numOfContourLevels = 1;
         
     end
 end

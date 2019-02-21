@@ -95,10 +95,10 @@ actMap1 = actMap1/Fs*1000; %% time in ms
 if size(data,3) ~= 1
     handles.activeCamData.saveData = actMap1;
     cla(movie_scrn); 
-    contourf(movie_scrn, actMap1,endp-stat,'LineColor','none');
+    contourf(movie_scrn, actMap1,(endp-stat),'LineColor','k');
     set(movie_scrn,'YDir','reverse');
     set(movie_scrn,'YTick',[],'XTick',[]);
-    colormap(cmap);
+    colormap(jet);
 %     colorbar(movie_scrn);
 end
 
