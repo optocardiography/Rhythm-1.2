@@ -67,37 +67,41 @@ export_button = uicontrol('Parent',NewconductionVelocityGroup,'Style','pushbutto
 
 numOfLevels_text = uicontrol('Parent',NewconductionVelocityGroup,'Style','text',...
     'FontSize',10,'String','step len(ms)',...
-    'Units','normalized','Position',[.01 0 .35 .15],'HorizontalAlignment','left',...
+    'Units','normalized','Position',[0 0 .35 .15],'HorizontalAlignment','left',...
     'Visible','on');
 numOfLevels_edit = uicontrol('Parent',NewconductionVelocityGroup,'Style','edit',...
     'FontSize',10,'Units','normalized','Position',[0.35 0 .25 .15],...
     'Visible','on','Callback', @numOfLevels_callback);
                     
 set(export_button,'CData',export_icon) 
-set(numOfLevels_edit,'String',num2str( (handles.numOfContourLevels)/handles.activeCamData.Fs));
 set(starttimevolt_edit, 'String', '0.3');
 set(endtimevolt_edit, 'String', '0.35');
-set(xdist_edit, 'String', '0.01');
-set(ydist_edit, 'String', '0.01');
+set(xdist_edit, 'String', '0.1');
+set(ydist_edit, 'String', '0.1');
 startTime_callback(starttimevolt_edit);
+set(numOfLevels_edit,'String',num2str( 1./ handles.activeCamData.Fs));
+numOfLevels_callback(numOfLevels_edit);
+
     % Save handles in figure with handle f.
     guidata(NewconductionVelocityGroup, handles);
     
     
 %%
     function numOfLevels_callback(source,~)
+        startTime = str2double(get(starttimevolt_edit,'String')); 
+        endTime = str2double(get(endtimevolt_edit,'String'));
         val_map_step = str2double(get(source,'String'));
         if (val_map_step < 1 / handles.activeCamData.Fs)
             set(source,'String', num2str(1 / handles.activeCamData.Fs));
             val_map_step = 1 / handles.activeCamData.Fs;
         end
-        if (val_map_step >= (handles.c_end - handles.c_start))
-            set(source,'String', num2str((handles.c_end - handles.c_start)));
-            val_map_step = handles.c_end - handles.c_start;
+        if (val_map_step >= (endTime - startTime))
+            set(source,'String', num2str((endTime - startTime)));
+            val_map_step = endTime - startTime;
         end
         
 %         handles.numOfContourLevels = round(val_map_step * handles.activeCamData.Fs)+1;
-        handles.numOfContourLevels = round((handles.c_end - handles.c_start) / val_map_step);
+        handles.numOfContourLevels = round((endTime - startTime) / val_map_step) + 1;
     end
     %% callback functions
     function startTime_callback(source,~)
@@ -115,6 +119,8 @@ startTime_callback(starttimevolt_edit);
             set(source,'String', num2str(val_start));
         end
         drawTimeLines(val_start, val_end, handles, f);
+        set(numOfLevels_edit,'String', num2str( 1./handles.activeCamData.Fs));
+        numOfLevels_callback(numOfLevels_edit);
     end
 
     function endTime_callback(source,~)
@@ -125,6 +131,8 @@ startTime_callback(starttimevolt_edit);
             val_end = val_start+0.01;
         end
         drawTimeLines(val_start, val_end, handles, f);
+        set(numOfLevels_edit,'String', num2str( 1./handles.activeCamData.Fs));
+        numOfLevels_callback(numOfLevels_edit);
     end 
 
     function drawTimeLines(val_start, val_end, handles, f)
