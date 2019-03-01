@@ -14,48 +14,65 @@ removeBG_button = uicontrol('Parent',conditionParametersGroup,...
                             'Style','checkbox','FontSize',fontSize,...
                             'String','Remove Background',...
                             'Units','normalized',...
-                            'Position',[0.01 0.9 0.9 0.1]);
+                            'Position',[0.01 0.9 0.9 0.1],...
+                            'Callback',@removeBGcheckbox_callback);
+
+fillHoles_checkbox = uicontrol('Parent',conditionParametersGroup,...
+                            'Style','checkbox','FontSize',fontSize,...
+                            'String','Fill Holes',...
+                            'Units','normalized',...
+                            'Position',[0.5 0.8 0.5 0.1],...
+                            'Callback',@removeBG_callback);
 
 bg_thresh_label = uicontrol('Parent',conditionParametersGroup, ...
                             'Style','text','FontSize',fontSize,...
-                            'String','BG Threshold',...
+                            'String','Threshold',...
                             'Units','normalized',...
-                            'Position',[0.1 0.8 0.6 0.1]);
-bg_thresh_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
-                           'FontSize',fontSize,'String','0.3',...
-                           'Units','normalized',...
-                           'Position',[0.7 0.8 0.3 0.1]);
-                       
+                            'Position',[0 0.8 0.5 0.1]);
+
+% bg_thresh_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
+%                            'FontSize',fontSize,'String','0.3',...
+%                            'Units','normalized',...
+%                            'Position',[0.7 0.7 0.3 0.1],...
+%                            'Callback', @removeBG_callback);
+        
+bg_thresh_slider = uicontrol('Parent',conditionParametersGroup,...
+                            'Style', 'slider', 'Units','normalized',...
+                            'Position',[0.1, 0.7, 0.9, 0.1],...
+                            'SliderStep',[.001 .01],...
+                            'Callback',{@removeBG_callback});
+
 perc_ex_label = uicontrol('Parent',conditionParametersGroup,'Style','text',...
-                          'FontSize',fontSize,'String','EX Threshold',...
+                          'FontSize',fontSize,'String','Remove Islands',...
                           'Units','normalized',...
-                          'Position',[0.1 0.7 0.6 0.1]);
+                          'Position',[0 0.6 0.7 0.1]);
 perc_ex_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
-                         'FontSize',fontSize,'String','0.5',...
+                         'FontSize',fontSize,'String','0.01',...
                          'Units','normalized',...
-                         'Position',[0.7 0.7 0.3 0.1]);
+                         'Position',[0.7 0.6 0.3 0.1],...
+                         'Callback',@removeBG_callback);
 
 bin_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                         'FontSize',fontSize,'String','Bin',...
                         'Units','normalized',...
-                         'Position',[0 0.6 0.5 0.1]);
+                         'Position',[0 0.5 0.5 0.1]);
 filt_button = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                         'FontSize',fontSize,'String','Filter',...
                         'Units','normalized',...
-                        'Position',[0 0.5 0.5 0.1]);
+                        'Position',[0 0.4 0.5 0.1]);
 removeDrift_button = uicontrol('Parent',conditionParametersGroup,...
                         'Style','checkbox','FontSize',10,'String','Drift',...
                         'Units','normalized',...
-                        'Position',[0 0.4 0.5 0.1]);
+                        'Position',[0 0.3 0.5 0.1]);
 norm_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                         'FontSize',fontSize,'String','Normalize',...
                         'Units','normalized',...
-                        'Position',[0 0.3 1 0.1]);
+                        'Position',[0 0.2 1 0.1]);
 inverse_button = uicontrol('Parent',conditionParametersGroup,...
                            'Style','checkbox','FontSize',fontSize,...
                            'String','Inverse signal',...
                            'Units','normalized',...
-                         'Position',[0 0.2 1 0.1]);
+                         'Position',[0 0.1 1 0.1]);
 apply_button = uicontrol('Parent',conditionParametersGroup,...
                          'Style','pushbutton','FontSize',fontSize,...
                          'String','Apply',...
@@ -66,20 +83,85 @@ bin_popup = uicontrol('Parent',conditionParametersGroup,...
                       'Style','popupmenu','FontSize',fontSize,...
                       'String',{'3 x 3', '5 x 5', '7 x 7'},...
                       'Units','normalized',...
-                      'Position',[0.5 0.6 0.5 0.1]);
+                      'Position',[0.5 0.5 0.5 0.1]);
 filt_popup = uicontrol('Parent',conditionParametersGroup,...
                        'Style','popupmenu','FontSize',fontSize,...
                        'String',{'[0 50]','[0 75]', '[0 100]', '[0 150]'},...
                        'Units','normalized',...
-                       'Position',[0.5 0.5 0.5 0.1]);
+                       'Position',[0.5 0.4 0.5 0.1]);
 drift_popup = uicontrol('Parent',conditionParametersGroup,...
                         'Style','popupmenu','FontSize',fontSize,...
                         'String',{'1st Order','2nd Order', '3rd Order', '4th Order'},...
                         'Units','normalized',...
-                        'Position',[0.5 0.4 0.5 0.1]);
+                        'Position',[0.5 0.3 0.5 0.1]);
 set(filt_popup,'Value',3)
 
+
+%% Movie Slider Functionality
+%     function movieslider_callback(source,~)
+%         val = get(source,'Value');
+%         
+%         maxBG = max (handles.activeCamData.bg);
+%         minBG = min (handles.activeCamData.bg);
+%         i = round(val*(maxBG - minBG)) + minBG;
+        
+%         % Update sweep bar
+%          if (handles.bounds(handles.activeScreenNo) == 0)
+%             set(f,'CurrentAxes',sweep_bar)
+%             a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale];b = [0 1]; cla
+%             plot(a,b,'r','Parent',sweep_bar)
+%             set(sweep_bar,'Layer','top');
+% %             axis([handles.starttime handles.endtime 0 1])
+%             axis([0 handles.time(end) 0 1])
+%             hold off; axis off;
+%          else
+%              for i_group=1:5
+%                  set(f,'CurrentAxes',signalGroup(i_group).sweepBar);
+%                  a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale];b = [0 1]; %cla
+%                  plot(a,b,'r','Parent',signalGroup(i_group).sweepBar)
+%                  %             axis([handles.starttime handles.endtime 0 1])
+%                  axis([0 handles.time(end) 0 1])
+%                  hold off;  axis off;
+%              end
+%          end
+%     end
+
 guidata(conditionParametersGroup, handles);
+if (handles.activeCamData.isloaded)
+    removeBG_callback(removeBG_button);
+end
+    function removeBG_callback(hObject,~)
+        %threshold = str2double(get(bg_thresh_edit,'String'));
+        val = get(bg_thresh_slider,'Value');
+        
+        maxBG = max (handles.activeCamData.bg);
+        minBG = min (handles.activeCamData.bg);
+        
+        perc_ex = str2double (get(perc_ex_edit, 'String'));
+        
+        frame = handles.activeCamData.bgRGB;
+        BG = mat2gray(frame);
+        %level = graythresh(BG); % find Otsu threshold
+        %BW = im2bw(BG,level*threshold); % create mask
+        
+        BW = im2bw(BG,val); % create mask
+        BW2 = bwareaopen(BW, ceil(perc_ex*size(BG,1)*size(BG,2))); % remove islands
+        
+        fillHoles = get(fillHoles_checkbox,'Value');
+        if fillHoles
+            BW3 = imfill(BW2,'holes'); %fill holes
+        else
+            BW3 = BW2;
+        end
+%         handles.activeCamData.segmentationBoundary = boundarymask (BW3);
+        handles.activeCamData.segmentation = BW3;
+        
+        drawFrame(handles.frame ,handles.activeScreenNo);
+    end
+
+    function removeBGcheckbox_callback(hObject,eventdata)
+        drawFrame(handles.frame ,handles.activeScreenNo);
+    end
 
 % Condition Signals Selection Change Callback
     function cond_sig_selcbk(hObject,~)
@@ -111,9 +193,10 @@ guidata(conditionParametersGroup, handles);
             % Update counter % progress bar
             counter = counter + 1;
             waitbar(counter/trackProg,g1,'Removing Background');
-            bg_thresh = str2double(get(bg_thresh_edit,'String'));
-            perc_ex = str2double(get(perc_ex_edit,'String'));
-            handles.activeCamData.cmosData = remove_BKGRD(handles.activeCamData.cmosData,handles.activeCamData.bg,bg_thresh,perc_ex);
+            %bg_thresh = str2double(get(bg_thresh_edit,'String'));
+            %perc_ex = str2double(get(perc_ex_edit,'String'));
+            %handles.activeCamData.cmosData = remove_BKGRD(handles.activeCamData.cmosData,handles.activeCamData.bg,bg_thresh,perc_ex);
+            handles.activeCamData.cmosData = handles.activeCamData.cmosData.* handles.activeCamData.segmentation;
         end
         % Bin Data
         if bin_state == 1
@@ -214,8 +297,8 @@ guidata(conditionParametersGroup, handles);
             set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
         end
         
-        
-    function drawFrame(frame, camNo)
+    end
+function drawFrame(frame, camNo)
         for i=1:4
             handles.allCamData(i).screen.XColor = 'black';
             handles.allCamData(i).screen.YColor = 'black';
@@ -242,9 +325,19 @@ guidata(conditionParametersGroup, handles);
                 A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
             end
 
-            I = J .* A + G .* (1 - A);
-
-            image(I,'Parent',handles.allCamData(camNo).screen);
+            I = J .* A + G .* (1 - A) ;
+            
+            removeBG = get(removeBG_button,'Value');
+            if (removeBG)
+                mask = handles.activeCamData.segmentation;
+                maskedI = I;
+                [row,col] = find(mask~=0);
+                for i=1:size(row,1)
+                    maskedI(row(i),col(i),1) = 1;
+                end
+            end
+            
+            %image(maskedI,'Parent',handles.allCamData(camNo).screen);
 
             if handles.bounds(camNo) == 1
                 M = handles.markers1;
@@ -255,8 +348,11 @@ guidata(conditionParametersGroup, handles);
             end
             [a,~]=size(M);
             hold(handles.allCamData(camNo).screen,'on')
-            image(I,'Parent',handles.allCamData(camNo).screen);
-                
+            if removeBG
+                image(maskedI,'Parent',handles.allCamData(camNo).screen);
+            else
+                image(I,'Parent',handles.allCamData(camNo).screen);
+            end
             for xx=1:a
                 plot(M(xx,1),M(xx,2),'wp','MarkerSize',12,'MarkerFaceColor',...
                     handles.markerColors(xx),'MarkerEdgeColor','w','Parent',handles.allCamData(camNo).screen);
@@ -326,7 +422,7 @@ guidata(conditionParametersGroup, handles);
             end
             hold off
         end
+         set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
     end
-end
 guidata(conditionParametersGroup, handles);
 end

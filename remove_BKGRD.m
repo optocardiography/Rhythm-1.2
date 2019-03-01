@@ -103,12 +103,12 @@ function new_data = remove_BKGRD(data,bg,thresh,perc_ex)
 %% Method 2: Thresholding
 % Threshold Image
 BG = mat2gray(bg);
-level = graythresh(BG);
-BW = im2bw(BG,level*thresh);
-BW2 = bwareaopen(BW, ceil(perc_ex*size(BG,1)*size(BG,2)));
-BW3 = imfill(BW2,'holes');
-mask = repmat(BW3,[1 1 size(data,3)]);
-new_data = data.*mask;
+level = graythresh(BG); % find Otsu threshold
+BW = im2bw(BG,level*thresh); % create mask
+BW2 = bwareaopen(BW, ceil(perc_ex*size(BG,1)*size(BG,2))); % remove islands
+BW3 = imfill(BW2,'holes'); %fill holes
+mask = repmat(BW3,[1 1 size(data,3)]); % bw to rgb?
+new_data = data.*mask; % apply mask to data
 
 
 
