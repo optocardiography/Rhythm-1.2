@@ -21,6 +21,7 @@ close all; clc;
 % synchronization. All data processing are in one popup menu. New
 % functional can be written with minimal interaction (see user guide).
 handles = rhythmHandles;
+
 try
     editor_service = com.mathworks.mlservices.MLEditorServices;
     editor_app = editor_service.getEditorApplication;
@@ -484,7 +485,11 @@ end
                         drawFrame(handles.frame, handles.activeScreenNo);
                         hold (handles.activeScreen,'on');
                         center = [i,j];
-                        viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
+                        if verLessThan('matlab','9.0.0')
+                            viscircles(handles.activeScreen, center, handles.brushSize,'EdgeColor','b');
+                        else
+                            viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
+                        end
                         set(handles.activeScreen,'YTick',[],'XTick',[]);
                         hold (handles.activeScreen,'off');
                     end
@@ -556,7 +561,11 @@ end
                 hold (handles.activeScreen,'on');
                 center = [i,j];
 %                 viscircles(handles.activeScreen, center, handles.activeCamData.brushSize,'Color','b');
-                viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
+                if verLessThan('matlab','9.0.0')
+                    viscircles(handles.activeScreen, center, handles.brushSize,'EdgeColor','b');
+                else
+                    viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
+                end
                 set(handles.activeScreen,'YTick',[],'XTick',[]);
                 hold (handles.activeScreen,'off');
             end
@@ -853,8 +862,12 @@ end
                 drawFrame(handles.frame, handles.activeScreenNo);
                 hold (handles.activeScreen,'on');
                 center = [i,j];
-%                 viscircles(handles.activeScreen, center, handles.activeCamData.brushSize,'Color','b');
-                viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
+                if verLessThan('matlab','9.0.0')
+                    viscircles(handles.activeScreen, center, handles.brushSize,'EdgeColor','b');
+                else
+                    viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
+                end
+%                 viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
                 set(handles.activeScreen,'YTick',[],'XTick',[]);
                 hold (handles.activeScreen,'off');
             end
@@ -912,7 +925,9 @@ end
             end
             % Load data from *.mat file
             Data = load([filename(1:end-3),'mat']);
-            
+            if isfield(Data,'cmos_all_data')
+                Data = Data.cmos_all_data;
+            end
             % check if a loaded data has framerate as the previous loaded data
             differentFs = 0;
             for i_cam=1:4
@@ -925,7 +940,6 @@ end
             if differentFs && ~firstLoad
                 msgbox('Warning: All loaded data should have an equal framerate!','Title','help')
             else
-            
                 % Check for dual camera data
                 if isfield(Data,'cmosData2')
                     disp('dual camera');
@@ -958,12 +972,19 @@ end
                 else
                     % Load from single camera
                     handles.activeCamData.isloaded = 1;
-                    handles.activeCamData.cmosData = double(Data.cmosData(:,:,2:end));
-                    handles.activeCamData.bg = double(Data.bgimage); 
+                    if isfield(Data,'cmosData')
+                        handles.activeCamData.cmosData = double(Data.cmosData(:,:,2:end));
+                    elseif isfield(Data,'filt_data')
+                        handles.activeCamData.cmosData = double(Data.filt_data(:,:,2:end));
+                    end
+                    if length(size(Data.bgimage)) == 3
+                        handles.activeCamData.bg = double(rgb2gray(Data.bgimage));
+                    else
+                        handles.activeCamData.bg = double(Data.bgimage);
+                    end
                     handles.activeCamData.finalSegmentation = zeros(size(handles.activeCamData.bg));
                     handles.activeCamData.brushSegmentation = zeros(size(handles.activeCamData.bg));
                     handles.activeCamData.thresholdSegmentation = zeros(size(handles.activeCamData.bg));
-
                     % Save out pacing spike
                     %handles.activeCamData.ecg = Data.channel{1}(2:end)*-1;
 
@@ -977,7 +998,8 @@ end
 
                 handles.activeCamData.cmosRawData = handles.activeCamData.cmosData; % Save a variable to preserve  the raw cmos data
                 handles.activeCamData.bgRGB = real2rgb(handles.activeCamData.bg,'gray'); % Convert background to grayscale 
-
+                %handles.activeCamData.bgRGB = handles.activeCamData.filt_data;
+                
                 handles.activeCamData.maxFrame = size(handles.activeCamData.cmosData,3);
 %                 disp( handles.activeCamData.maxFrame);
                 if (handles.maxFrame < handles.activeCamData.maxFrame)
@@ -1043,9 +1065,11 @@ end
             handles.dir = dir_name;
             search_name = [dir_name,'/*.rsh'];
             search_nameNew = [dir_name,'/*.gsh'];
+            search_nameMat = [dir_name,'/*.mat'];
             files = struct2cell(dir(search_name));
             filesNew = struct2cell(dir(search_nameNew));
-            handles.file_list = [files(1,:)'; filesNew(1,:)'];
+            filesMat = struct2cell(dir(search_nameMat));
+            handles.file_list = [files(1,:)'; filesNew(1,:)';filesMat(1,:)'];
             set(filelist,'String',handles.file_list)
             handles.filename = char(handles.file_list(1));
         end

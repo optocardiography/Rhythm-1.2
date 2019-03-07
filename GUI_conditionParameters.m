@@ -245,7 +245,7 @@ end
             %bg_thresh = str2double(get(bg_thresh_edit,'String'));
             %perc_ex = str2double(get(perc_ex_edit,'String'));
             %handles.activeCamData.cmosData = remove_BKGRD(handles.activeCamData.cmosData,handles.activeCamData.bg,bg_thresh,perc_ex);
-            handles.activeCamData.cmosData = handles.activeCamData.cmosData.* handles.activeCamData.finalSegmentation;
+            handles.activeCamData.cmosData = handles.activeCamData.cmosData.* repmat(handles.activeCamData.finalSegmentation,[1 1 size(handles.activeCamData.cmosData,3)]);
         end
         % Bin Data
         if bin_state == 1

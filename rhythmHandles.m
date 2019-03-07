@@ -102,5 +102,7 @@ classdef rhythmHandles < handle
         isFillHoles = 0;
         isRemoveIslands = 0;
         removeIslandsPercent = 0;
+        
+        matlabVersion = 2018;
     end
 end
