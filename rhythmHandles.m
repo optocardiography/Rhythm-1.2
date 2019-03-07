@@ -95,6 +95,12 @@ classdef rhythmHandles < handle
         T_max=0;
         
         numOfContourLevels = 2;
-        
+        drawBrush = 0;
+        drawSegmentation=0;
+        brushSize=1;
+        brushMaskIndices=[];
+        isFillHoles = 0;
+        isRemoveIslands = 0;
+        removeIslandsPercent = 0;
     end
 end

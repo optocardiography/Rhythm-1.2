@@ -73,6 +73,11 @@ classdef cameraData < handle
         drawMap = 0;
         lastMapMode=0;
         %numOfContourLevels = 1;
-        segmentation = [];
+        thresholdSegmentation = [];
+        brushSegmentation = [];
+        finalSegmentation = [];
+        removeBGthreshold=0;
+%         brushSize = 1.0;
+%         brushMaskIndices=[];
     end
 end

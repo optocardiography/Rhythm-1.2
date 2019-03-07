@@ -10,6 +10,44 @@ function GUI_conditionParameters(conditionParametersGroup, handles)
 % Signal Conditioning Button Group and Buttons
 fontSize=9;
 
+ brush_checkbox = uicontrol('Parent',conditionParametersGroup,...
+                             'Style','checkbox','FontSize',fontSize,...
+                             'String','Brush',...
+                             'Units','normalized',...
+                             'Position',[0.5 0.835 0.5 0.075],...
+                             'Callback',{@brush_checkbox_callback});
+    function brush_checkbox_callback(src,~)
+        handles.drawBrush = get(src,'Value');
+    end
+
+% brush_slider = uicontrol('Parent',conditionParametersGroup,...
+%                             'Style', 'slider', 'Units','normalized',...
+%                             'Position',[0.001 0.55 0.7 0.075],...
+%                             'SliderStep',[.01 .2],...
+%                             'Callback',{@brush_slider_callback});
+
+%     function brush_slider_callback(src,~)
+%         brushSize = 1.0 + get(src,'Value')*30;
+% %         handles.activeCamData.brushSize = brushSize;
+%         handles.brushSize = brushSize;
+%         
+%         % Make a circle mask
+%         circleMask = zeros(1 + 2*ceil(brushSize), 1 + 2*ceil(brushSize));
+%         for i=1:size(circleMask,1)
+%             for j=1:size(circleMask,2)
+%                 if (j - size(circleMask,2)/2-0.5)^2 + (i - size(circleMask,2)/2-0.5)^2 < brushSize^2
+%                     circleMask(j,i) = 1;
+%                 end
+%             end
+%         end
+%         [row,col] = find(circleMask);
+%         row = row - size(circleMask,2)/2 - 0.5;
+%         col = col - size(circleMask,2)/2 - 0.5;
+% %         handles.activeCamData.brushMaskIndices = [row,col];
+%         handles.brushMaskIndices = [row,col];
+%     end
+                        
+                        
 removeBG_button = uicontrol('Parent',conditionParametersGroup,...
                             'Style','checkbox','FontSize',fontSize,...
                             'String','Remove Background',...
@@ -21,152 +59,155 @@ fillHoles_checkbox = uicontrol('Parent',conditionParametersGroup,...
                             'Style','checkbox','FontSize',fontSize,...
                             'String','Fill Holes',...
                             'Units','normalized',...
-                            'Position',[0.2 0.8 0.6 0.1],...
+                            'Position',[0.001 0.475 0.7 0.075],...
                             'Callback',@removeBG_callback);
 
 bg_thresh_label = uicontrol('Parent',conditionParametersGroup, ...
                             'Style','text','FontSize',fontSize,...
-                            'String','BG Threshold',...
+                            'String','Threshold',...
                             'Units','normalized',...
-                            'Position',[0.1 0.7 0.6 0.1]);
-bg_thresh_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
-                           'FontSize',fontSize,'String','0.3',...
-                           'Units','normalized',...
-                           'Position',[0.7 0.7 0.3 0.1],...
-                           'Callback', @removeBG_callback);
-        
-bg_thresh_slider = uicontrol('Parent',f, 'Style', 'slider', 'Units','normalized',...
-                            'Position',[0.15, 0.16, 0.5, 0.02],...
-                            'SliderStep',[.001 .01],...
-                            'Callback',{@threshSlider_callback});
+                            'Position',[0 0.825 0.5 0.075]);
 
-perc_ex_label = uicontrol('Parent',conditionParametersGroup,'Style','text',...
-                          'FontSize',fontSize,'String','EX Threshold',...
+% bg_thresh_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
+%                            'FontSize',fontSize,'String','0.3',...
+%                            'Units','normalized',...
+%                            'Position',[0.7 0.7 0.3 0.1],...
+%                            'Callback', @removeBG_callback);
+        
+bg_thresh_slider = uicontrol('Parent',conditionParametersGroup,...
+                            'Style', 'slider', 'Units','normalized',...
+                            'Position',[0.1, 0.75, 0.9, 0.075],...
+                            'SliderStep',[.01 .02],...
+                            'Callback',{@removeBG_callback});
+
+removeIslandsCheckbox = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
+                          'FontSize',fontSize,'String','Remove Islands',...
                           'Units','normalized',...
-                          'Position',[0.1 0.6 0.6 0.1]);
+                          'Position',[0 0.65 0.7 0.075],...
+                          'Callback', {@removeBG_callback});
 perc_ex_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
-                         'FontSize',fontSize,'String','0.5',...
+                         'FontSize',fontSize,'String','0.01',...
                          'Units','normalized',...
-                         'Position',[0.7 0.6 0.3 0.1],...
+                         'Position',[0.7 0.55 0.3 0.075],...
                          'Callback',@removeBG_callback);
 
 bin_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                         'FontSize',fontSize,'String','Bin',...
                         'Units','normalized',...
-                         'Position',[0 0.5 0.5 0.1]);
+                         'Position',[0 0.375 0.5 0.075]);
 filt_button = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                         'FontSize',fontSize,'String','Filter',...
                         'Units','normalized',...
-                        'Position',[0 0.4 0.5 0.1]);
+                        'Position',[0 0.3 0.5 0.075]);
 removeDrift_button = uicontrol('Parent',conditionParametersGroup,...
                         'Style','checkbox','FontSize',10,'String','Drift',...
                         'Units','normalized',...
-                        'Position',[0 0.3 0.5 0.1]);
+                        'Position',[0 0.225 0.5 0.075]);
 norm_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                         'FontSize',fontSize,'String','Normalize',...
                         'Units','normalized',...
-                        'Position',[0 0.2 1 0.1]);
+                        'Position',[0 0.15 1 0.075]);
 inverse_button = uicontrol('Parent',conditionParametersGroup,...
                            'Style','checkbox','FontSize',fontSize,...
                            'String','Inverse signal',...
                            'Units','normalized',...
-                         'Position',[0 0.1 1 0.1]);
+                         'Position',[0 0.075 1 0.075]);
 apply_button = uicontrol('Parent',conditionParametersGroup,...
                          'Style','pushbutton','FontSize',fontSize,...
                          'String','Apply',...
                          'Units','normalized',...
-                         'Position',[0 0 1 0.1],'Callback',@cond_sig_selcbk);
+                         'Position',[0 0 1 0.075],'Callback',@cond_sig_selcbk);
 %Pop-up menu options
 bin_popup = uicontrol('Parent',conditionParametersGroup,...
                       'Style','popupmenu','FontSize',fontSize,...
                       'String',{'3 x 3', '5 x 5', '7 x 7'},...
                       'Units','normalized',...
-                      'Position',[0.5 0.5 0.5 0.1]);
+                      'Position',[0.5 0.375 0.5 0.075]);
 filt_popup = uicontrol('Parent',conditionParametersGroup,...
                        'Style','popupmenu','FontSize',fontSize,...
                        'String',{'[0 50]','[0 75]', '[0 100]', '[0 150]'},...
                        'Units','normalized',...
-                       'Position',[0.5 0.4 0.5 0.1]);
+                       'Position',[0.5 0.3 0.5 0.075]);
 drift_popup = uicontrol('Parent',conditionParametersGroup,...
                         'Style','popupmenu','FontSize',fontSize,...
                         'String',{'1st Order','2nd Order', '3rd Order', '4th Order'},...
                         'Units','normalized',...
-                        'Position',[0.5 0.3 0.5 0.1]);
+                        'Position',[0.5 0.225 0.5 0.075]);
 set(filt_popup,'Value',3)
+meanValues = mean(handles.activeCamData.cmosData, 3);
+meanValues = meanValues - min(meanValues(:,:)) ;
+meanValues = meanValues ./ max(meanValues(:,:)) ;
+%figure;
+%imshow(meanValues);
+
+deviationValues = std(handles.activeCamData.cmosData,0,[3]);
+deviationValues = deviationValues - min(deviationValues(:,:)) ;
+deviationValues = deviationValues ./ max(deviationValues(:,:)) ;
+%figure;
+%imshow(deviationValues);
+
+%sample = squeeze(handles.activeCamData.cmosData(36,30,:));
+%[pxx,f] = pwelch(sample - mean(sample), handles.activeCamData.Fs);
+%figure
+%plot (pxx)
+% fidi = fopen('d2_r6__001.txt');
+% D = textscan(fidi, '%f%f%f%*f', 'CollectOutput',1);
+% s = D{:}(:,2:3);
+% Fs = handles.activeCamData.Fs;                                                  % Sampling Frequency (Hz)
+% Ts = Fs * size(handles.activeCamData.cmosData,3);                                                  % Sampling Interval (sec)
+% Fn = Fs/2;                                                  % Nyquist Frequency (Hz)
+% t = D{:}(:,1)*Ts;                                           % Time Vector
+% L = length(t);                                              % Vector Length
+% FTs = fft(s-mean(s))/L;                                     % Fourier Transform (Subtract d-c Offset)
+% Fv = linspace(0, 1, fix(L/2)+1)*Fn;                         % Frequency Vector
+% Iv = 1:length(Fv);                                          % Index Vector
+% [pks1,frqs1] = findpeaks(abs(FTs(Iv,1))*2, Fv, 'MinPeakHeight',0.05);
+% [pks2,frqs2] = findpeaks(abs(FTs(Iv,2))*2, Fv, 'MinPeakHeight',0.05);
+% figure(1)
+% plot(Fv, abs(FTs(Iv,:))*2)
+% hold on
+% plot(frqs1, pks1, '^b')
+% plot(frqs2, pks2, '^r')
+% hold off
+% grid
+% axis([0  1000    ylim])
 
 
-%% Movie Slider Functionality
-    function movieslider_callback(source,~)
-        val = get(source,'Value');
+guidata(conditionParametersGroup, handles);
+if (handles.activeCamData.isloaded)
+    removeBG_callback(removeBG_button);
+end
+    function removeBG_callback(hObject,~)
+        %threshold = str2double(get(bg_thresh_edit,'String'));
+        val = get(bg_thresh_slider,'Value');
         
         maxBG = max (handles.activeCamData.bg);
         minBG = min (handles.activeCamData.bg);
-        i = round(val*(maxBG - minBG)) + minBG;
-        handles.frame = i;
-        if handles.frame == handles.maxFrame + 1
-            i = handles.maxFrame;
-            handles.frame = handles.maxFrame;
-        end
-        
-        % Update movie screen
-        
-        for i_cam=1:4
-            %handles.allCamData(i_cam).drawMap = 0;
-            if handles.allCamData(i_cam).isloaded == 1 && handles.allCamData(i_cam).isVisible == 1
-                set(handles.allCamData(i_cam).screen,'NextPlot','replacechildren','YTick',[],'XTick',[]);
-                set(f,'CurrentAxes',handles.allCamData(i_cam).screen)
-                
-                drawFrame(i, i_cam);
-            end
-        end
-        
-        % Update sweep bar
-         if (handles.bounds(handles.activeScreenNo) == 0)
-            set(f,'CurrentAxes',sweep_bar)
-            a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale];b = [0 1]; cla
-            plot(a,b,'r','Parent',sweep_bar)
-            set(sweep_bar,'Layer','top');
-%             axis([handles.starttime handles.endtime 0 1])
-            axis([0 handles.time(end) 0 1])
-            hold off; axis off;
-         else
-             for i_group=1:5
-                 set(f,'CurrentAxes',signalGroup(i_group).sweepBar);
-                 a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale];b = [0 1]; %cla
-                 plot(a,b,'r','Parent',signalGroup(i_group).sweepBar)
-                 %             axis([handles.starttime handles.endtime 0 1])
-                 axis([0 handles.time(end) 0 1])
-                 hold off;  axis off;
-             end
-         end
-    end
-
-guidata(conditionParametersGroup, handles);
-removeBG_callback(bg_thresh_edit);
-    function removeBG_callback(hObject,~)
-        threshold = str2double(get(bg_thresh_edit,'String'));
-        perc_ex = str2double (get(perc_ex_edit, 'String'));
         
         frame = handles.activeCamData.bgRGB;
         BG = mat2gray(frame);
-        level = graythresh(BG); % find Otsu threshold
+
+        BW = im2bw(BG,val); % create mask
         
-        BW = im2bw(BG,level*threshold); % create mask
-        BW2 = bwareaopen(BW, ceil(perc_ex*size(BG,1)*size(BG,2))); % remove islands
+        handles.activeCamData.thresholdSegmentation = BW;
+        handles.activeCamData.finalSegmentation = handles.activeCamData.brushSegmentation | handles.activeCamData.thresholdSegmentation;
         
-        fillHoles = get(fillHoles_checkbox,'Value');
-        if fillHoles
-            BW3 = imfill(BW2,'holes'); %fill holes
-        else
-            BW3 = BW2;
+        handles.isFillHoles = get(fillHoles_checkbox,'Value');
+        if handles.isFillHoles
+            handles.activeCamData.finalSegmentation = imfill(handles.activeCamData.finalSegmentation,'holes'); %fill holes
         end
-%         handles.activeCamData.segmentationBoundary = boundarymask (BW3);
-        handles.activeCamData.segmentation = BW3;
         
+        handles.isRemoveIslands = get(removeIslandsCheckbox,'Value');
+        handles.removeIslandsPercent = str2double (get(perc_ex_edit, 'String'));
+        if handles.isRemoveIslands
+            handles.activeCamData.finalSegmentation = bwareaopen(handles.activeCamData.finalSegmentation , ceil(handles.removeIslandsPercent*size(BG ,1)*size(BG,2))); % remove islands
+        end
         drawFrame(handles.frame ,handles.activeScreenNo);
     end
 
     function removeBGcheckbox_callback(hObject,eventdata)
+        removeBG_callback(hObject);
+        handles.drawSegmentation = get(hObject,'Value');
         drawFrame(handles.frame ,handles.activeScreenNo);
     end
 
@@ -200,10 +241,10 @@ removeBG_callback(bg_thresh_edit);
             % Update counter % progress bar
             counter = counter + 1;
             waitbar(counter/trackProg,g1,'Removing Background');
-            bg_thresh = str2double(get(bg_thresh_edit,'String'));
-            perc_ex = str2double(get(perc_ex_edit,'String'));
+            %bg_thresh = str2double(get(bg_thresh_edit,'String'));
+            %perc_ex = str2double(get(perc_ex_edit,'String'));
             %handles.activeCamData.cmosData = remove_BKGRD(handles.activeCamData.cmosData,handles.activeCamData.bg,bg_thresh,perc_ex);
-            handles.activeCamData.cmosData = handles.activeCamData.cmosData.* handles.activeCamData.segmentation;
+            handles.activeCamData.cmosData = handles.activeCamData.cmosData.* handles.activeCamData.finalSegmentation;
         end
         % Bin Data
         if bin_state == 1
@@ -334,9 +375,10 @@ function drawFrame(frame, camNo)
 
             I = J .* A + G .* (1 - A) ;
             
-            removeBG = get(removeBG_button,'Value');
-            if (removeBG)
-                mask = handles.activeCamData.segmentation;
+            removeBGthreshold = get(removeBG_button,'Value');
+            handles.activeCamData.removeBGthreshold = removeBGthreshold;
+            if (removeBGthreshold)
+                mask = handles.activeCamData.finalSegmentation;
                 maskedI = I;
                 [row,col] = find(mask~=0);
                 for i=1:size(row,1)
@@ -355,7 +397,7 @@ function drawFrame(frame, camNo)
             end
             [a,~]=size(M);
             hold(handles.allCamData(camNo).screen,'on')
-            if removeBG
+            if removeBGthreshold
                 image(maskedI,'Parent',handles.allCamData(camNo).screen);
             else
                 image(I,'Parent',handles.allCamData(camNo).screen);

@@ -96,7 +96,6 @@ addlistener(movie_slider,'ContinuousValueChange',@movieslider_callback);
 set(f,'WindowButtonDownFcn',{@button_down_function});
 set(f,'WindowButtonUpFcn',{@button_up_function});
 set(f,'WindowButtonMotionFcn',{@button_motion_function});
-set(f,'windowscrollWheelFcn',{@change_brush_size});
 
 % Signal Display Screens for Optical Action Potentials
 % signal_scrn1 = axes('Parent',p1,'Color','w','XTick',[],'Position',[0.55 0.7 0.25 0.2]);
@@ -236,8 +235,6 @@ signalSlider = uicontrol('Style','Slider','Parent',p1,...
       'Units','normalized','Position',[0.985 0.2 0.015 0.8],...
       'Value',1,'Callback',{@slider_callback1,auxSignalPanel}, 'Visible','off');
 
-    
-  
 function sync_callback(src,eventdata,arg1)
     val12 = get(sync12,'Value');
     val13 = get(sync13,'Value');
@@ -476,8 +473,8 @@ end
                         handles.activeCamData.finalSegmentation = imfill(handles.activeCamData.finalSegmentation,'holes'); %fill holes
                     end
                     if handles.isRemoveIslands
-                        pixelsCount = size(handles.activeCamData.bg,1) * size(handles.activeCamData.bg,2);
-                        handles.activeCamData.finalSegmentation = bwareaopen(handles.activeCamData.finalSegmentation , ceil(handles.removeIslandsPercent*pixelsCount)); % remove islands
+                        pixelsCount = size(handles.activeSc
+                        handles.activeCamData.finalSegmentation = bwareaopen(handles.activeCamData.finalSegmentation , ceil(handles.removeIslandsPercent*size(BG ,1)*size(BG,2))); % remove islands
                     end
                     if handles.drawBrush
                         cla (handles.activeScreen);
@@ -509,58 +506,6 @@ end
         handles.activeCamData.grabbed = -1;
         handles.grabbed = -1;
         handles.dispWaveClicked = 0;
-    end
-
-    function change_brush_size(src, evnt)
-        %disp ('wheel');
-        if (evnt.VerticalScrollCount>0) 
-            % scroll down 
-            handles.brushSize = handles.brushSize-1;
-            if handles.brushSize < 1
-                handles.brushSize = 1;
-            end
-        else 
-            % scroll up 
-            handles.brushSize = handles.brushSize+1;
-            if handles.brushSize > 40
-                handles.brushSize = 40;
-            end
-        end 
-        brushSize = handles.brushSize;
-        % Make a circle mask
-        circleMask = zeros(1 + 2*ceil(brushSize), 1 + 2*ceil(brushSize));
-        for i=1:size(circleMask,1)
-            for j=1:size(circleMask,2)
-                if (j - size(circleMask,2)/2-0.5)^2 + (i - size(circleMask,2)/2-0.5)^2 < brushSize^2
-                    circleMask(j,i) = 1;
-                end
-            end
-        end
-        [row,col] = find(circleMask);
-        row = row - size(circleMask,2)/2 - 0.5;
-        col = col - size(circleMask,2)/2 - 0.5;
-        handles.brushMaskIndices = [row,col];
-    
-        if handles.drawBrush
-            ps = get(handles.activeScreen,'CurrentPoint');
-            i_temp = round(ps(1,1));
-            j_temp = round(ps(2,2));
-            if i_temp<=size(handles.activeCamData.cmosData,1) && i_temp>1 && ...
-                  j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
-
-                i = i_temp;
-                j = j_temp;
-                
-                cla
-                drawFrame(handles.frame, handles.activeScreenNo);
-                hold (handles.activeScreen,'on');
-                center = [i,j];
-%                 viscircles(handles.activeScreen, center, handles.activeCamData.brushSize,'Color','b');
-                viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
-                set(handles.activeScreen,'YTick',[],'XTick',[]);
-                hold (handles.activeScreen,'off');
-            end
-        end
     end
 
 function selectWindow(clickedScreen)
@@ -935,15 +880,15 @@ end
                     if strcmp(questdual,'Camera1')
                         handles.activeCamData.cmosData = double(Data.cmosData(:,:,2:end));
                         handles.activeCamData.bg = double(Data.bgimage);
+                        handles.activeCamData.finalSegmentation = zeros(size(handles.activeCamData.bg));
+                        handles.activeCamData.brushSegmentation = zeros(size(handles.activeCamData.bg));
+                        handles.activeCamData.thresholdSegmentation = zeros(size(handles.activeCamData.bg));
                     end
                     % Load Camera2 data
                     if strcmp(questdual,'Camera2')
                         handles.activeCamData.cmosData = double(Data.cmosData2(:,:,2:end));
                         handles.activeCamData.bg = double(Data.bgimage2);
                     end
-                    handles.activeCamData.finalSegmentation = zeros(size(handles.activeCamData.bg));
-                    handles.activeCamData.brushSegmentation = zeros(size(handles.activeCamData.bg));
-                    handles.activeCamData.thresholdSegmentation = zeros(size(handles.activeCamData.bg));
                     handles.activeCamData.isloaded = 1;
                     
                     % Save out the frequency, cameras alternate, divide by 2
@@ -960,9 +905,6 @@ end
                     handles.activeCamData.isloaded = 1;
                     handles.activeCamData.cmosData = double(Data.cmosData(:,:,2:end));
                     handles.activeCamData.bg = double(Data.bgimage); 
-                    handles.activeCamData.finalSegmentation = zeros(size(handles.activeCamData.bg));
-                    handles.activeCamData.brushSegmentation = zeros(size(handles.activeCamData.bg));
-                    handles.activeCamData.thresholdSegmentation = zeros(size(handles.activeCamData.bg));
 
                     % Save out pacing spike
                     %handles.activeCamData.ecg = Data.channel{1}(2:end)*-1;
