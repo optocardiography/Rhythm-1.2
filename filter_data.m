@@ -33,12 +33,15 @@ function filt_data = filter_data(data,Fs,or,lb,hb)
 %      Wn = hb/(Fs/2); % Pass band for low pass filter
 %     [b,a] = butter(5,Wn); % Example of Butterworth Filter
 %     [b,a] = cheby2(15,20,Wn); % Example of ChebyII Filter
+
     %% Apply Filter
     temp = reshape(data,[],size(data,3));
     filt_temp = zeros(size(temp));
     for i = 1:size(temp,1)
         if sum(temp(i,:)) ~= 0
-        filt_temp(i,:) = filtfilt(b,a,temp(i,:)); % needed to create 0 phase offset
+            filt_temp(i,:) = filtfilt(b,a,temp(i,:)); % needed to create 0 phase offset
         end
     end
+
     filt_data = reshape(filt_temp,size(data,1),size(data,2),[]);
+    

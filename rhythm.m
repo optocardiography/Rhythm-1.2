@@ -13,7 +13,7 @@ close all; clc;
 % For any questions and suggestions, please email us at:
 % cgloschat@gmail.com or igor@wustl.edu
 %
-% Modification Log:
+% Modification Log: 
 % 
 % 2018 -- GUI was strongly refactored since Rhythm 1.1 by Roman Pryamonosov, Roman
 % Syunyaev and Alexander Zolotarev. New features: multi view for signal
@@ -42,8 +42,8 @@ handles.cmap = colormap('Jet');
 % Load Data
 p1 = uipanel('Title','Display Data','FontSize',12,'Position',[.01 .01 .98 .98]);
 filelist = uicontrol('Parent',p1,'Style','listbox','String','Files','Position',[10 660 150 150],'Callback',{@filelist_callback});
-selectdir = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,'String','Select Directory','Position',[10 650 150 30],'Callback',{@selectdir_callback});
-loadfile = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,'String','Load','Position',[10 620 150 30],'Callback',{@loadfile_callback});
+selectdir = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,'String','Select Directory','Position',[10 630 150 30],'Callback',{@selectdir_callback});
+loadfile = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,'String','Load','Position',[10 600 150 30],'Callback',{@loadfile_callback});
 
 % Movie Screens for Optical Data
 movieScreen1 = axes('Parent',p1,'Units','Pixels','YTick',[],'XTick',[],...
@@ -109,49 +109,68 @@ signal_scrn5 = axes('Parent',p1,'Units','Pixels','Color','w','Position',[860, 19
 handles.signalScreens = [signal_scrn1, signal_scrn2, signal_scrn3,...
                          signal_scrn4, signal_scrn5];
 xlabel('Time (sec)');
+%% Waveform Export Group
 
-expwave_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,...
-                            'String','Export OAPs','Units','normalized','Position',[0.9 0.14 0.08 0.04],...
+waveform_export = uibuttongroup('Parent',p1,'Title','Waveform Export','FontSize',10,'Units','normalized','Position',[0.67 0.01 .32 0.18]);
+
+expwave_button = uicontrol('Parent',waveform_export,'Style','pushbutton','FontSize',12,...
+                            'String','Export OAPs','Units','normalized','Position',[0.75 0.67 0.25 0.33],...
                             'Callback',{@expwave_button_callback});
-exptofile_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,...
-                            'String','Export to file','Units','normalized','Position',[0.9 0.10 0.08 0.04],...
+exptofile_button = uicontrol('Parent',waveform_export,'Style','pushbutton','FontSize',12,...
+                            'String','Export to file','Units','normalized','Position',[0.75 0.20 0.25 0.33],...
                             'Callback',{@exptofile_button_callback});
-starttimemap_text = uicontrol('Parent',p1,'Style','text','FontSize',10,...
-                            'String','Start Time','Units','normalized','Position',[0.68 0.14 0.07 0.04]);
-starttimemap_edit = uicontrol('Parent',p1,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.75 0.14 0.05 0.04],...
+starttimemap_text = uicontrol('Parent',waveform_export,'Style','text','FontSize',10,...
+                            'String','Start Time (s)','Units','normalized','Position',[0.03 0.67 0.17 0.33]);
+starttimemap_edit = uicontrol('Parent',waveform_export,'Style','edit','FontSize',14,...
+                            'Units','normalized','Position',[0.21 0.67 0.17 0.27],...
                             'Callback',{@starttime_edit_callback});
-endtimemap_text = uicontrol('Parent',p1,'Style','text','FontSize',10,...
-                            'String','End Time','Units','normalized','Position',[0.8 0.14 0.05 0.04]);
-endtimemap_edit = uicontrol('Parent',p1,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.85 0.14 0.05 0.04],...
+endtimemap_text = uicontrol('Parent',waveform_export,'Style','text','FontSize',10,...
+                            'String','End Time (s)','Units','normalized','Position',[0.39 0.67 0.17 0.33]);
+endtimemap_edit = uicontrol('Parent',waveform_export,'Style','edit','FontSize',14,...
+                            'Units','normalized','Position',[0.57 0.67 0.17 0.27],...
                             'Callback',{@endtime_edit_callback});
+pacingcl_edit = uicontrol('Parent',waveform_export,'Style','edit','FontSize',14,...
+                            'Units','normalized','Position',[0.21 0.23 0.17 0.27],...
+                            'Callback',{@pacingcl_edit_callback});
+ensembleAverage_checkbox = uicontrol('Parent',waveform_export,...
+                             'Style','checkbox','FontSize',10,...
+                             'String','Ensemble Average',...
+                             'Units','normalized',...
+                             'Position',[0.03 0.01 0.5 0.2],...
+                             'Callback',{@ensembleAverage_checkbox_callback});
+pacingcl_text = uicontrol('Parent',waveform_export,'Style','text','FontSize',10,...
+                            'String','Pacing CL (ms)','Units','normalized','Position',[0.03 0.21 0.17 0.33]);
+truncateafter_edit = uicontrol('Parent',waveform_export,'Style','edit','FontSize',14,...
+                            'Units','normalized','Position',[0.57 0.23 0.17 0.27],...
+                            'Callback',{@truncateafter_edit_callback});
+truncateafter_text = uicontrol('Parent',waveform_export,'Style','text','FontSize',10,...
+                            'String','Truncate after (ms)','Units','normalized','Position',[0.39 0.21 0.17 0.33]);
 
 % Sweep Bar Display for Optical Action Potentials
-sweep_bar = axes ('Parent',p1,'Units','Pixels','Layer','top','Position',[860,195,350,625]);
+sweep_bar = axes ('Parent',p1,'Units','Pixels','Layer','top','Position', [860,195,350,625]);
 set(sweep_bar,'NextPlot','replacechildren','Visible','off')
 handles.sweepBar = sweep_bar;
 
 % Video Control Buttons and Optical Action Potential Display
 play_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
                         'String','Play Movie','Units','normalized',...
-                        'Position',[0.23, 0.12, 0.08, 0.04],...
+                        'Position',[0.23, 0.11, 0.08, 0.04],...
                         'Callback',{@play_button_callback});
 stop_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
                         'String','Stop Movie','Units','normalized',...
-                        'Position',[0.31, 0.12, 0.08, 0.04]...
+                        'Position',[0.31, 0.11, 0.08, 0.04]...
                         ,'Callback',{@stop_button_callback});
 dispwave_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
                         'String','Display Wave','Units','normalized',...
-                        'Position',[0.4, 0.12, 0.08, 0.04],...
+                        'Position',[0.4, 0.11, 0.08, 0.04],...
                         'Callback',{@dispwave_button_callback});
 expmov_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
                          'String','Export Movie','Units','normalized',...
-                         'Position',[0.48, 0.12, 0.08, 0.04],...
+                         'Position',[0.48, 0.11, 0.08, 0.04],...
                          'Callback',{@expmov_button_callback});
 %% Statistical Results
 %create button group- will display results for both voltage and calcium
-results = uibuttongroup('Parent',p1,'Title','Statistics','FontSize',10,'Units','normalized','Position',[0.01 0.01 .95 0.09]);
+results = uibuttongroup('Parent',p1,'Title','Statistics','FontSize',10,'Units','normalized','Position',[0.01 0.01 .65 0.09]);
 
 handles.meanresults = uicontrol('Parent',results,'Style','text','FontSize',10,'String','Mean:','Units','normalized',...
     'Position',[0.01 0.01 .13 0.9],'HorizontalAlignment','Left','Visible','on');
@@ -175,17 +194,17 @@ handles.angleresults = uicontrol('Parent',results,'Style','text','FontSize',10,'
           
 %% Optical Action Potential Analysis Button Group and Buttons
 % Create Button Group
-anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',12,'Position',[0.001 0.17 0.13 0.59]);
+anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',12,'Position',[0.001 0.12 0.13 0.59]);
 
 % Invert Color Map Option
 %invert_cmap = uicontrol('Parent',anal_data,'Style','checkbox','FontSize',10,'String','Invert Colormaps','Position',[3 350 140 25],'Callback',{@invert_cmap_callback});
 
-map = uibuttongroup('Parent',anal_data,'Title','Parameters', 'FontSize',12,'Position',[0.001 0.001 .98 .94]);
+map = uibuttongroup('Parent',anal_data,'Title','Parameters', 'FontSize',12,'Position',[0.001 0.001 .98 .91]);
 
 map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',10,...
                         'Units', 'normalized',...
                        'String',{'Condition Parameters','CV map', 'Activation map', 'APD\CaT map', 'Rise Time', 'Calcium Decay'},...
-                       'Position',[0 0.951 1 0.05], 'Callback',{@mapPopUp_callback});
+                       'Position',[0.005 0.940 0.99 0.05], 'Callback',{@mapPopUp_callback});
 
 set(map_popup,'Value',1);
 set(map_popup,'Enable','off')
@@ -343,12 +362,13 @@ set([f,p1,filelist,selectdir,loadfile,...
     sweep_bar,dispwave_button,play_button,stop_button,...
     expmov_button,expwave_button,exptofile_button...
     map,anal_data,starttimemap_text,starttimemap_edit...
-    endtimemap_text,endtimemap_edit,...
-    map_popup],'Units','normalized');
+    endtimemap_text,endtimemap_edit,pacingcl_edit...
+    pacingcl_text,truncateafter_edit...
+    truncateafter_text,map_popup],'Units','normalized');
 
 % Disable buttons that will not be needed until data is loaded
 set([play_button,stop_button,dispwave_button,expmov_button,starttimemap_edit,endtimemap_edit,...
-    expwave_button,exptofile_button],'Enable','off')
+    expwave_button,exptofile_button,pacingcl_edit,truncateafter_edit],'Enable','off')
 
 % Center GUI on screen
 movegui(f,'center')
@@ -1047,8 +1067,8 @@ end
                 if (firstLoad)
                     set(movie_slider,'Value',0)
                     drawFrame(1, handles.activeScreenNo);
-                    set([play_button,stop_button,dispwave_button,expmov_button,...
-                        starttimemap_edit,endtimemap_edit,expwave_button,exptofile_button],'Enable','on')
+                    set([play_button,stop_button,dispwave_button,expmov_button,pacingcl_edit...
+                        starttimemap_edit,endtimemap_edit,expwave_button,exptofile_button, truncateafter_edit],'Enable','on')
                 else
                     drawFrame(handles.frame, handles.activeScreenNo);
                     redrawWaveScreens();
@@ -1626,45 +1646,34 @@ end
 
     end
 
-%% Export signal waves to file
-function exptofile_button_callback(~,~)
-        M = handles.activeCamData.markers; [a,~]=size(M);
-        if isempty(M)&&isempty(handles.markers1)
-            msgbox('No wave to export. Please use "Display Wave" button to select pixels on movie screen.','Icon','help')
-        else
-            if handles.bounds(handles.activeScreenNo) == 0 % case for ungrouped screen
-                A = zeros(handles.activeCamData.maxFrame,a+1);
-                for x = 1:a
-                    for t = 1:handles.activeCamData.maxFrame
-                        A(t,1) = handles.time(t);
-                        A(t,x+1) = handles.activeCamData.cmosData(M(x,2),M(x,1),t);
-                    end
-                end
-            else % here case for both screen groups 1 or 2
-                if handles.bounds(handles.activeScreenNo) == 1
-                    M = handles.markers1;
-                elseif handles.bounds(handles.activeScreenNo) == 2
-                    M = handles.markers2;
-                end
-                msize = size(M,1);
-                A = zeros(handles.activeCamData.maxFrame, 4*msize+1);
-                
-                for i_marker=1:msize
-                    for i_cam = 1:4
-                        if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == handles.bounds(handles.activeScreenNo))
-                            for t = 1:handles.allCamData(i_cam).maxFrame
-                                A(t,(i_marker-1)*4+i_cam+1) = handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),t);
-                                A(t,1) = handles.time(t);
-                            end
-                        end
-                    end
-                end
-            end
+%% Pacing CL editable textbox for ensemble averaging
+    function pacingcl_edit_callback(source,~)
+        cl = str2double(get(source,'String'));
+        if (cl < 0)
+            set(source,'String', str2double(-cl));
         end
-        [filename, path] = uiputfile('output.txt');
-        dlmwrite(strcat(path,filename), A,'\t');
     end
 
+%% Truncate after editable textbox for ensemble averaging
+    function truncateafter_edit_callback(source, ~)
+        ta = str2double(get(source,'String'));
+        if (ta < 0)
+            set(source,'String', str2double(-ta));
+        end
+    end
+
+
+%% Export signal waves to file
+    function exptofile_button_callback(~,~)
+        pacingCL = str2double(get(pacingcl_edit,'String'));
+        truncateAfter = str2double(get(truncateafter_edit,'String'));
+        ensembleAverage = get(ensembleAverage_checkbox, 'Value');
+        apExp(handles, pacingCL, truncateAfter, ensembleAverage);
+    end
+
+%% Checkbox for enabling ensemble averaging
+    function ensembleAverage_checkbox_callback(~,~)
+    end
 
 % INVERT COLORMAP: inverts the colormaps for all isochrone maps
 %     function invert_cmap_callback(~,~)

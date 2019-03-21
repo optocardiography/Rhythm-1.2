@@ -34,49 +34,78 @@ function [apdMap] = apdMap(data,start,endp,Fs,percent,cmap, movie_scrn, handles)
 
 
 %% Create initial variablesns
-start=round(start*Fs);
+
+start= 1 + round(start*Fs);
 endp=round(endp*Fs);
 apd_data = data(:,:,start:endp);        % window signal 
 apd_data = normalize_data(apd_data); %re-normalize windowed data
 
-%%Determining activation time point
-% Find First Derivative and its index of maximum
-apd_data2 = diff(apd_data,1,3); % first derivative
-[~,max_i] = max(apd_data2,[],3); % find location of max derivative
-
-
-%%Find location of repolarization
-%%Find maximum of the signal and its index
-[~,maxValI] = max(apd_data,[],3);
-
-%locs is a temporary holding place
-locs = nan(size(apd_data,1),size(apd_data,2));
+apdMap = nan(size(apd_data,1),size(apd_data,2));
 
 %Define the baseline value you want to go down to
 requiredVal = 1.0 - percent;
 
-%%for each pixel
+
+%% Andrey Pikunov and Roman Sunyaev (21.03.2019)
+%for each pixel
 for i = 1:size(apd_data,1)
     for j = 1:size(apd_data,2)
-        %%starting from the peak of the signal, loop until we reach baseline
-        for k = maxValI(i,j):size(apd_data,3)
-            if apd_data(i,j,k) <= requiredVal
-                locs(i,j) = k; %Save the index when the baseline is reached
-                                %this is the repolarizatin time point
-                break;
-            end
+        
+        index=find(apd_data(i,j,:)<=requiredVal);
+        
+        if size(index, 1) > 2
+            apdMap(i, j) = max(index(2:end) - index(1:end-1));
         end
+
     end
 end
 
 %%account for different sampling frequencies
 unitFix = 1000.0 / Fs;
-
 % Calculate Action Potential Duration
-apd = minus(locs,max_i); 
-apdMap = apd * unitFix;
-apdMap(apdMap <= 0) = nan;
+apdMap = apdMap * unitFix;
+
+%%Simple filtration: tails cut-off (by Andrey Pikunov)
+if (false)
+    
+    apdMap(apdMap < 20) = nan; % remove APD < 20 ms - obvious noise
+    apdMap_dropnan = rmmissing(reshape(apdMap, [], 1));
+    apdMap_unique = unique(apdMap_dropnan);
+
+    %Calculate APD distrubution
+    [APD_count, ~] = hist(apdMap_dropnan, size(apdMap_unique, 1));
+    APD_count = APD_count / max(APD_count); % rescaling
+
+    % we will remove APD with small appearance
+    % 0.025 is mild, you may use 0.05 to remove more noise
+    thrashold_value = 0.025;
+    APD_trash = find(APD_count < thrashold_value);
+
+    % find the most left APD below trashold
+    APD_trash_left = APD_trash(1);
+    for i = 1 : size(APD_trash, 2)
+       if (APD_trash(i+1) - APD_trash(i) > 1)
+           APD_trash_left = APD_trash(i);
+           break;
+       end
+    end
+
+    % find the most right APD below trashold
+    APD_trash_right = APD_trash(end);
+    for i = size(APD_trash, 2) : -1 : 1
+       if (APD_trash(i) - APD_trash(i-1) > 1)
+           APD_trash_right = APD_trash(i);
+           break;
+       end
+    end
+
+    apdMap(apdMap < APD_trash_left) = nan;
+    apdMap(apdMap > APD_trash_right) = nan;
+    
+end % Filtration is done.
+
 handles.activeCamData.saveData = apdMap;
+
 %Setting up values to use for color axis
 APD_min = prctile(apdMap(isfinite(apdMap)),5);
 APD_max = prctile(apdMap(isfinite(apdMap)),95);
@@ -92,7 +121,8 @@ imagesc(movie_scrn, apdMap);
 %set(gca,'XTick',[],'YTick',[],'Xlim',[0 size(data,1)],'YLim',[0 size(data,2)])
 axis(movie_scrn,'off')
 colormap(cmap);
-% colorbar(movie_scrn);
+%cb = colorbar(movie_scrn);
+%ylabel(cb, "APD (ms)");
 caxis(movie_scrn,[APD_min APD_max])
 
 % Plot Histogram of APDMap
