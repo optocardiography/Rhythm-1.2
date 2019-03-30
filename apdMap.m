@@ -33,28 +33,26 @@ function [apdMap] = apdMap(data,start,endp,Fs,percent,cmap, movie_scrn, handles)
 % Refer to efimovlab.org for more information.
 
 
-%% Create initial variablesns
-
-start= 1 + round(start*Fs);
-endp=round(endp*Fs);
-apd_data = data(:,:,start:endp);        % window signal 
+%% Create initial variables
+start = 1 + round(start * Fs);
+endp = round(endp * Fs);
+apd_data = data(:, :, start : endp);        % window signal 
 apd_data = normalize_data(apd_data); %re-normalize windowed data
 
-apdMap = nan(size(apd_data,1),size(apd_data,2));
-
-%Define the baseline value you want to go down to
-requiredVal = 1.0 - percent;
-
+apdMap = nan(size(apd_data, 1), size(apd_data, 2));
 
 %% Andrey Pikunov and Roman Sunyaev (21.03.2019)
-%for each pixel
-for i = 1:size(apd_data,1)
-    for j = 1:size(apd_data,2)
+% Find the largest interval when AP height more than requiredValue
+% Ex.: requiredVal = 0.2 when we calculate APD80
+requiredVal = 1.0 - percent;
+
+for i = 1 : size(apd_data, 1)
+    for j = 1 : size(apd_data, 2)
         
-        index=find(apd_data(i,j,:)<=requiredVal);
+        index = find(apd_data(i, j, :) <= requiredVal);
         
         if size(index, 1) > 2
-            apdMap(i, j) = max(index(2:end) - index(1:end-1));
+            apdMap(i, j) = max(index(2: end) - index(1: end - 1));
         end
 
     end
@@ -66,6 +64,7 @@ unitFix = 1000.0 / Fs;
 apdMap = apdMap * unitFix;
 
 %%Simple filtration: tails cut-off (by Andrey Pikunov)
+% disabled by default
 if (false)
     
     apdMap(apdMap < 20) = nan; % remove APD < 20 ms - obvious noise
