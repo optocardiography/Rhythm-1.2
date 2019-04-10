@@ -207,7 +207,7 @@ map = uibuttongroup('Parent',anal_data,'Title','Parameters', 'FontSize',12,'Posi
 
 map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',10,...
                         'Units', 'normalized',...
-                       'String',{'Condition Parameters','CV map', 'Activation map', 'APD\CaT map', 'Rise Time', 'Calcium Decay'},...
+                       'String',{'Condition Parameters','CV map', 'Activation map', 'APD\CaT map', 'Rise Time', 'Calcium Decay', 'Alternance Map'},...
                        'Position',[0.005 0.940 0.99 0.05], 'Callback',{@mapPopUp_callback});
 
 set(map_popup,'Value',1);
@@ -427,6 +427,9 @@ function mapPopUp_callback(~,~)
         case 6
             % Calcium Decay Map
             GUI_CalciumDecay(map, handles, f);
+        case 7
+            % Alternance Map
+            GUI_AlternanceMap(map, handles, f);
     end 
     
     set(handles.meanresults,'String',handles.activeCamData.meanresults);

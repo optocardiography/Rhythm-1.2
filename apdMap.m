@@ -116,6 +116,7 @@ set(movie_scrn,'YTick',[],'XTick',[]);
 
 %map_fig1 = subplot(1,1,1,'replace');
 %imagesc(movie_scrn, apdMap,map_fig1);
+colormap(handles.activeScreen, cmap);
 imagesc(movie_scrn, apdMap);
 %set(gca,'XTick',[],'YTick',[],'Xlim',[0 size(data,1)],'YLim',[0 size(data,2)])
 axis(movie_scrn,'off')

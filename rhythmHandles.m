@@ -45,6 +45,7 @@ classdef rhythmHandles < handle
         a_start = 0;
         a_end = 0;
         
+        % APD mapping
         apd_start = 0;
         apd_end = 0;
         percentAPD = 0;
@@ -54,6 +55,10 @@ classdef rhythmHandles < handle
         APstart = 0;
         APend = 0;
         Line = [];
+        
+        % Alternance mapping
+        alternance_start = 0;
+        alternance_end = 0;
         
         % FUNCTIONAL FOR 4 WINDOW VIEW
         activeScreen=[];
