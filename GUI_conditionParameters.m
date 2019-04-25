@@ -8,188 +8,239 @@
 function GUI_conditionParameters(conditionParametersGroup, handles)
 % New pushbutton with callback definition.
 % Signal Conditioning Button Group and Buttons
-fontSize=9;
 
- brush_checkbox = uicontrol('Parent',conditionParametersGroup,...
-                             'Style','checkbox','FontSize',fontSize,...
-                             'String','Brush',...
-                             'Units','normalized',...
-                             'Position',[0.5 0.845 0.5 0.075],...
-                             'Callback',{@brush_checkbox_callback});
+fontSize = 9;
+pos_bottom = 1; % initial position (top)
+element_height = 0.065; % default, you may adjust it
+% We will move from top to bottom and create buttons and labels
+                        
+%%
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 0.6;
+removeBG_button = uicontrol('Parent',conditionParametersGroup,...
+                            'Style','checkbox','FontSize',fontSize,...
+                            'String','Remove BG',...
+                            'Units','normalized',...
+                            'Position',[pos_left, pos_bottom, element_width, element_height],...
+                            'Callback',@removeBGcheckbox_callback);
+
+pos_left = 0.6;                        
+element_width = 1 - pos_left;                        
+brush_checkbox = uicontrol('Parent',conditionParametersGroup,...
+                            'Style','checkbox','FontSize',fontSize,...
+                            'String','Brush',...
+                            'Units','normalized',...
+                            'Position',[pos_left, pos_bottom, element_width, element_height],...
+                            'Callback',{@brush_checkbox_callback});
+                        
     function brush_checkbox_callback(src,~)
         handles.drawBrush = get(src,'Value');
     end
 
-% brush_slider = uicontrol('Parent',conditionParametersGroup,...
-%                             'Style', 'slider', 'Units','normalized',...
-%                             'Position',[0.001 0.55 0.7 0.075],...
-%                             'SliderStep',[.01 .2],...
-%                             'Callback',{@brush_slider_callback});
+%%
+% pos_left = 0;
+% pos_bottom = pos_bottom - element_height;
+% element_width = 1;
+% bg_thresh_label = uicontrol('Parent',conditionParametersGroup, ...
+%                             'Style','text','FontSize',fontSize,...
+%                             'String','Threshold',...
+%                             'Units','normalized',...
+%                             'Position',[pos_left, pos_bottom, element_width, element_height]);
 
-%     function brush_slider_callback(src,~)
-%         brushSize = 1.0 + get(src,'Value')*30;
-% %         handles.activeCamData.brushSize = brushSize;
-%         handles.brushSize = brushSize;
-%         
-%         % Make a circle mask
-%         circleMask = zeros(1 + 2*ceil(brushSize), 1 + 2*ceil(brushSize));
-%         for i=1:size(circleMask,1)
-%             for j=1:size(circleMask,2)
-%                 if (j - size(circleMask,2)/2-0.5)^2 + (i - size(circleMask,2)/2-0.5)^2 < brushSize^2
-%                     circleMask(j,i) = 1;
-%                 end
-%             end
-%         end
-%         [row,col] = find(circleMask);
-%         row = row - size(circleMask,2)/2 - 0.5;
-%         col = col - size(circleMask,2)/2 - 0.5;
-% %         handles.activeCamData.brushMaskIndices = [row,col];
-%         handles.brushMaskIndices = [row,col];
-%     end
-                        
-                        
-removeBG_button = uicontrol('Parent',conditionParametersGroup,...
-                            'Style','checkbox','FontSize',fontSize,...
-                            'String','Remove Background',...
-                            'Units','normalized',...
-                            'Position',[0.01 0.9 0.9 0.1],...
-                            'Callback',@removeBGcheckbox_callback);
-
-fillHoles_checkbox = uicontrol('Parent',conditionParametersGroup,...
-                            'Style','checkbox','FontSize',fontSize,...
-                            'String','Fill Holes',...
-                            'Units','normalized',...
-                            'Position',[0.001 0.57 0.7 0.075],...
-                            'Callback',@removeBG_callback);
-
-bg_thresh_label = uicontrol('Parent',conditionParametersGroup, ...
-                            'Style','text','FontSize',fontSize,...
-                            'String','Threshold',...
-                            'Units','normalized',...
-                            'Position',[0 0.821 0.5 0.075]);
-
-% bg_thresh_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
-%                            'FontSize',fontSize,'String','0.3',...
-%                            'Units','normalized',...
-%                            'Position',[0.7 0.7 0.3 0.1],...
-%                            'Callback', @removeBG_callback);
-        
+%%
+pos_left = 0;
+slider_height = 0.05;
+pos_bottom = pos_bottom - slider_height;
+element_width = 1;
 bg_thresh_slider = uicontrol('Parent',conditionParametersGroup,...
                             'Style', 'slider', 'Units','normalized',...
-                            'Position',[0., 0.78, 0.9, 0.060],...
+                            'Position',[pos_left, pos_bottom, element_width, slider_height],...
                             'SliderStep',[.01 .02],...
                             'Callback',{@removeBG_callback});
 set(bg_thresh_slider,'Value',0.5);
 
+%%
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 0.75;
 removeIslandsCheckbox = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                           'FontSize',fontSize,'String','Remove Islands',...
                           'Units','normalized',...
-                          'Position',[0 0.65 0.7 0.075],...
+                          'Position',[pos_left, pos_bottom, element_width, element_height],...
                           'Callback', {@removeBG_callback});
+
+pos_left = 0.75;
+element_width = 1 - pos_left;
+perc_ex_height = element_height;
 perc_ex_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
                          'FontSize',fontSize,'String','0.01',...
                          'Units','normalized',...
-                         'Position',[0.7 0.65 0.3 0.075],...
+                         'Position',[pos_left, pos_bottom, element_width, perc_ex_height],...
                          'Callback',@removeBG_callback);
 
-
-
-bin_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
-                        'FontSize',fontSize,'String','Bin',...
+%%
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 1;
+fillHoles_checkbox = uicontrol('Parent',conditionParametersGroup,...
+                            'Style','checkbox','FontSize',fontSize,...
+                            'String','Fill Holes',...
+                            'Units','normalized',...
+                            'Position',[pos_left, pos_bottom, element_width, element_height],...
+                            'Callback',@removeBG_callback);
+        
+%%
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 0.5;
+bin_button  = uicontrol('Parent',conditionParametersGroup,...
+                        'Style','checkbox',...
+                        'FontSize',fontSize,...
+                        'String','Bin',...
                         'Units','normalized',...
-                         'Position',[0 0.495 0.5 0.075]);
+                        'Position',[pos_left, pos_bottom, element_width, element_height]);
+
+pos_left = 0.5;     
+element_width = 1 - pos_left;
+kernel_popup = uicontrol('Parent',conditionParametersGroup,...
+                      'Style','popupmenu',...
+                      'FontSize',fontSize,...
+                      'String',{'uniform', 'gaussian'},...
+                      'Units','normalized',...
+                      'Position',[pos_left, pos_bottom, element_width, element_height]);                      
+
+%%
+pos_bottom = pos_bottom - element_height;
+
+pos_left = 0.5;
+element_width = 0.25;
+kernel_size_label = uicontrol('Parent',conditionParametersGroup, ...
+                            'Style','text','FontSize',fontSize,...
+                            'String','size',...
+                            'Units','normalized',...
+                            'Position',[pos_left, pos_bottom, element_width, element_height]);   
+pos_left = 0.75;
+element_width = 0.25;
+kernel_edit_height = element_height;
+kernel_size_edit = uicontrol('Parent',conditionParametersGroup,...
+                         'Style','edit',...
+                         'FontSize',fontSize,...
+                         'String','9',...
+                         'Units','normalized',...
+                         'Position',[pos_left, pos_bottom, element_width, kernel_edit_height]);
+                                            
+%%     
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 0.5;
 filt_button = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                         'FontSize',fontSize,'String','Filter',...
                         'Units','normalized',...
-                        'Position',[0 0.42 0.5 0.075]);
-
-
-filt_60hz_button = uicontrol('Parent',conditionParametersGroup,...
-                             'Style','checkbox','FontSize',fontSize,...
-                             'String','60 Hz filter',...
-                             'Units','normalized',...
-                             'Position',[0.5 0.345 0.5 0.075]);
-
-removeDrift_button = uicontrol('Parent',conditionParametersGroup,...
-                        'Style','checkbox','FontSize',10,'String','Drift',...
-                        'Units','normalized',...
-                        'Position',[0 0.270 0.5 0.075]);
-norm_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
-                        'FontSize',fontSize,'String','Normalize',...
-                        'Units','normalized',...
-                        'Position',[0 0.195 1 0.075]);
-inverse_button = uicontrol('Parent',conditionParametersGroup,...
-                           'Style','checkbox','FontSize',fontSize,...
-                           'String','Inverse signal',...
-                           'Units','normalized',...
-                         'Position',[0 0.120 1 0.075]);
-apply_button = uicontrol('Parent',conditionParametersGroup,...
-                         'Style','pushbutton','FontSize',fontSize,...
-                         'String','Apply',...
-                         'Units','normalized',...
-                         'Position',[0 0 1 0.075],'Callback',@cond_sig_selcbk);
-
-
-%Pop-up menu options
-bin_popup = uicontrol('Parent',conditionParametersGroup,...
-                      'Style','popupmenu','FontSize',fontSize,...
-                      'String',{'3 x 3', '5 x 5', '7 x 7'},...
-                      'Units','normalized',...
-                      'Position',[0.5 0.48 0.5 0.075]);
+                        'Position',[pos_left, pos_bottom, element_width, element_height]);
+pos_left = 0.5;
+element_width = 1 - pos_left;                    
 filt_popup = uicontrol('Parent',conditionParametersGroup,...
                        'Style','popupmenu','FontSize',fontSize,...
                        'String',{'[0 50]','[0 75]', '[0 100]', '[0 150]'},...
                        'Units','normalized',...
-                       'Position',[0.5 0.405 0.5 0.075]);
+                       'Position',[pos_left, pos_bottom, element_width, element_height]);  
+                   
+set(filt_popup,'Value',3)
+
+%%
+pos_left = 0.5;
+pos_bottom = pos_bottom - element_height;
+element_width = 1 - pos_left;
+filt_60hz_button = uicontrol('Parent',conditionParametersGroup,...
+                             'Style','checkbox','FontSize',fontSize,...
+                             'String','60 Hz filter',...
+                             'Units','normalized',...
+                             'Position',[pos_left, pos_bottom, element_width, element_height]);
+
+%%
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 0.5;
+removeDrift_button = uicontrol('Parent',conditionParametersGroup,...
+                        'Style','checkbox','FontSize',10,'String','Drift',...
+                        'Units','normalized',...
+                        'Position',[pos_left, pos_bottom, element_width, element_height]);
+
+pos_left = 0.5;
+element_width = 1 - pos_left;                      
 drift_popup = uicontrol('Parent',conditionParametersGroup,...
                         'Style','popupmenu','FontSize',fontSize,...
-                        'String',{'1st Order','2nd Order', '3rd Order', '4th Order'},...
+                        'String',{'polynomial', 'least squares'},...
                         'Units','normalized',...
-                        'Position',[0.5 0.258 0.5 0.075]);
-set(filt_popup,'Value',3)
-meanValues = mean(handles.activeCamData.cmosData, 3);
-meanValues = meanValues - min(meanValues(:,:)) ;
-meanValues = meanValues ./ max(meanValues(:,:)) ;
-%figure;
-%imshow(meanValues);
+                        'Position',[pos_left, pos_bottom, element_width, element_height]);                      
+                    
+%%
+pos_bottom = pos_bottom - element_height;
 
-deviationValues = std(handles.activeCamData.cmosData,0,[3]);
-deviationValues = deviationValues - min(deviationValues(:,:)) ;
-deviationValues = deviationValues ./ max(deviationValues(:,:)) ;
-%figure;
-%imshow(deviationValues);
+pos_left = 0.5;
+element_width = 0.25;
+first_drift_param_label = uicontrol('Parent',conditionParametersGroup, ...
+                            'Style','text',...
+                            'FontSize',fontSize,...
+                            'String','order',...
+                            'Units','normalized',...
+                            'Position',[pos_left, pos_bottom, element_width, element_height]);   
+pos_left = 0.75;
+element_width = 0.25;
+first_drift_param_height = element_height;
+first_drift_param_edit = uicontrol('Parent',conditionParametersGroup,...
+                         'Style','edit',...
+                         'FontSize',fontSize,...
+                         'String','1',...
+                         'Units','normalized',...
+                         'Position',[pos_left, pos_bottom, element_width, first_drift_param_height]);
+                  
+%% 
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 1;
+phase_button = uicontrol('Parent',conditionParametersGroup,...
+                         'Style','checkbox',...
+                         'FontSize',fontSize,...
+                         'String','Transform to phase',...
+                         'Units','normalized',...
+                         'Position',[pos_left, pos_bottom, element_width, element_height]);                    
+%% 
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 1;
+inverse_button = uicontrol('Parent',conditionParametersGroup,...
+                           'Style','checkbox','FontSize',fontSize,...
+                           'String','Inverse signal',...
+                           'Units','normalized',...
+                         'Position',[pos_left, pos_bottom, element_width, element_height]);
+%%
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 1;
+norm_button  = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
+                        'FontSize',fontSize,'String','Normalize',...
+                        'Units','normalized',...
+                        'Position',[pos_left, pos_bottom, element_width, element_height]);
+                                         
+%%  
+pos_left = 0;
+pos_bottom = 0;
+element_width = 1;
+apply_button = uicontrol('Parent',conditionParametersGroup,...
+                         'Style','pushbutton','FontSize',fontSize,...
+                         'String','Apply',...
+                         'Units','normalized',...
+                         'Position',[pos_left, pos_bottom, element_width, element_height],...
+                         'Callback',@cond_sig_selcbk);
 
-%sample = squeeze(handles.activeCamData.cmosData(36,30,:));
-%[pxx,f] = pwelch(sample - mean(sample), handles.activeCamData.Fs);
-%figure
-%plot (pxx)
-% fidi = fopen('d2_r6__001.txt');
-% D = textscan(fidi, '%f%f%f%*f', 'CollectOutput',1);
-% s = D{:}(:,2:3);
-% Fs = handles.activeCamData.Fs;                                                  % Sampling Frequency (Hz)
-% Ts = Fs * size(handles.activeCamData.cmosData,3);                                                  % Sampling Interval (sec)
-% Fn = Fs/2;                                                  % Nyquist Frequency (Hz)
-% t = D{:}(:,1)*Ts;                                           % Time Vector
-% L = length(t);                                              % Vector Length
-% FTs = fft(s-mean(s))/L;                                     % Fourier Transform (Subtract d-c Offset)
-% Fv = linspace(0, 1, fix(L/2)+1)*Fn;                         % Frequency Vector
-% Iv = 1:length(Fv);                                          % Index Vector
-% [pks1,frqs1] = findpeaks(abs(FTs(Iv,1))*2, Fv, 'MinPeakHeight',0.05);
-% [pks2,frqs2] = findpeaks(abs(FTs(Iv,2))*2, Fv, 'MinPeakHeight',0.05);
-% figure(1)
-% plot(Fv, abs(FTs(Iv,:))*2)
-% hold on
-% plot(frqs1, pks1, '^b')
-% plot(frqs2, pks2, '^r')
-% hold off
-% grid
-% axis([0  1000    ylim])
-
-
+%%
 guidata(conditionParametersGroup, handles);
 if (handles.activeCamData.isloaded)
     removeBG_callback(removeBG_button);
 end
+
     function removeBG_callback(hObject,~)
         %threshold = str2double(get(bg_thresh_edit,'String'));
         val = get(bg_thresh_slider,'Value');
@@ -199,7 +250,7 @@ end
         
         frame = handles.activeCamData.bgRGB;
         BG = mat2gray(frame);
-
+        
         BW = im2bw(BG,val); % create mask
         
         handles.activeCamData.thresholdSegmentation = BW;
@@ -218,63 +269,76 @@ end
         drawFrame(handles.frame ,handles.activeScreenNo);
     end
 
+
     function removeBGcheckbox_callback(hObject,eventdata)
         removeBG_callback(hObject);
         handles.drawSegmentation = get(hObject,'Value');
         drawFrame(handles.frame ,handles.activeScreenNo);
     end
 
-% Condition Signals Selection Change Callback
+%% Condition Signals Selection Change Callback
     function cond_sig_selcbk(hObject,~)
+        
         % Read check box
-        removeBG_state =get(removeBG_button,'Value');
-        bin_state = get(bin_button,'Value');
-        filt_state = get(filt_button,'Value');
-	filt_60hz_state = get(filt_60hz_button,'Value');
-        drift_state = get(removeDrift_button,'Value');
-        norm_state = get(norm_button,'Value');
-        inverse_state = get(inverse_button,'Value'); 
-        %denoise_state = get(denoise_button,'Value');
+        removeBG_state          = get(removeBG_button,'Value');
+        bin_state               = get(bin_button,'Value');
+        filt_state              = get(filt_button,'Value');
+        filt_60hz_state         = get(filt_60hz_button,'Value');
+        drift_state             = get(removeDrift_button,'Value');
+        norm_state              = get(norm_button,'Value');
+        inverse_state           = get(inverse_button,'Value');
+        phase_state             = get(phase_button,'Value');
+        
         % Grab pop up box values
-        bin_pop_state = get(bin_popup,'Value');
+        bin_pop_state           = get(kernel_popup,'Value');
+        drift_pop_state         = get(drift_popup,'Value');
         
         % Create variable for tracking conditioning progress
-        trackProg = [removeBG_state filt_state filt_60hz_state bin_state drift_state norm_state inverse_state];
+        trackProg = [removeBG_state,...
+                     filt_state,...
+                     filt_60hz_state,...
+                     bin_state,...
+                     drift_state,...
+                     norm_state,...
+                     inverse_state,...
+                     phase_state];
         trackProg = sum(trackProg);
+        
         counter = 0;
         g1 = waitbar(counter,'Conditioning Signal');
         
-        % Return to raw unfiltered cmos data
-        
+        % Return to raw unfiltered cmos data    
         handles.normflag = 0; % Initialize normflag
         handles.activeCamData.cmosData = handles.activeCamData.cmosRawData;
         
-        % Condition Signals
-        % Remove Background
+        %% Remove Background
         if removeBG_state == 1
             % Update counter % progress bar
             counter = counter + 1;
             waitbar(counter/trackProg,g1,'Removing Background');
-            %bg_thresh = str2double(get(bg_thresh_edit,'String'));
-            %perc_ex = str2double(get(perc_ex_edit,'String'));
-            %handles.activeCamData.cmosData = remove_BKGRD(handles.activeCamData.cmosData,handles.activeCamData.bg,bg_thresh,perc_ex);
             handles.activeCamData.cmosData = handles.activeCamData.cmosData.* repmat(handles.activeCamData.finalSegmentation,[1 1 size(handles.activeCamData.cmosData,3)]);
         end
-        % Bin Data
+        
+        %% Bin Data
         if bin_state == 1
             % Update counter % progress bar
             counter = counter + 1;
-            waitbar(counter/trackProg,g1,'Binning Data');
-            if bin_pop_state == 3
-                bin_size = 7;
+            waitbar(counter/trackProg, g1, 'Binning Data');
+            
+            if bin_pop_state == 1
+                kernel_name = 'uniform';
             elseif bin_pop_state == 2
-                bin_size = 5;
-            else
-                bin_size = 3;
+                kernel_name = 'gaussian';
             end
-            handles.activeCamData.cmosData = binning(handles.activeCamData.cmosData,bin_size);
+            
+            kernel_size = str2double(get(kernel_size_edit, 'String'));
+            kernel_size = round(kernel_size);
+            set(kernel_size_edit,'String',string(kernel_size));
+            
+            handles.activeCamData.cmosData = binning(handles.activeCamData.cmosData, kernel_size, kernel_name);
         end
-        % Filter Data
+        
+        %% Filter Data
         if filt_state == 1
             % Update counter % progress bar
             counter = counter + 1;
@@ -297,58 +361,70 @@ end
                 lb = 0.5;
                 hb = 50;
             end
-            handles.activeCamData.cmosData = filter_data(handles.activeCamData.cmosData,handles.activeCamData.Fs, or, lb, hb);
+            handles.activeCamData.cmosData = filter_data(handles.activeCamData.cmosData,...
+                                                         handles.activeCamData.Fs,...
+                                                         or, lb, hb);
         end
-	% Remove 60 Hz hum
-	if filt_60hz_state == 1
-	    % Update counter % progress bar
+        
+        %% Remove 60 Hz hum
+        if filt_60hz_state == 1
+            % Update counter % progress bar
             counter = counter + 1;
-            waitbar(counter/trackProg,g1,'Removing 60 Hz hum');
-	    % Removing 60 Hz hum
-	    handles.activeCamData.cmosData = remove_60hz(handles.activeCamData.cmosData, handles.activeCamData.Fs);
-	end
-	
-        % Remove Drift
+            waitbar(counter/trackProg, g1, 'Removing 60 Hz hum');
+            handles.activeCamData.cmosData = remove_60hz(handles.activeCamData.cmosData,...
+                                                         handles.activeCamData.Fs);
+        end
+        
+        %% Remove Drift
         if drift_state == 1
             % Update counter % progress bar
             counter = counter + 1;
             waitbar(counter/trackProg,g1,'Removing Drift');
-            % Gather drift values and adjust for drift
-            ord_val = get(drift_popup,'Value');
-            ord_str = get(drift_popup,'String');
-            handles.activeCamData.cmosData = remove_Drift(handles.activeCamData.cmosData,ord_str(ord_val));
-        end
-        % Normalize Data
-        if norm_state == 1
-            % Update counter % progress bar
-            counter = counter + 1;
-            waitbar(counter/trackProg,g1,'Normalizing Data');
-            % Normalize data
-            handles.activeCamData.cmosData = normalize_data(handles.activeCamData.cmosData);
             
-            handles.normflag = 1;
+            if drift_pop_state == 1
+                method_name = 'polynomial';
+            elseif drift_pop_state == 2
+                method_name = 'least squares';
+            end
+            
+            method_param = str2double(get(first_drift_param_edit, 'String'));
+            method_param = round(method_param);
+            set(first_drift_param_edit,'String',string(method_param));
+            
+            handles.activeCamData.cmosData = remove_Drift(handles.activeCamData.cmosData,...
+                                                          method_name, method_param);
         end
-        %Inverse Data
+        
+        %% Transform to phase
+        if phase_state == 1
+            counter = counter + 1;
+            waitbar(counter/trackProg, g1, 'Transform to phase');
+            handles.activeCamData.cmosData = transform_to_phase(handles.activeCamData.cmosData);
+        end
+
+        %% Inverse Data
         if inverse_state==1
             counter = counter + 1;
             waitbar(counter/trackProg,g1,'Inversing Data');
             handles.activeCamData.cmosData=-handles.activeCamData.cmosData+max(handles.activeCamData.cmosData(:))+min(handles.activeCamData.cmosData(:));
         end
-        % Denoise Data
-        %if denoise_state == 1
+                
+        %% Normalize Data
+        if norm_state == 1
             % Update counter % progress bar
-        %    counter = counter + 1;
-        %    waitbar(counter/trackProg,g1,'Denoising Data');
-            % Denoise data
-        %    handles.activeCamData.cmosData = denoise_data(handles.activeCamData.cmosData,handles.activeCamData.Fs,handles.activeCamData.bg);
-        %end
-        
-        % Delete the progress bar 
+            counter = counter + 1;
+            waitbar(counter/trackProg,g1,'Normalizing Data');
+            handles.activeCamData.cmosData = normalize_data(handles.activeCamData.cmosData);
+            handles.normflag = 1;
+        end
+                
+        %% Delete the progress bar
         delete(g1)
-        % Save conditioned signal
+        
+        %% Save conditioned signal
         hObject.UserData = handles.activeCamData.cmosData;
-
-% Save handles in figure with handle f.
+        
+        %% Save handles in figure with handle f.
         guidata(conditionParametersGroup, handles);
         guidata(handles.activeScreen, handles);
         if isempty(handles.activeCamData.cmosData)
@@ -369,16 +445,17 @@ end
         end
         
     end
-function drawFrame(frame, camNo)
+
+    function drawFrame(frame, camNo)
         for i=1:4
             handles.allCamData(i).screen.XColor = 'black';
             handles.allCamData(i).screen.YColor = 'black';
         end
         handles.activeScreen.XColor = 'red';
         handles.activeScreen.YColor = 'red';
-
+        
         if handles.allCamData(camNo).isloaded==1
-
+            
             G = handles.allCamData(camNo).bgRGB;
             if (frame <= handles.allCamData(camNo).maxFrame)
                 Mframe = handles.allCamData(camNo).cmosData(:,:,frame);
@@ -395,7 +472,7 @@ function drawFrame(frame, camNo)
                 J = real2rgb(Mframe, 'jet');
                 A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
             end
-
+            
             I = J .* A + G .* (1 - A) ;
             
             removeBGthreshold = get(removeBG_button,'Value');
@@ -410,7 +487,7 @@ function drawFrame(frame, camNo)
             end
             
             %image(maskedI,'Parent',handles.allCamData(camNo).screen);
-
+            
             if handles.bounds(camNo) == 1
                 M = handles.markers1;
             elseif handles.bounds(camNo) == 2
@@ -428,7 +505,7 @@ function drawFrame(frame, camNo)
             for xx=1:a
                 plot(M(xx,1),M(xx,2),'wp','MarkerSize',12,'MarkerFaceColor',...
                     handles.markerColors(xx),'MarkerEdgeColor','w','Parent',handles.allCamData(camNo).screen);
-
+                
                 set(handles.allCamData(camNo).screen,'YTick',[],'XTick',[]);% Hide tick markes
             end
             hold(handles.allCamData(camNo).screen,'off')
@@ -444,7 +521,7 @@ function drawFrame(frame, camNo)
             for x=1:a
                 plot(handles.time(1:handles.activeCamData.maxFrame),...
                     squeeze(handles.activeCamData.cmosData(M(x,2),M(x,1),:)),...
-                            handles.markerColors(x),'LineWidth',2,'Parent',handles.signalScreens(x));
+                    handles.markerColors(x),'LineWidth',2,'Parent',handles.signalScreens(x));
                 set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
             end
             hold off
@@ -494,7 +571,7 @@ function drawFrame(frame, camNo)
             end
             hold off
         end
-         set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
+        set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
     end
 guidata(conditionParametersGroup, handles);
 end

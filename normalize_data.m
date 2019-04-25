@@ -3,7 +3,6 @@ function normData = normalize_data(data)
 
 % INPUTS
 % data = cmos data
-% Fs = sampling frequency
 
 % OUTPUT
 % normData = normalized data matrix
@@ -27,7 +26,4 @@ else
     diff_data = repmat(max(data,[],3)-min(data,[],3),[1 1 size(data,3)]);
     normData = (data-min_data)./(diff_data);
 end
-% % %% NON RECTANGULAR POLYGON MOD
-% % min_data = repmat(min(data,[],2),[1 size(data,2)]);
-% % diff_data = repmat(max(data,[],2),[1 size(data,2)])-min_data;
-% % normData = (data-min_data)./diff_data;
+
