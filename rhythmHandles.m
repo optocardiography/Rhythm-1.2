@@ -20,7 +20,6 @@ classdef rhythmHandles < handle
         %%minimum values pixels require to be drawn
         
         matrixMax=1;
-        minVisible = 6;
         normalizeMinVisible = .3;
         
         cmap = []; %colormap('Jet'); %saves the default colormap values
@@ -45,20 +44,12 @@ classdef rhythmHandles < handle
         a_start = 0;
         a_end = 0;
         
-        % APD mapping
-        apd_start = 0;
-        apd_end = 0;
-        percentAPD = 0;
-        maxapd = 0;
-        minapd =0;
-        percentRT = 0;
-        APstart = 0;
-        APend = 0;
-        Line = [];
-        
-        % Alternance mapping
-        alternance_start = 0;
-        alternance_end = 0;
+        % APD and Alternance mapping
+        apd_alternance_start_time = 0;
+        apd_alternance_end_time = 1;
+        minapd = 10;
+        maxapd = 1000;
+        percentAPD = 80;
         
         % FUNCTIONAL FOR 4 WINDOW VIEW
         activeScreen=[];

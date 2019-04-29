@@ -1,4 +1,4 @@
-function [data] = transform_to_phase(data)
+function [data] = transform_to_phase(data, mask)
 %% Spatial filtration of data with given kernel
 
 % INPUTS
@@ -8,7 +8,7 @@ function [data] = transform_to_phase(data)
 % [data] = phase data
 
 % METHOD
-% Phase is being calculated as hilbert transform from centered signal.
+% Phase is being calculated as an angle of hilbert transform of centered signal.
 
 % AUTHOR
 % Pikunov Andrey - pikunov@phystech.edu
@@ -20,7 +20,7 @@ function [data] = transform_to_phase(data)
 for i = 1 : size(data, 1)
     for j = 1 : size(data, 2)
         data_slice = data(i, j, :);
-        if any(data_slice ~= 0) % avoid masked pixels
+        if mask(i, j) ~= 0 
             data_slice = make_centered(data_slice); 
             data_slice_hilbert = hilbert(data_slice);
             data(i, j, :) = angle(data_slice_hilbert);

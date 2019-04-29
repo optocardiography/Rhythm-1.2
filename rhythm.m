@@ -397,12 +397,7 @@ handles.Fs = 1000; % this is the default value. it will be overwritten
 handles.starttime = 0;
 handles.fileLength = 1;
 handles.endtime = 1;
-% handles.M = []; % this handle stores the locations of the markers
 
-% handles.slide=-1; % parameter for recognize clicking location
-%%minimum values pixels require to be drawn
-% handles.minVisible = 6;
-% handles.normalizeMinVisible = .3;
 handles.cmap = colormap('Jet'); %saves the default colormap values
 
 %% All Callback functions
@@ -1051,7 +1046,7 @@ end
                     Mframe = handles.activeCamData.cmosData(:,:,end);
                 end
                 J = real2rgb(Mframe, 'jet');
-                A = real2rgb(Mframe >= handles.minVisible, 'gray');
+                A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
                 I = J .* A + G .* (1-A);
                 image(I,'Parent',handles.activeScreen);
 
@@ -1170,17 +1165,8 @@ function drawFrame(frame, camNo)
             else
                 Mframe = handles.allCamData(camNo).cmosData(:,:,end);
             end
-            if handles.normflag == 0
-                Mmax = handles.matrixMax;
-                Mmin = handles.minVisible;
-                numcol = size(jet,1);
-                J = ind2rgb(round((Mframe - Mmin) ./ (Mmax - Mmin) * (numcol - 1)), 'jet');
-                A = real2rgb(Mframe >= handles.minVisible, 'gray');
-            else
-                J = real2rgb(Mframe, 'jet');
-                A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
-            end
-
+            J = real2rgb(Mframe, 'jet');
+            A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray'); 
             I = J .* A + G .* (1 - A);
 
             if handles.activeScreenNo == camNo
@@ -1475,17 +1461,8 @@ end
             % Update image
             G = handles.activeCamData.bgRGB;
             Mframe = handles.activeCamData.cmosData(:,:,i);
-            if handles.normflag == 0
-                Mmax = handles.matrixMax;
-                Mmin = handles.minVisible;
-                numcol = size(jet,1);
-                J = ind2rgb(round((Mframe - Mmin) ./ (Mmax - Mmin) * (numcol - 1)), jet);
-                A = real2rgb(Mframe >= handles.minVisible, 'gray');
-            else
-                J = real2rgb(Mframe, 'jet');
-                A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
-            end
-            
+            J = real2rgb(Mframe, 'jet');
+            A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
             I = J .* A + G .* (1 - A);
             image(I);
             axis off; hold off

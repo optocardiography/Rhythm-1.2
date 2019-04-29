@@ -39,14 +39,14 @@ brush_checkbox = uicontrol('Parent',conditionParametersGroup,...
     end
 
 %%
-% pos_left = 0;
-% pos_bottom = pos_bottom - element_height;
-% element_width = 1;
-% bg_thresh_label = uicontrol('Parent',conditionParametersGroup, ...
-%                             'Style','text','FontSize',fontSize,...
-%                             'String','Threshold',...
-%                             'Units','normalized',...
-%                             'Position',[pos_left, pos_bottom, element_width, element_height]);
+pos_left = 0;
+pos_bottom = pos_bottom - element_height;
+element_width = 1;
+bg_thresh_label = uicontrol('Parent',conditionParametersGroup, ...
+                            'Style','text','FontSize',fontSize,...
+                            'String','Threshold',...
+                            'Units','normalized',...
+                            'Position',[pos_left, pos_bottom, element_width, element_height]);
 
 %%
 pos_left = 0;
@@ -128,7 +128,8 @@ kernel_size_edit = uicontrol('Parent',conditionParametersGroup,...
                          'FontSize',fontSize,...
                          'String','9',...
                          'Units','normalized',...
-                         'Position',[pos_left, pos_bottom, element_width, kernel_edit_height]);
+                         'Position',[pos_left, pos_bottom, element_width, kernel_edit_height],...
+                         'Callback', @kernel_size_edit_callback);
                                             
 %%     
 pos_left = 0;
@@ -276,6 +277,27 @@ end
         drawFrame(handles.frame ,handles.activeScreenNo);
     end
 
+
+    function kernel_size_edit_callback(source,~)
+        
+        kernel_size = str2double(get(kernel_size_edit, 'String'));
+        
+        if (kernel_size < 3) || (mod(kernel_size, 2) ~= 1)
+            
+            error_report = 'Kernel size must be odd value greater than 3!';
+            msgbox(error_report, 'Incorrect Input', 'Error');
+            
+            kernel_size = max(3, floor(kernel_size));
+            
+            if (mod(kernel_size, 2) ~= 1)
+                kernel_size = kernel_size + 1;
+            end
+            
+            set(kernel_size_edit, 'String', string(kernel_size));
+        end
+    end
+
+
 %% Condition Signals Selection Change Callback
     function cond_sig_selcbk(hObject,~)
         
@@ -311,12 +333,15 @@ end
         handles.normflag = 0; % Initialize normflag
         handles.activeCamData.cmosData = handles.activeCamData.cmosRawData;
         
+        mask = handles.activeCamData.finalSegmentation;
+        
         %% Remove Background
         if removeBG_state == 1
             % Update counter % progress bar
             counter = counter + 1;
             waitbar(counter/trackProg,g1,'Removing Background');
-            handles.activeCamData.cmosData = handles.activeCamData.cmosData.* repmat(handles.activeCamData.finalSegmentation,[1 1 size(handles.activeCamData.cmosData,3)]);
+            handles.activeCamData.cmosData = handles.activeCamData.cmosData.* repmat(mask,...
+                                                                                     [1 1 size(handles.activeCamData.cmosData, 3)]);
         end
         
         %% Bin Data
@@ -332,10 +357,8 @@ end
             end
             
             kernel_size = str2double(get(kernel_size_edit, 'String'));
-            kernel_size = round(kernel_size);
-            set(kernel_size_edit,'String',string(kernel_size));
-            
-            handles.activeCamData.cmosData = binning(handles.activeCamData.cmosData, kernel_size, kernel_name);
+           
+            handles.activeCamData.cmosData = binning(handles.activeCamData.cmosData, mask, kernel_size, kernel_name);
         end
         
         %% Filter Data
@@ -391,7 +414,7 @@ end
             method_param = round(method_param);
             set(first_drift_param_edit,'String',string(method_param));
             
-            handles.activeCamData.cmosData = remove_Drift(handles.activeCamData.cmosData,...
+            handles.activeCamData.cmosData = remove_Drift(handles.activeCamData.cmosData, mask,...
                                                           method_name, method_param);
         end
         
@@ -399,7 +422,7 @@ end
         if phase_state == 1
             counter = counter + 1;
             waitbar(counter/trackProg, g1, 'Transform to phase');
-            handles.activeCamData.cmosData = transform_to_phase(handles.activeCamData.cmosData);
+            handles.activeCamData.cmosData = transform_to_phase(handles.activeCamData.cmosData, mask);
         end
 
         %% Inverse Data
@@ -462,18 +485,14 @@ end
             else
                 Mframe = handles.allCamData(camNo).cmosData(:,:,end);
             end
-            if handles.normflag == 0
-                Mmax = handles.matrixMax;
-                Mmin = handles.minVisible;
-                numcol = size(jet,1);
-                J = ind2rgb(round((Mframe - Mmin) ./ (Mmax - Mmin) * (numcol - 1)), 'jet');
-                A = real2rgb(Mframe >= handles.minVisible, 'gray');
-            else
-                J = real2rgb(Mframe, 'jet');
-                A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
-            end
+
+            J = real2rgb(Mframe, 'jet');
+            A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
             
-            I = J .* A + G .* (1 - A) ;
+            I = J .* A + G .* (1 - A);
+            % J - signal
+            % G - backhround
+            %%
             
             removeBGthreshold = get(removeBG_button,'Value');
             handles.activeCamData.removeBGthreshold = removeBGthreshold;
