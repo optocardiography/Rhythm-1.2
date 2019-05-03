@@ -1,13 +1,14 @@
-function [data] = binning(data, mask, kernel_size, kernel_name)
+function [data_binned] = binning(data, mask, kernel_size, kernel_name)
 %% Spatial filtration of data with given kernel
 
 % INPUTS
 % data = cmos data with structure N * M * time
-% kernel_size = size of the window to convolve with data
+% mask = mask to avoid BG pixels 
+% kernel_size = size of the window to convolve with data (odd integer)
 % kernel_name = "uniform" or "gaussian" 
 
 % OUTPUT 
-% [data] = binned data
+% [data_binned] = binned data
 
 % AUTHOR
 % Pikunov Andrey - pikunov@phystech.edu
@@ -28,69 +29,68 @@ N = size(data, 1); % for y loop
 M = size(data, 2); % for x loop
 T = size(data, 3); % for time loop
 
+data_binned = zeros(size(data));
+
 kernel_size_half = floor(kernel_size / 2);
 
-for t = 1 : T
-    
-    data_layer = data(:, :, t);
-    data_layer_filtered = zeros(size(data_layer));
-    
-    for y = 1 : N
-        for x = 1 : M
+tic;
+
+for y = 1 : N
+    for x = 1 : M
+        
+        if mask(y, x) == 1
             
-            if mask(y, x) == 1
+            range_x = [x - kernel_size_half, x + kernel_size_half];
+            range_y = [y - kernel_size_half, y + kernel_size_half];
             
-                range_x = [x - kernel_size_half, x + kernel_size_half];
-                range_y = [y - kernel_size_half, y + kernel_size_half];
-
-                left_margin = 0;
-                right_margin = 0;
-                up_margin = 0;
-                bottom_margin = 0;
-
-                if range_x(1) < 1
-                    left_margin = abs(1 - range_x(1));
-                end
-                if range_x(2) > M
-                    right_margin = abs(M - range_x(2));
-                end
-                if range_y(1) < 1
-                    up_margin = abs(1 - range_y(1));
-                end
-                if range_y(2) > N
-                    bottom_margin = abs(N - range_y(2));
-                end
-
-                mask_window = mask(range_y(1) + up_margin : range_y(2) - bottom_margin,...
-                                   range_x(1) + left_margin : range_x(2) - right_margin);
-
-                mask_window = create_fake_borders(mask_window, left_margin,...
-                                                               right_margin,...
-                                                               up_margin,...
-                                                               bottom_margin);                  
-           
+            left_margin = 0;
+            right_margin = 0;
+            up_margin = 0;
+            bottom_margin = 0;
+            
+            if range_x(1) < 1
+                left_margin = abs(1 - range_x(1));
+            end
+            if range_x(2) > M
+                right_margin = abs(M - range_x(2));
+            end
+            if range_y(1) < 1
+                up_margin = abs(1 - range_y(1));
+            end
+            if range_y(2) > N
+                bottom_margin = abs(N - range_y(2));
+            end
+            
+            mask_window = mask(range_y(1) + up_margin : range_y(2) - bottom_margin,...
+                               range_x(1) + left_margin : range_x(2) - right_margin);
+            
+            mask_window = create_fake_borders(mask_window, left_margin,...
+                                              right_margin,...
+                                              up_margin,...
+                                              bottom_margin);      
+            
+            kernel_current = kernel .* mask_window;
+            kernel_current = kernel_current(1 + up_margin : end - bottom_margin,...
+                                            1 + left_margin : end - right_margin);   
+            kernel_current = kernel_current / sum(sum(kernel_current)); % renormalizing        
+            
+            for t = 1 : T
                 
-                data_window = data_layer(range_y(1) + up_margin : range_y(2) - bottom_margin,...
-                                         range_x(1) + left_margin : range_x(2) - right_margin);
-                           
-                data_window = create_fake_borders(data_window, left_margin,...
-                                                               right_margin,...
-                                                               up_margin,...
-                                                               bottom_margin); 
-                                                           
-                kernel_current = kernel .* mask_window;
-                kernel_current = kernel_current / sum(sum(kernel_current)); % renormalizing
-                
-                data_layer_filtered(y, x) = sum(sum(data_window .* kernel_current));
-            
+                data_window = data(range_y(1) + up_margin : range_y(2) - bottom_margin,...
+                                   range_x(1) + left_margin : range_x(2) - right_margin,...
+                                   t);
+
+                data_binned(y, x, t) = sum(sum(data_window .* kernel_current));
+
             end
         end
     end
     
-    data(:, :, t) = data_layer_filtered;
-    
 end
-    
+
+disp("time binning (min) = ");
+disp(toc / 60);
+
 end
 
 

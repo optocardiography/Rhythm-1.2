@@ -97,7 +97,7 @@ classdef rhythmHandles < handle
         brushMaskIndices=[];
         isFillHoles = 0;
         isRemoveIslands = 0;
-        removeIslandsPercent = 0;
+        removeIslandsPercent = 0.01;
         
         matlabVersion = 2018;
     end

@@ -54,8 +54,8 @@ switch method_name
     case 'least squares'
 
         % TODO: move to GUI
-        smoothness_param = 1e6;
-        asym_param = .05;
+        smoothness_param = 1e9;
+        asym_param = 5e-3;
         
         n_iter = method_params(1);
 
