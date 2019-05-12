@@ -38,11 +38,13 @@ classdef rhythmHandles < handle
         objectToDrawOn=[];
         playback=0;
         
+        % Conduction Velocity
         c_start = 0;
         c_end = 0;
         contour_state = 0;
         a_start = 0;
         a_end = 0;
+        Line = [];
         
         % APD and Alternance mapping
         apd_alternance_start_time = 0;
