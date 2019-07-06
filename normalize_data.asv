@@ -20,13 +20,12 @@ function normData = normalize_data(data)
 if size(data,3) == 1
     min_data = repmat(min(data,[],2),[1 size(data,2)]);
     diff_data = repmat(max(data,[],2)-min(data,[],2),[1 size(data,2)]);
-    normData = (data-min_data);
-    normData(nonzero) = normData(nonzero)./(diff_data(nonzero));
+    normData = (data-min_data)./(diff_data);
 else
     min_data = repmat(min(data,[],3),[1 1 size(data,3)]);
     diff_data = repmat(max(data,[],3)-min(data,[],3),[1 1 size(data,3)]);
     nonzero = find(diff_data);
     normData = (data-min_data);
-    normData(nonzero) = normData(nonzero)./(diff_data(nonzero));
+    normData(nonzero) = normData./(diff_data);
 end
 

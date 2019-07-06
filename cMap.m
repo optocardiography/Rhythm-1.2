@@ -61,7 +61,6 @@ function [cMap] = cMap(data,stat,endp,Fs,bg,rect, f, movie_scrn, handles)
 stat=round(stat*Fs)+1;
 endp=round(endp*Fs)+1;
 actMap = zeros(size(data,1),size(data,2));
-mask2 = zeros(size(data,1),size(data,2));
 dataCroppedInTime = data(:,:,stat:endp); % truncate data
 
 % Re-normalize data in case of drift
@@ -70,12 +69,6 @@ dataCroppedInTime = normalize_data(dataCroppedInTime);
 % identify channels that have been zero-ed out due to noise
 mask = max(dataCroppedInTime,[],3) > 0;
 
-% Remove non-connected artifacts
-CC = bwconncomp(mask,4);
-numPixels = cellfun(@numel,CC.PixelIdxList);
-[~,idx] = max(numPixels);
-mask_id = CC.PixelIdxList{idx};
-mask2(mask_id) = 1;
 
 % Find First Derivative and time of maxium
 derivatives = diff(dataCroppedInTime,1,3); % first derivative
@@ -98,7 +91,7 @@ use_window=1; % use windowed least-squares fitting
 
 % if ~use_window
     includeMask=zeros(rect(4)+1,rect(3)+1);
-    includeMask(2:end-1,2:end-1)=abs(croppedAmap(1:end-2,2:end-1)-croppedAmap(3:end,2:end-1))+abs(croppedAmap(2:end-1,1:end-2)-croppedAmap(2:end-1,3:end))
+    includeMask(2:end-1,2:end-1)=abs(croppedAmap(1:end-2,2:end-1)-croppedAmap(3:end,2:end-1))+abs(croppedAmap(2:end-1,1:end-2)-croppedAmap(2:end-1,3:end));
     includeMask(2:end-1,2:end-1)=((croppedAmap(2:end-1,2:end-1)<croppedAmap(3:end,2:end-1))|(croppedAmap(2:end-1,2:end-1))<croppedAmap(1:end-2,2:end-1)|(croppedAmap(2:end-1,2:end-1)<croppedAmap(2:end-1,3:end))|(croppedAmap(2:end-1,2:end-1))<croppedAmap(2:end-1,1:end-2));
     croppedAmap(includeMask==0)=NaN;
 % end
@@ -107,6 +100,7 @@ if use_window
     xx = reshape(xx,[],1);
     yy = reshape(yy,[],1);
     t = reshape(croppedAmap,[],1);
+    
     xyt = [xx yy t];
     
     M=size(xyt,1);
@@ -143,8 +137,10 @@ if use_window
         end
     end
             
+    cropped = dataCroppedInTime(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3),1);
+    croppedResized = reshape(cropped,[],1);
     
-    was_fitted=find( (XYT(:,1)~=0) & (XYT(:,2)~=0)); % if XYT was not filled    
+    was_fitted=find( (XYT(:,1)~=0) & (XYT(:,2)~=0) & ( croppedResized(:) > 0) ); % if XYT was not filled or point not inside of segmented region
     XYT=XYT(was_fitted,:);
     
     % coef_x / (coef_x^2 + coef_y^2) * TODO multiplier????

@@ -102,5 +102,7 @@ classdef rhythmHandles < handle
         removeIslandsPercent = 0.01;
         
         matlabVersion = 2018;
+        
+        signalPanel, signalSlider
     end
 end

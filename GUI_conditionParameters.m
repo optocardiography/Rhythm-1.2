@@ -268,14 +268,16 @@ end
         if handles.isRemoveIslands
             handles.activeCamData.finalSegmentation = bwareaopen(handles.activeCamData.finalSegmentation , ceil(handles.removeIslandsPercent*size(BG ,1)*size(BG,2))); % remove islands
         end
-        drawFrame(handles.frame ,handles.activeScreenNo);
+        drawFrame(handles.frame ,handles.activeScreenNo, handles);
+        redrawWaveScreens(handles);
     end
 
 
     function removeBGcheckbox_callback(hObject,eventdata)
         removeBG_callback(hObject);
         handles.drawSegmentation = get(hObject,'Value');
-        drawFrame(handles.frame ,handles.activeScreenNo);
+        drawFrame(handles.frame ,handles.activeScreenNo, handles);
+        redrawWaveScreens(handles);
     end
 
 
@@ -458,140 +460,18 @@ end
             handles.matrixMax = .9 * max(handles.activeCamData.cmosData(:));
             currentframe = handles.frame;
             if handles.normflag == 0
-                drawFrame(currentframe, handles.activeScreenNo);
+                drawFrame(currentframe, handles.activeScreenNo, handles);
+                redrawWaveScreens(handles);
                 hold on
             else
-                drawFrame(currentframe, handles.activeScreenNo);
+                drawFrame(currentframe, handles.activeScreenNo, handles);
+                redrawWaveScreens(handles);
                 caxis([0 1])
                 hold on
             end
             set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
         end
         
-    end
-
-    function drawFrame(frame, camNo)
-        for i=1:4
-            handles.allCamData(i).screen.XColor = 'black';
-            handles.allCamData(i).screen.YColor = 'black';
-        end
-        handles.activeScreen.XColor = 'red';
-        handles.activeScreen.YColor = 'red';
-        
-        if handles.allCamData(camNo).isloaded==1
-            
-            G = handles.allCamData(camNo).bgRGB;
-            if (frame <= handles.allCamData(camNo).maxFrame)
-                Mframe = handles.allCamData(camNo).cmosData(:,:,frame);
-            else
-                Mframe = handles.allCamData(camNo).cmosData(:,:,end);
-            end
-
-            J = real2rgb(Mframe, 'jet');
-            A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
-            
-            I = J .* A + G .* (1 - A);
-            % J - signal
-            % G - backhround
-            %%
-            
-            removeBGthreshold = get(removeBG_button,'Value');
-            handles.activeCamData.removeBGthreshold = removeBGthreshold;
-            if (removeBGthreshold)
-                mask = handles.activeCamData.finalSegmentation;
-                maskedI = I;
-                [row,col] = find(mask~=0);
-                for i=1:size(row,1)
-                    maskedI(row(i),col(i),1) = 1;
-                end
-            end
-            
-            %image(maskedI,'Parent',handles.allCamData(camNo).screen);
-            
-            if handles.bounds(camNo) == 1
-                M = handles.markers1;
-            elseif handles.bounds(camNo) == 2
-                M = handles.markers2;
-            else
-                M = handles.allCamData(camNo).markers;
-            end
-            [a,~]=size(M);
-            hold(handles.allCamData(camNo).screen,'on')
-            if removeBGthreshold
-                image(maskedI,'Parent',handles.allCamData(camNo).screen);
-            else
-                image(I,'Parent',handles.allCamData(camNo).screen);
-            end
-            for xx=1:a
-                plot(M(xx,1),M(xx,2),'wp','MarkerSize',12,'MarkerFaceColor',...
-                    handles.markerColors(xx),'MarkerEdgeColor','w','Parent',handles.allCamData(camNo).screen);
-                
-                set(handles.allCamData(camNo).screen,'YTick',[],'XTick',[]);% Hide tick markes
-            end
-            hold(handles.allCamData(camNo).screen,'off')
-            
-        end
-        % redraw signal screens
-        if handles.bounds(handles.activeScreenNo) == 0
-            for i_cam=1:5
-                cla(handles.signalScreens(i_cam));
-            end
-            M = handles.activeCamData.markers; [a,~]=size(M);
-            hold on
-            for x=1:a
-                plot(handles.time(1:handles.activeCamData.maxFrame),...
-                    squeeze(handles.activeCamData.cmosData(M(x,2),M(x,1),:)),...
-                    handles.markerColors(x),'LineWidth',2,'Parent',handles.signalScreens(x));
-                set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
-            end
-            hold off
-        elseif handles.bounds(handles.activeScreenNo) == 1
-            % draw signal screens for the screen group 1
-            
-            for i_marker=1:5
-                for i_cam = 1:4
-                    cla(handles.signalGroup(i_marker).signalScreen(i_cam));
-                end
-            end
-            
-            M = handles.markers1;
-            msize = size(handles.markers1,1);
-            hold on
-            for i_marker=1:msize
-                for i_cam = 1:4
-                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
-                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
-                            handles.markerColors(i_marker),'LineWidth',2,...
-                            'Parent',handles.signalGroup(i_marker).signalScreen(i_cam))
-                    end
-                end
-            end
-            hold off
-        elseif handles.bounds(handles.activeScreenNo) == 2
-            % draw signal screens for the screen group 2
-            for i_marker=1:5
-                for i_cam = 1:4
-                    cla(handles.signalGroup(i_marker).signalScreen(i_cam));
-                end
-            end
-            
-            M = handles.markers2;
-            msize = size(handles.markers2,1);
-            hold on
-            for i_marker=1:msize
-                for i_cam = 1:4
-                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 2)
-                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
-                            handles.markerColors(i_marker),'LineWidth',2,...
-                            'Parent',handles.signalGroup(i_marker).signalScreen(i_cam))
-                    end
-                end
-            end
-            hold off
-        end
-        set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
     end
 guidata(conditionParametersGroup, handles);
 end

@@ -232,6 +232,7 @@ sync34 = uicontrol('Parent',p1,'Style','checkbox','Units','normalized','Position
 
 
 signalPanel = uipanel('Parent',p1,'Units','normalized','Position',[0.66 0.2 0.325 0.8], 'Visible','off');
+handles.signalPanel = signalPanel;
 auxSignalPanel = uipanel('Parent',signalPanel,'Units','normalized','Position',[0 -3 1 4]);
 signalGroup = [signalPanelHandles, signalPanelHandles,...
                signalPanelHandles,signalPanelHandles,signalPanelHandles];
@@ -266,7 +267,7 @@ handles.signalGroup = signalGroup;
 signalSlider = uicontrol('Style','Slider','Parent',p1,...
       'Units','normalized','Position',[0.985 0.2 0.015 0.8],...
       'Value',1,'Callback',{@slider_callback1,auxSignalPanel}, 'Visible','off');
-
+handles.signalSlider = signalSlider;
     
   
 function sync_callback(src,eventdata,arg1)
@@ -303,7 +304,7 @@ function sync_callback(src,eventdata,arg1)
     end
     if anyLoads
         movieslider_callback(movie_slider);
-        redrawWaveScreens();
+        redrawWaveScreens(handles);
     end
 end
 
@@ -316,33 +317,7 @@ function slider_callback1(src,eventdata,arg1)
     set(arg1,'Position',[0, -val*3.0, 1, 4])
 end
 
-    function visualizeWaveScreens(sync )
-        if (sync)
-            set([signalPanel, signalSlider], 'Visible','on');
-            for i=1:5
-                set(handles.signalScreens(i),'Visible','off');
-            end
-            % sync all screen signals and markers
-            movieslider_callback(movie_slider);
-        else
-            % unbound all screens
 
-            set([signalPanel, signalSlider, ], 'Visible','off');
-            for i=1:5
-                set(handles.signalScreens(i),'Visible','on');
-            end
-        end
-        anyLoads = 0;
-        for i_cam=1:4
-            if handles.allCamData(i_cam).isloaded
-                anyLoads = 1;
-                break;
-            end
-        end
-        if anyLoads
-            movieslider_callback(movie_slider);
-        end
-    end
 % function syncBox_callback(src,eventdata,arg1)
 %     val = get(src, 'Value');
 %     if (val)
@@ -406,7 +381,8 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
 function mapPopUp_callback(~,~)
     map = uibuttongroup('Parent',anal_data,...
                         'Position',[0 0 1 .95]);
-    
+    handles.drawBrush = 0;
+    movieslider_callback(movie_slider);
     %colormap(handles.activeScreen, jet);
     switch get(map_popup,'Value')
         case 1
@@ -511,7 +487,7 @@ end
                     end
                     if handles.drawBrush
                         cla (handles.activeScreen);
-                        drawFrame(handles.frame, handles.activeScreenNo);
+                        drawFrame(handles.frame, handles.activeScreenNo, handles);
                         hold (handles.activeScreen,'on');
                         center = [i,j];
                         if verLessThan('matlab','9.0.0')
@@ -586,7 +562,7 @@ end
                 j = j_temp;
                 
                 cla
-                drawFrame(handles.frame, handles.activeScreenNo);
+                drawFrame(handles.frame, handles.activeScreenNo, handles);
                 hold (handles.activeScreen,'on');
                 center = [i,j];
 %                 viscircles(handles.activeScreen, center, handles.activeCamData.brushSize,'Color','b');
@@ -625,7 +601,7 @@ function selectWindow(clickedScreen)
         
         % redraw singal_screens for unbound screen
         %if ~handles.linked
-        redrawWaveScreens();    
+        redrawWaveScreens(handles);    
     end
     if isempty(chk)
         chk = 1;
@@ -742,69 +718,6 @@ function selectWindow(clickedScreen)
     end
 end
 
-    function redrawWaveScreens()
-        if handles.bounds(handles.activeScreenNo) == 0
-            visualizeWaveScreens(0);
-            for i_cam=1:5
-                cla(handles.signalScreens(i_cam));
-            end
-            M = handles.activeCamData.markers; [a,~]=size(M);
-            hold on
-            for x=1:a
-                plot(handles.time(1:handles.activeCamData.maxFrame),...
-                    squeeze(handles.activeCamData.cmosData(M(x,2),M(x,1),:)),...
-                            handles.markerColors(x),'LineWidth',2,'Parent',handles.signalScreens(x));
-                set(handles.activeScreen,'YTick',[],'XTick',[]);% Hide tick markes
-            end
-            hold off
-        elseif handles.bounds(handles.activeScreenNo) == 1
-            % draw signal screens for the screen group 1
-            visualizeWaveScreens(1);
-            for i_marker=1:5
-                for i_cam = 1:4
-                    cla(signalGroup(i_marker).signalScreen(i_cam));
-                end
-            end
-            
-            M = handles.markers1;
-            msize = size(handles.markers1,1);
-            hold on
-            for i_marker=1:msize
-                for i_cam = 1:4
-                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
-                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
-                            handles.markerColors(i_marker),'LineWidth',2,...
-                            'Parent',signalGroup(i_marker).signalScreen(i_cam))
-                    end
-                end
-            end
-            hold off
-        elseif handles.bounds(handles.activeScreenNo) == 2
-            visualizeWaveScreens(1);
-            % draw signal screens for the screen group 2
-            for i_marker=1:5
-                for i_cam = 1:4
-                    cla(signalGroup(i_marker).signalScreen(i_cam));
-                end
-            end
-            
-            M = handles.markers2;
-            msize = size(handles.markers2,1);
-            hold on
-            for i_marker=1:msize
-                for i_cam = 1:4
-                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 2)
-                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
-                            handles.markerColors(i_marker),'LineWidth',2,...
-                            'Parent',signalGroup(i_marker).signalScreen(i_cam))
-                    end
-                end
-            end
-            hold off
-        end
-    end
 
 %% Update appropriate screens or slider when mouse is moved
     function button_motion_function(obj,~)
@@ -815,6 +728,7 @@ end
             grabbed = handles.activeCamData.grabbed;
         end
         if grabbed > -1
+            handles.activeCamData.drawMap = 0;
             set(obj,'CurrentAxes',handles.activeScreen)
             ps = get(handles.activeScreen,'CurrentPoint');
             i_temp = round(ps(1,1));
@@ -824,7 +738,7 @@ end
                 
                 i = i_temp;
                 j = j_temp;
-                disp([i,j]);
+%                 disp([i,j]);
                 
 %                 if handles.linked
                 if handles.bounds(handles.activeScreenNo) == 1
@@ -872,7 +786,7 @@ end
                     handles.activeCamData.markers(handles.activeCamData.grabbed,:) = [i j];
 
                     cla
-                    drawFrame(handles.frame, handles.activeScreenNo);
+                    drawFrame(handles.frame, handles.activeScreenNo, handles);
                 end
             end
         end
@@ -888,7 +802,7 @@ end
                 j = j_temp;
                 
                 cla
-                drawFrame(handles.frame, handles.activeScreenNo);
+                drawFrame(handles.frame, handles.activeScreenNo, handles);
                 hold (handles.activeScreen,'on');
                 center = [i,j];
                 if verLessThan('matlab','9.0.0')
@@ -1075,12 +989,12 @@ end
                 % Initialize movie slider to the first frame
                 if (firstLoad)
                     set(movie_slider,'Value',0)
-                    drawFrame(1, handles.activeScreenNo);
+                    drawFrame(1, handles.activeScreenNo, handles);
                     set([play_button,stop_button,dispwave_button,expmov_button,pacingcl_edit...
                         starttimemap_edit,endtimemap_edit,expwave_button,exptofile_button, truncateafter_edit],'Enable','on')
                 else
-                    drawFrame(handles.frame, handles.activeScreenNo);
-                    redrawWaveScreens();
+                    drawFrame(handles.frame, handles.activeScreenNo, handles);
+                    redrawWaveScreens(handles);
                 end
                 
             end
@@ -1123,7 +1037,7 @@ end
                 set(handles.allCamData(i_cam).screen,'NextPlot','replacechildren','YTick',[],'XTick',[]);
                 set(f,'CurrentAxes',handles.allCamData(i_cam).screen)
                 
-                drawFrame(i, i_cam);
+                drawFrame(i, i_cam, handles);
             end
         end
         
@@ -1148,67 +1062,6 @@ end
          end
     end
 
-%% Draw
-function drawFrame(frame, camNo)
-    for i=1:4
-        handles.allCamData(i).screen.XColor = 'black';
-        handles.allCamData(i).screen.YColor = 'black';
-    end
-    handles.activeScreen.XColor = 'red';
-    handles.activeScreen.YColor = 'red';
-    
-    if handles.allCamData(camNo).isloaded==1 
-        if ~handles.allCamData(camNo).drawMap
-            G = handles.allCamData(camNo).bgRGB;
-            if (frame <= handles.allCamData(camNo).maxFrame)
-                Mframe = handles.allCamData(camNo).cmosData(:,:,frame);
-            else
-                Mframe = handles.allCamData(camNo).cmosData(:,:,end);
-            end
-            J = real2rgb(Mframe, 'jet');
-            A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray'); 
-            I = J .* A + G .* (1 - A);
-
-            if handles.activeScreenNo == camNo
-                if (handles.drawSegmentation)
-%                 if (handles.activeCamData.removeBGthreshold)
-                    mask = handles.activeCamData.finalSegmentation;
-                    maskedI = I;
-                    [row,col] = find(mask~=0);
-                    for i=1:size(row,1)
-                        maskedI(row(i),col(i),1) = 1;
-                    end
-                    image(maskedI,'Parent',handles.activeScreen);
- 
-                else
-                    image(I,'Parent',handles.activeScreen);
-                end
-            
-            else
-                image(I,'Parent',handles.allCamData(camNo).screen);
-            end
-        end
-        
-        if handles.bounds(camNo) == 1
-            M = handles.markers1;
-        elseif handles.bounds(camNo) == 2
-            M = handles.markers2;
-        else
-            M = handles.allCamData(camNo).markers;
-        end
-        [a,~]=size(M);
-        hold (handles.allCamData(camNo).screen,'on');
-        for x=1:a
-            plot(M(x,1),M(x,2),'wp','MarkerSize',12,'MarkerFaceColor',...
-                handles.markerColors(x),'MarkerEdgeColor','w','Parent',handles.allCamData(camNo).screen);
-            
-            set(handles.allCamData(camNo).screen,'YTick',[],'XTick',[]);% Hide tick markes
-        end
-        hold (handles.allCamData(camNo).screen,'off')       
-        
-    end
-end
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% DISPLAY CONTROL
@@ -1231,7 +1084,7 @@ end
                         if handles.allCamData(i_cam).isloaded == 1 && handles.allCamData(i_cam).isVisible==1 
                             set(handles.allCamData(i_cam).screen,'NextPlot','replacechildren','YTick',[],'XTick',[]);
                             set(f,'CurrentAxes',handles.allCamData(i_cam).screen)
-                            drawFrame(i, i_cam);
+                            drawFrame(i, i_cam, handles);
                         end
                     end
                     handles.frame = i;
@@ -1271,7 +1124,7 @@ end
                 if handles.allCamData(i_cam).isloaded == 1 && handles.allCamData(i_cam).isVisible == 1
                     set(handles.allCamData(i_cam).screen,'NextPlot','replacechildren','YTick',[],'XTick',[]);
                     set(f,'CurrentAxes',handles.allCamData(i_cam).screen)
-                    drawFrame(i, i_cam);
+                    drawFrame(i, i_cam, handles);
                 end
             end
             handles.frame = i;

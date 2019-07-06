@@ -300,6 +300,7 @@ end
            end
        end
        handles.activeCamData.drawMap = 1;
+       drawFrame(handles.frame ,handles.activeScreenNo, handles);
        
        %higlight quivers included in calculation by black
        cla(handles.activeScreen); 
@@ -322,7 +323,6 @@ end
                    -1.0 * Vy(1:quiver_step:end),'w');      
        q.LineWidth = 2;
        q.AutoScaleFactor = 2;
-       drawFrame(handles.frame ,handles.activeScreenNo, handles);
        
        set( handles.activeScreen,'YDir','reverse');
     
