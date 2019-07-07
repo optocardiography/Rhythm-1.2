@@ -1,4 +1,4 @@
-function [actMap1] = aMap(data,stat,endp,Fs,cmap, movie_scrn, handles)
+function [actMap1] = aMap(data,stat,endp,Fs,cmap, rect, movie_scrn, handles)
 %% aMap is the central function for creating conduction velocity maps
 % [actMap1] = aMap(data,stat,endp,Fs,bg) calculates the activation map
 % for a single action potential upstroke.
@@ -91,11 +91,15 @@ offset1 = min(min(actMap1));
 actMap1 = actMap1 - offset1*ones(size(actMap1,1),size(actMap1,2));
 actMap1 = actMap1/Fs*1000; %% time in ms
 
+% Isolate ROI Specified by RECT
+rect = round(rect);
+croppedAmap = actMap1(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3));
+
 % Plot Map
 if size(data,3) ~= 1
-    handles.activeCamData.saveData = actMap1;
+    handles.activeCamData.saveData = croppedAmap;
     cla(movie_scrn); 
-    contourf(movie_scrn, actMap1,(endp-stat),'LineColor','k');
+    contourf(movie_scrn, croppedAmap,(endp-stat),'LineColor','k');
     set(movie_scrn,'YDir','reverse');
     set(movie_scrn,'YTick',[],'XTick',[]);
     colormap(jet);

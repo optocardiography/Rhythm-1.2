@@ -168,13 +168,17 @@ guidata(activationMapGroup, handles);
         % get the bounds of the activation window
         a_start = str2double(get(starttimeamap_edit,'String'));
         a_end = str2double(get(endtimeamap_edit,'String'));
+        
         drawTimeLines(a_start, a_end, handles, f);
         handles.a_start = a_start;
         handles.a_end = a_end;
+        
         axes(handles.activeCamData.screen)
+        rect = getrect(handles.activeCamData.screen);
         gg=msgbox('Building  Activation Map...');
         aMap(handles.activeCamData.cmosData,handles.a_start,handles.a_end,...
-            handles.activeCamData.Fs,handles.activeCamData.cmap, handles.activeCamData.screen, handles);
+            handles.activeCamData.Fs,handles.activeCamData.cmap,rect,... 
+            handles.activeCamData.screen, handles);
         handles.activeCamData.drawMap = 1;
         close(gg)
     end
