@@ -15,7 +15,7 @@ function drawFrame(frame, camNo, handles)
                 Mframe = handles.allCamData(camNo).cmosData(:,:,end);
             end
             J = real2rgb(Mframe, 'jet');
-            A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray'); 
+            A = (Mframe >= handles.normalizeMinVisible);
             I = J .* A + G .* (1 - A);
 
             if handles.activeScreenNo == camNo
@@ -47,7 +47,7 @@ function drawFrame(frame, camNo, handles)
         [a,~]=size(M);
         hold (handles.allCamData(camNo).screen,'on');
    
-        %TODO возможно здесь нужно рисовать maskedI или I
+        %TODO пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ maskedI пїЅпїЅпїЅ I
 
         for x=1:a
             plot(M(x,1),M(x,2),'wp','MarkerSize',12,'MarkerFaceColor',...

@@ -210,7 +210,8 @@ map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',10,...
                                 'CV map', 'Activation map',...
                                 'APD\CaT map', 'Rise Time',...
                                 'Calcium Decay',...
-                                'Alternance Map'},...
+                                'Alternance Map',...
+                                'Phase analysis'},...
                       'Position',[0 0.95 1 0.05], ...
                       'Callback',{@mapPopUp_callback}); % [0.005 0.940 0.99 0.05]
 
@@ -408,6 +409,9 @@ function mapPopUp_callback(~,~)
         case 7
             % Alternance Map
             GUI_AlternanceMap(map, handles, f);
+        case 8
+            % Phase Analyis
+            GUI_PhaseAnalysis(map, handles, f);
     end 
     
     set(handles.meanresults,'String',handles.activeCamData.meanresults);
@@ -960,7 +964,7 @@ end
                     Mframe = handles.activeCamData.cmosData(:,:,end);
                 end
                 J = real2rgb(Mframe, 'jet');
-                A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
+                A = (Mframe >= handles.normalizeMinVisible);
                 I = J .* A + G .* (1-A);
                 image(I,'Parent',handles.activeScreen);
 

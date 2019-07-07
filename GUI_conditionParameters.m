@@ -202,16 +202,6 @@ first_drift_param_edit = uicontrol('Parent',conditionParametersGroup,...
 pos_left = 0;
 pos_bottom = pos_bottom - element_height;
 element_width = 1;
-phase_button = uicontrol('Parent',conditionParametersGroup,...
-                         'Style','checkbox',...
-                         'FontSize',fontSize,...
-                         'String','Transform to phase',...
-                         'Units','normalized',...
-                         'Position',[pos_left, pos_bottom, element_width, element_height]);                    
-%% 
-pos_left = 0;
-pos_bottom = pos_bottom - element_height;
-element_width = 1;
 inverse_button = uicontrol('Parent',conditionParametersGroup,...
                            'Style','checkbox','FontSize',fontSize,...
                            'String','Inverse signal',...
@@ -312,7 +302,6 @@ end
         drift_state             = get(removeDrift_button,'Value');
         norm_state              = get(norm_button,'Value');
         inverse_state           = get(inverse_button,'Value');
-        phase_state             = get(phase_button,'Value');
         
         % Grab pop up box values
         bin_pop_state           = get(kernel_popup,'Value');
@@ -325,8 +314,7 @@ end
                      bin_state,...
                      drift_state,...
                      norm_state,...
-                     inverse_state,...
-                     phase_state];
+                     inverse_state];
         trackProg = sum(trackProg);
         
         counter = 0;
@@ -335,6 +323,8 @@ end
         % Return to raw unfiltered cmos data    
         handles.normflag = 0; % Initialize normflag
         handles.activeCamData.cmosData = handles.activeCamData.cmosRawData;
+        handles.matrixMax = 1;
+        handles.normalizeMinVisible = 0.3;
         
         mask = handles.activeCamData.finalSegmentation;
         
@@ -419,13 +409,6 @@ end
             
             handles.activeCamData.cmosData = remove_Drift(handles.activeCamData.cmosData, mask,...
                                                           method_name, method_param);
-        end
-        
-        %% Transform to phase
-        if phase_state == 1
-            counter = counter + 1;
-            waitbar(counter/trackProg, g1, 'Transform to phase');
-            handles.activeCamData.cmosData = transform_to_phase(handles.activeCamData.cmosData, mask);
         end
 
         %% Inverse Data
