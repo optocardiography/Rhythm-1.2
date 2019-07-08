@@ -14,6 +14,7 @@ classdef cameraData < handle
         
         colorbar = [];
         cmosData = [];
+        cmosPhase = [];
         rawData = [];
         bg=[];
         ecg=[];
@@ -71,6 +72,7 @@ classdef cameraData < handle
         yFlip = 0;
         
         drawMap = 0;
+        drawPhase = 0;
         lastMapMode=0;
         %numOfContourLevels = 1;
         thresholdSegmentation = [];

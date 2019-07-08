@@ -21,7 +21,7 @@ switch kernel_name
     case 'uniform'
         kernel = ones(kernel_size, kernel_size) / kernel_size^2;
     case 'gaussian'
-        sigma = kernel_size / (3 * 2); % so we put 3 sigma inside the window
+        sigma = kernel_size / (2 * 2); % so we put 2 sigma inside the window
         kernel = kernel_gaussian(kernel_size, sigma, 0);
 end
 

@@ -323,6 +323,7 @@ end
         % Return to raw unfiltered cmos data    
         handles.normflag = 0; % Initialize normflag
         handles.activeCamData.cmosData = handles.activeCamData.cmosRawData;
+        handles.activeCamData.drawPhase = 0;
         handles.matrixMax = 1;
         handles.normalizeMinVisible = 0.3;
         

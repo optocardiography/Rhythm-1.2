@@ -751,8 +751,13 @@ end
                     % plot signals for all loaded screens and set markers
                     for i_cam = 1:4
                         if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
+                            if handles.allCamData(i_cam).drawPhase == 0
+                                signal_current = squeeze(handles.allCamData(i_cam).cmosData(j,i,:));
+                            else
+                                signal_current = squeeze(handles.allCamData(i_cam).cmosPhase(j,i,:));
+                            end
                             plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                                squeeze(handles.allCamData(i_cam).cmosData(j,i,:)),...
+                                signal_current,...
                                 handles.markerColors(grabbed),'LineWidth',2,...
                                 'Parent',signalGroup(grabbed).signalScreen(i_cam))
                         end
@@ -769,8 +774,13 @@ end
                     for i_cam = 1:4
                         if (handles.allCamData(i_cam).isloaded && ...
                                 handles.bounds(i_cam) == 2)
+                            if handles.allCamData(i_cam).drawPhase == 0
+                                signal_current = squeeze(handles.allCamData(i_cam).cmosData(j,i,:));
+                            else
+                                signal_current = squeeze(handles.allCamData(i_cam).cmosPhase(j,i,:));
+                            end 
                             plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                                squeeze(handles.allCamData(i_cam).cmosData(j,i,:)),...
+                                signal_current,...
                                 handles.markerColors(grabbed),'LineWidth',2,...
                                 'Parent',signalGroup(grabbed).signalScreen(i_cam))
                         end
@@ -782,9 +792,13 @@ end
                     movieslider_callback(movie_slider);
                 else
                     handles.activeCamData.markers(grabbed,:) = [i_temp j_temp];
-                
+                    if handles.activeCamData.drawPhase == 0
+                        signal_current = squeeze(handles.activeCamData.cmosData(j,i,:));
+                    else
+                        signal_current = squeeze(handles.activeCamData.cmosPhase(j,i,:));
+                    end
                     plot(handles.time(1:handles.activeCamData.maxFrame),...
-                        squeeze(handles.activeCamData.cmosData(j,i,:)),...
+                        signal_current,...
                         handles.markerColors(handles.activeCamData.grabbed),'LineWidth',2,...
                         'Parent',handles.signalScreens(handles.activeCamData.grabbed))
                     handles.activeCamData.markers(handles.activeCamData.grabbed,:) = [i j];
@@ -1200,10 +1214,15 @@ end
 
                 for i_cam = 1:4
                     if handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1
-                       plot(handles.time(1:handles.allCamData(i_cam).maxFrame), ...
-                                squeeze(handles.allCamData(i_cam).cmosData(j,i,:)),...
-                                handles.markerColors(wave_window),'LineWidth',2, ...
-                                'Parent',signalGroup(wave_window).signalScreen(i_cam));
+                        if handles.activeCamData.drawPhase == 0
+                            signal_current = squeeze(handles.allCamData(i_cam).cmosData(j,i,:));
+                        else
+                            signal_current = squeeze(handles.allCamData(i_cam).cmosPhase(j,i,:));
+                        end
+                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame), ...
+                            signal_current,...
+                            handles.markerColors(wave_window),'LineWidth',2, ...
+                            'Parent',signalGroup(wave_window).signalScreen(i_cam));
                     end
                 end
                 handles.markers1(wave_window,:) = [i j];
@@ -1215,10 +1234,15 @@ end
 
                 for i_cam = 1:4
                     if handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 2
-                       plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                           squeeze(handles.allCamData(i_cam).cmosData(j,i,:)),...
-                                handles.markerColors(wave_window),'LineWidth',2, ...
-                                'Parent',signalGroup(wave_window).signalScreen(i_cam));
+                        if handles.activeCamData.drawPhase == 0
+                            signal_current = squeeze(handles.allCamData(i_cam).cmosData(j,i,:));
+                        else
+                            signal_current = squeeze(handles.allCamData(i_cam).cmosPhase(j,i,:));
+                        end
+                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
+                            signal_current,...
+                            handles.markerColors(wave_window),'LineWidth',2, ...
+                            'Parent',signalGroup(wave_window).signalScreen(i_cam));
                     end
                 end
                 handles.markers2(wave_window,:) = [i j];
@@ -1228,11 +1252,16 @@ end
                     handles.activeCamData.wave_window = 1;
                 end
                 wave_window = handles.activeCamData.wave_window;
-
+                if handles.activeCamData.drawPhase == 0
+                    signal_current = squeeze(handles.activeCamData.cmosData(j,i,:));
+                else
+                    signal_current = squeeze(handles.activeCamData.cmosPhase(j,i,:));
+                end
+                
                 plot(handles.time(1:handles.activeCamData.maxFrame),...
-                    squeeze(handles.activeCamData.cmosData(j,i,:)),...
-                            handles.markerColors(wave_window),'LineWidth',2,...
-                            'Parent',handles.signalScreens(wave_window));
+                    signal_current,...
+                    handles.markerColors(wave_window),'LineWidth',2,...
+                    'Parent',handles.signalScreens(wave_window));
                 handles.activeCamData.markers(wave_window,:) = [i j];
             end
         end
@@ -1308,18 +1337,26 @@ end
             endtime = round(handles.endtime*handles.activeCamData.Fs);
             % Plot the desired
             %plot(handles.time(start:endtime),handles.ecg(start:endtime));
-            plot(handles.time(start:endtime),squeeze(handles.activeCamData.cmosData(60,62,start:endtime)), 'LineWidth',1.5);
+            x_coord = 50;
+            y_coord = 50;
+            if handles.activeCamData.drawPhase == 0
+                Mframe = handles.activeCamData.cmosData(:,:,i);
+                signal_current = squeeze(handles.activeCamData.cmosData(x_coord,y_coord,start:endtime));
+            else
+                Mframe = handles.activeCamData.cmosPhase(:,:,i);
+                signal_current = squeeze(handles.activeCamData.cmosPhase(x_coord,y_coord,start:endtime));
+            end
+            plot(handles.time(start:endtime),signal_current, 'LineWidth',1.5);
             % 
-            axis([handles.time(start) handles.time(end) min(squeeze(handles.activeCamData.cmosData(60,62,start:endtime))) max(squeeze(handles.activeCamData.cmosData(60,62,start:endtime)))]);
+            axis([handles.time(start) handles.time(end) min(signal_current) max(signal_current)]);
             % Set the xick mark to start from zero
             xlabel('Time (sec)');hold on
             % Image movie frames on the top subplot
             subplot('Position',[0.05, 0.28, 0.9,0.68])
             % Update image
             G = handles.activeCamData.bgRGB;
-            Mframe = handles.activeCamData.cmosData(:,:,i);
             J = real2rgb(Mframe, 'jet');
-            A = real2rgb(Mframe >= handles.normalizeMinVisible, 'gray');
+            A = (Mframe >= handles.normalizeMinVisible);
             I = J .* A + G .* (1 - A);
             image(I);
             axis off; hold off
@@ -1435,52 +1472,56 @@ end
             hold on
             number_of_bounds=0;
             for i=1:4
-                if handles.bounds(i)==1 
+                if handles.bounds(i)==1
                     number_of_bounds=number_of_bounds+1;
                 end
             end
-                for i_marker=1:msize
-                    for i_cam = 1:4
-                        
-                        if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
-                            subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
-                            plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
-                                handles.markerColors(i_marker),'LineWidth',2)
-                            %hold on
-                            movegui(w,'center')
-                            set(w,'Visible','on')
-                            set(w, 'Position', get(0, 'Screensize'));
-                        end
+            for i_marker=1:msize
+                for i_cam = 1:4
+                    
+                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
+                        subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
+                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
+                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
+                            handles.markerColors(i_marker),'LineWidth',2)
+                        %hold on
+                        movegui(w,'center')
+                        set(w,'Visible','on')
+                        set(w, 'Position', get(0, 'Screensize'));
                     end
                 end
+            end
         elseif handles.bounds(handles.activeScreenNo) == 2
             M = handles.markers2;
             msize = size(handles.markers2,1);
             hold on
             number_of_bounds=0;
             for i=1:4
-                if handles.bounds(i)==2 
+                if handles.bounds(i)==2
                     number_of_bounds=number_of_bounds+1;
                 end
             end
-                for i_marker=1:msize
-                    for i_cam = 1:4
-                        
-                        if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
-                            subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
-                            plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
-                                handles.markerColors(i_marker),'LineWidth',2)
-                            %hold on
-                            movegui(w,'center')
-                            set(w,'Visible','on')
-                            set(w, 'Position', get(0, 'Screensize'));
+            for i_marker=1:msize
+                for i_cam = 1:4
+                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
+                        if handles.activeCamData.drawPhase == 0
+                            signal_current = squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:));
+                        else
+                            signal_current = squeeze(handles.allCamData(i_cam).cmosPhase(M(i_marker,2),M(i_marker,1),:));
                         end
+                        subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
+                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
+                            signal_current,...
+                            handles.markerColors(i_marker),'LineWidth',2)
+                        %hold on
+                        movegui(w,'center')
+                        set(w,'Visible','on')
+                        set(w, 'Position', get(0, 'Screensize'));
                     end
                 end
+            end
         end
-
+        
     end
 
 %% Pacing CL editable textbox for ensemble averaging

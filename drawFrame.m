@@ -9,11 +9,19 @@ function drawFrame(frame, camNo, handles)
     if handles.allCamData(camNo).isloaded==1 
         if ~handles.allCamData(camNo).drawMap    
             G = handles.allCamData(camNo).bgRGB;
+            
             if (frame <= handles.allCamData(camNo).maxFrame)
-                Mframe = handles.allCamData(camNo).cmosData(:,:,frame);
+                frame_index = frame;
             else
-                Mframe = handles.allCamData(camNo).cmosData(:,:,end);
+                frame_index = size(handles.allCamData(camNo).cmosData, 3);
             end
+            
+            if handles.allCamData(camNo).drawPhase == 0
+                Mframe = handles.allCamData(camNo).cmosData(:,:,frame_index);
+            else
+                Mframe = handles.allCamData(camNo).cmosPhase(:,:,frame_index);
+            end
+            
             J = real2rgb(Mframe, 'jet');
             A = (Mframe >= handles.normalizeMinVisible);
             I = J .* A + G .* (1 - A);
