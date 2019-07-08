@@ -91,6 +91,8 @@ classdef rhythmHandles < handle
         RT_min=0;
         T_min=0;
         T_max=0;
+        APstart=0;
+        APend=0;
         
         numOfContourLevels = 2;
         drawBrush = 0;
