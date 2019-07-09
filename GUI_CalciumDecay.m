@@ -224,6 +224,8 @@ function calcTau_callback(~,~)
             else
                 R(i,j) = nan;
                 Tau2(i,j) = nan;
+                CTFit(1) = nan;
+                CTfit(2) = nan;
             end
             
 %             % Remove noisy data
