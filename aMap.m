@@ -104,12 +104,28 @@ actMap1 = actMap1/Fs*1000; %% time in ms
 % Plot Map
 if size(data,3) ~= 1
     handles.activeCamData.saveData = actMap1;
-    cla(movie_scrn); 
-    contourf(movie_scrn, actMap1,(endp-stat),'LineColor','k');
+    
+    G = handles.activeCamData.bgRGB;
+    N = size(G, 1);
+    M = size(G, 2);
+    
+    f = figure('visible', 'off');
+    colormap(cmap);
+    contourf(actMap1,(endp-stat),'LineColor','k');
+    frame = getframe();
+    close(f);
+    J = imresize(frame.cdata, [N, M]);
+    J = double(J) / 255.;
+    J = flipud(J);
+
+    I = J .* mask_ROI + G .* (1 - mask_ROI);
+    
+    cla(movie_scrn);
+    image(I,'Parent',movie_scrn);
+
+
     set(movie_scrn,'YDir','reverse');
     set(movie_scrn,'YTick',[],'XTick',[]);
-    colormap(handles.activeScreen, cmap);
-%     colorbar(movie_scrn);
 end
 
           handles.activeCamData.meanresults = sprintf('Mean:');
