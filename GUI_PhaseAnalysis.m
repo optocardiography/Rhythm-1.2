@@ -36,13 +36,16 @@ transform_to_phase_button  = uicontrol('Parent',PhaseAnalysisGroup,...
                                    
     function transform_to_phase_callback(~,~)
         if handles.activeCamData.drawPhase == 0
-            mask = handles.activeCamData.finalSegmentation;
+
+            N = size(handles.activeCamData.cmosData, 1);
+            M = size(handles.activeCamData.cmosData, 2);
+            mask = ones(N, M);
             phase = transform_to_phase(handles.activeCamData.cmosData, mask);
             
             % for BG image drawing
             for i = 1 : size(phase, 1)
                 for j = 1 : size(phase, 2)
-                    if mask(i, j) == 0
+                    if (all(phase(i, j, :) == phase(i, j, 1)))
                         phase(i, j, :) = -(pi + 0.01) * ones(size(phase(i, j, :)));
                     end
                 end

@@ -71,7 +71,7 @@ guidata(activationMapGroup, handles);
 %% ACTIVATION MAP
 %%
     function numOfLevels_callback(source,~)
-        startTime = str2double(get(starttimeamap_edit ,'String')); 
+        startTime = str2double(get(starttimeamap_edit ,'String'));
         endTime = str2double(get(endtimeamap_edit ,'String'));
         val_map_step = str2double(get(source,'String'));
         if (val_map_step < 1 / handles.activeCamData.Fs)
@@ -83,7 +83,7 @@ guidata(activationMapGroup, handles);
             val_map_step = endTime - startTime;
         end
         
-%         handles.numOfContourLevels = round(val_map_step * handles.activeCamData.Fs)+1;
+        %         handles.numOfContourLevels = round(val_map_step * handles.activeCamData.Fs)+1;
         handles.numOfContourLevels = round((endTime - startTime) / val_map_step) + 1;
     end
 
@@ -117,15 +117,15 @@ guidata(activationMapGroup, handles);
         drawTimeLines(val_start, val_end, handles, f);
         set(numOfLevels_edit,'String', num2str( 1./handles.activeCamData.Fs));
         numOfLevels_callback(numOfLevels_edit);
-    end 
+    end
 
     function drawTimeLines(val_start, val_end, handles, f)
         if val_start >= 0 && val_start <= handles.time(end)
             if val_end >= 0 && val_end <= handles.time(end)
                 % set boundaries to draw time lines
-                pointB = [0 1]; 
+                pointB = [0 1];
                 playTimeA = [(handles.time(handles.frame)-handles.starttime)*handles.timeScale (handles.time(handles.frame)-handles.starttime)*handles.timeScale];
-                startLineA = [(val_start-handles.starttime)*handles.timeScale (val_start-handles.starttime)*handles.timeScale]; 
+                startLineA = [(val_start-handles.starttime)*handles.timeScale (val_start-handles.starttime)*handles.timeScale];
                 endLineA = [(val_end-handles.starttime)*handles.timeScale (val_end-handles.starttime)*handles.timeScale];
                 if (handles.bounds(handles.activeScreenNo) == 0)
                     set(f,'CurrentAxes',handles.sweepBar); cla;
@@ -136,7 +136,7 @@ guidata(activationMapGroup, handles);
                     hold on
                     plot(endLineA, pointB, '-g','Parent',handles.sweepBar)
                     hold off; axis off
-                    hold off 
+                    hold off
                 else
                     hold on
                     for i_group=1:5
@@ -171,22 +171,25 @@ guidata(activationMapGroup, handles);
         drawTimeLines(a_start, a_end, handles, f);
         handles.a_start = a_start;
         handles.a_end = a_end;
+        Rect = getrect(handles.activeScreen);
+        rect=round(abs(Rect));
         axes(handles.activeCamData.screen)
         gg=msgbox('Building  Activation Map...');
-        aMap(handles.activeCamData.cmosData,handles.a_start,handles.a_end,...
-            handles.activeCamData.Fs,handles.activeCamData.cmap, handles.activeCamData.screen, handles);
+        aMap(handles.activeCamData.cmosData,...
+             handles.a_start,handles.a_end,rect,...
+             handles.activeCamData.Fs,handles.activeCamData.cmap, handles.activeCamData.screen, handles);
         handles.activeCamData.drawMap = 1;
         close(gg)
     end
 
 %% Export picture from the screen
-    function export_button_callback(~,~)  
-       if isempty(handles.activeCamData.saveData)
-           error = 'ExportedData must exist! Function cancelled.';
-           msgbox(error,'Incorrect Input','Error');
-           return
-       else
-        figure;
+    function export_button_callback(~,~)
+        if isempty(handles.activeCamData.saveData)
+            error = 'ExportedData must exist! Function cancelled.';
+            msgbox(error,'Incorrect Input','Error');
+            return
+        else
+            figure;
             startp = round(handles.a_start*handles.activeCamData.Fs);
             endp = round(handles.activeCamData.Fs*handles.a_end);
             isDrawIsolines = get(isolinesCheckBox,'Value');
@@ -195,8 +198,8 @@ guidata(activationMapGroup, handles);
             else
                 contourf(flipud(handles.activeCamData.saveData),handles.numOfContourLevels-1,'LineColor','none');
             end
-        colormap jet;
-        colorbar;
-       end
+            colormap jet;
+            colorbar;
+        end
     end
 end

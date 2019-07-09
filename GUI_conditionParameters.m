@@ -127,7 +127,7 @@ kernel_edit_height = element_height;
 kernel_size_edit = uicontrol('Parent',conditionParametersGroup,...
                          'Style','edit',...
                          'FontSize',fontSize,...
-                         'String','9',...
+                         'String','3',...
                          'Units','normalized',...
                          'Position',[pos_left, pos_bottom, element_width, kernel_edit_height],...
                          'Callback', @kernel_size_edit_callback);
@@ -323,11 +323,15 @@ end
         % Return to raw unfiltered cmos data    
         handles.normflag = 0; % Initialize normflag
         handles.activeCamData.cmosData = handles.activeCamData.cmosRawData;
+        handles.activeCamData.drawMap = 0;
         handles.activeCamData.drawPhase = 0;
         handles.matrixMax = 1;
         handles.normalizeMinVisible = 0.3;
         
         mask = handles.activeCamData.finalSegmentation;
+        if handles.drawSegmentation == 0
+            mask = ones(size(mask));
+        end
         
         %% Remove Background
         if removeBG_state == 1
