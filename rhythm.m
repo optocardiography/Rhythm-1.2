@@ -978,7 +978,7 @@ end
                     Mframe = handles.activeCamData.cmosData(:,:,end);
                 end
                 J = real2rgb(Mframe, 'jet');
-                A = (Mframe >= handles.normalizeMinVisible);
+                A = real2rgb(Mframe >= handles.normalizeMinVisible,'gray');
                 I = J .* A + G .* (1-A);
                 image(I,'Parent',handles.activeScreen);
 

@@ -88,7 +88,7 @@ for y = 1 : N
     
 end
 
-disp("time binning (min) = ");
+disp('time binning (min) = ');
 disp(toc / 60);
 
 end

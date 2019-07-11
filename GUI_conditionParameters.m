@@ -410,7 +410,7 @@ end
             
             method_param = str2double(get(first_drift_param_edit, 'String'));
             method_param = round(method_param);
-            set(first_drift_param_edit,'String',string(method_param));
+            set(first_drift_param_edit,'String',char(method_param));
             
             handles.activeCamData.cmosData = remove_Drift(handles.activeCamData.cmosData, mask,...
                                                           method_name, method_param);

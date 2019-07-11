@@ -111,13 +111,14 @@ if size(data,3) ~= 1
     
     f = figure('visible', 'off');
     colormap(cmap);
-    contourf(actMap1,(endp-stat),'LineColor','k');
+    contourf(actMap1,handles.numOfContourLevels-1,'LineColor','none');
     frame = getframe();
     close(f);
-    J = imresize(frame.cdata, [N, M]);
+    J = imresize(frame.cdata, [N, M],'nearest');
     J = double(J) / 255.;
     J = flipud(J);
-
+   
+    mask_ROI=repmat(mask_ROI,[1 1 3]);
     I = J .* mask_ROI + G .* (1 - mask_ROI);
     
     cla(movie_scrn);
