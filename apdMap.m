@@ -89,7 +89,7 @@ handles.activeCamData.saveData = apdMap;
 cla(movie_scrn);
 
 colormap(handles.activeScreen, cmap);
-imagesc(movie_scrn, apdMap, 'AlphaData', ~isnan(apdMap));
+imagesc(apdMap,'Parent', movie_scrn, 'AlphaData', ~isnan(apdMap));
 %axis(movie_scrn,'off');
 set(movie_scrn,'Color','k');
 set(movie_scrn,'YDir','reverse');

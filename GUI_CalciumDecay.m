@@ -274,7 +274,7 @@ function calcTau_callback(~,~)
           %Plot Rise Time Map and Histogram
           cla(handles.activeCamData.screen);
           set(handles.activeCamData.screen,'YTick',[],'XTick',[]);
-          imagesc( handles.activeCamData.screen,I)
+          imagesc(I, 'Parent', handles.activeCamData.screen)
           colormap(jet);
           axis(handles.activeCamData.screen,'off')
           %axis image;
