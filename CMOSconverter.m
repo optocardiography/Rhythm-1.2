@@ -48,8 +48,8 @@ if strcmp(oldfilename(end-2:end),'rsh')
     acqFrontInd = strfind(fstr,'sample_time');
     acqBackInd = sampind2-acqFrontInd;
     [~,acqBackInd] = min(acqBackInd);
-    acqBackInd = sampind2(acqBackInd)-2;
-    acqFreq = str2double(fstr(acqFrontInd+13:acqBackInd));
+    acqBackInd = sampind2(acqBackInd)-1;
+    acqFreq = str2double(fstr(acqFrontInd+12:acqBackInd));
     
     % Dual cam
     dualIndFront = strfind(fstr,'dual_cam');
