@@ -16,6 +16,7 @@ function [data_binned] = binning(data, mask, kernel_size, kernel_name)
 % Email optocardiography@gmail.com for any questions or concerns.
 % Refer to efimovlab.org for more information.
 
+profile on;
 
 switch kernel_name
     case 'uniform'
@@ -73,16 +74,16 @@ for y = 1 : N
             kernel_current = kernel_current(1 + up_margin : end - bottom_margin,...
                                             1 + left_margin : end - right_margin);   
             kernel_current = kernel_current / sum(sum(kernel_current)); % renormalizing        
-            
-            for t = 1 : T
+            kernel_current = repmat(kernel_current, 1, 1, T);
+            %for t = 1 : T
                 
                 data_window = data(range_y(1) + up_margin : range_y(2) - bottom_margin,...
                                    range_x(1) + left_margin : range_x(2) - right_margin,...
-                                   t);
+                                   :);
 
-                data_binned(y, x, t) = sum(sum(data_window .* kernel_current));
+                data_binned(y, x, :) = sum(sum(data_window .* kernel_current));
 
-            end
+            %end
         end
     end
     
