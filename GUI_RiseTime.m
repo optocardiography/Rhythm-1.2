@@ -308,7 +308,7 @@ guidata(riseTimeGroup, handles);
           set(handles.activeCamData.screen,'YTick',[],'XTick',[]);
           
           %imagesc( handles.activeCamData.screen,G);
-          imagesc( handles.activeCamData.screen,I);
+          imagesc(I, 'Parent', handles.activeCamData.screen);
        
          
           colormap(jet);

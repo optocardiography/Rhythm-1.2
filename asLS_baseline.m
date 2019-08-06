@@ -22,7 +22,7 @@ for count = 1 : n_iter
     
     Weights = spdiags(penalty_vector, 0, signal_length, signal_length);
     
-    C = chol(Weights + (smoothness_matrix .* difference_matrix') * difference_matrix);
+    C = chol(Weights + (repmat(smoothness_matrix, 1022, 1) .* difference_matrix') * difference_matrix);
     
     baseline = C \ (C' \ (penalty_vector .* signal));
     
