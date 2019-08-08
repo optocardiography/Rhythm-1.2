@@ -133,22 +133,27 @@ endtimemap_edit = uicontrol('Parent',waveform_export,'Style','edit','FontSize',1
                             'Units','normalized','Position',[0.57 0.67 0.17 0.27],...
                             'Callback',{@endtime_edit_callback});
 pacingcl_edit = uicontrol('Parent',ensembleAveraging,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.33 0.4 0.22 0.6],...
+                            'Units','normalized','Position',[0.31 0.5 0.22 0.45],...
                             'Callback',{@pacingcl_edit_callback});
+startingTime_edit = uicontrol('Parent',ensembleAveraging,'Style','edit','FontSize',14,...
+                            'Units','normalized','Position',[0.77 0 0.22 0.45],...
+                            'Callback',{@startingTime_edit_callback});
+startingTime_text = uicontrol('Parent',ensembleAveraging,'Style','text','FontSize',10,...
+                            'String','Starting time (ms)','Units','normalized','Position',[0.3 0 0.45 0.4]);
 
 pacingcl_text = uicontrol('Parent',ensembleAveraging,'Style','text','FontSize',10,...
-                            'String','Pacing CL (ms)','Units','normalized','Position',[0.03 0.2 0.30 0.8]);
+                            'String','Pacing CL (ms)','Units','normalized','Position',[0.03 0.35 0.28 0.65]);
 truncateafter_edit = uicontrol('Parent',ensembleAveraging,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.77 0.4 0.22 0.6],...
+                            'Units','normalized','Position',[0.77 0.5 0.22 0.45],...
                             'Callback',{@truncateafter_edit_callback});
-truncateafter_text = uicontrol('Parent',ensembleAveraging,'Style','text','FontSize',10,...
-                            'String','Truncate after (ms)','Units','normalized','Position',[0.55 0.2 0.22 0.8]);
+truncateafter_text = uicontrol('Parent',ensembleAveraging,'Style','text','FontSize',9,...
+                            'String','Output length (ms)','Units','normalized','Position',[0.53 0.4 0.24 0.6]);
 
 ensembleAverage_checkbox = uicontrol('Parent',ensembleAveraging,...
                              'Style','checkbox','FontSize',10,...
                              'String','Enable',...
                              'Units','normalized',...
-                             'Position',[0.03 0.01 0.5 0.3],...
+                             'Position',[0.03 0.01 0.25 0.3],...
                              'Callback',{@ensembleAverage_checkbox_callback});
 % Sweep Bar Display for Optical Action Potentials
 sweep_bar = axes ('Parent',p1,'Units','Pixels','Layer','top','Position', [860,195,350,625]);
@@ -350,12 +355,12 @@ set([f,p1,filelist,selectdir,loadfile,...
     expmov_button,expwave_button,exptofile_button...
     map,anal_data,starttimemap_text,starttimemap_edit...
     endtimemap_text,endtimemap_edit,pacingcl_edit...
-    pacingcl_text,truncateafter_edit...
+    pacingcl_text,truncateafter_edit,startingTime_text...
     truncateafter_text,map_popup],'Units','normalized');
 
 % Disable buttons that will not be needed until data is loaded
 set([play_button,stop_button,dispwave_button,expmov_button,starttimemap_edit,endtimemap_edit,...
-    expwave_button,exptofile_button,pacingcl_edit,truncateafter_edit],'Enable','off')
+    expwave_button,exptofile_button,pacingcl_edit,startingTime_edit,truncateafter_edit],'Enable','off')
 
 % Center GUI on screen
 movegui(f,'center')
@@ -1004,11 +1009,14 @@ end
                 handles.timeScale = handles.time(end)/(handles.endtime - handles.starttime);
                 set(starttimemap_edit,'String',num2str(handles.starttime))
                 set(endtimemap_edit,'String',num2str(handles.endtime))
+                set(pacingcl_edit,'String',num2str(min(500,handles.maxFrame*handles.activeCamData.Fs)));
+                set(truncateafter_edit,'String',num2str(min(500,handles.maxFrame*handles.activeCamData.Fs)));
+                set(startingTime_edit,'String','0');
                 % Initialize movie slider to the first frame
                 if (firstLoad)
                     set(movie_slider,'Value',0)
                     drawFrame(1, handles.activeScreenNo, handles);
-                    set([play_button,stop_button,dispwave_button,expmov_button,pacingcl_edit...
+                    set([play_button,stop_button,dispwave_button,expmov_button,pacingcl_edit,startingTime_edit...
                         starttimemap_edit,endtimemap_edit,expwave_button,exptofile_button, truncateafter_edit],'Enable','on')
                 else
                     drawFrame(handles.frame, handles.activeScreenNo, handles);
@@ -1540,18 +1548,28 @@ end
         end
     end
 
+    function startingTime_edit_callback(source, ~)
+        st = str2double(get(source,'String'));
+        if (st < 0)
+            set(source,'String', str2double(-st));
+        end
+    end
 
 %% Export signal waves to file
     function exptofile_button_callback(~,~)
-        pacingCL = str2double(get(pacingcl_edit,'String'));
-        truncateAfter = str2double(get(truncateafter_edit,'String'));
-        ensembleAverage = get(ensembleAverage_checkbox, 'Value');
+        pacingCL_t = str2double(get(pacingcl_edit,'String'));
+        truncateAfter_t = str2double(get(truncateafter_edit,'String'));
+        startingTime_t = str2double(get(startingTime_edit, 'String'));
+        ensembleAveragingEnabled = get(ensembleAverage_checkbox, 'Value');
         %ensembleAverage = get(ensembleAverage_checkbox, "Value");
-        if ensembleAverage
-            apExp(handles, pacingCL, truncateAfter);
+        if ensembleAveragingEnabled
+            output = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t);
         else
-            apExp1(handles);
+            output = APExport(handles);
         end
+        [filename, path] = uiputfile('waveforms.txt');
+        writetable(output,strcat(path,filename));
+        %dlmwrite(strcat(path,filename), output,'\t');
     end
 
 %% Checkbox for enabling ensemble averaging
