@@ -1029,7 +1029,7 @@ end
 
 %% Select directory for optical files
     function selectdir_callback(~,~)
-        dir_name = uigetdir;
+        dir_name = uigetdir(handles.dir);
         if dir_name ~= 0
             handles.dir = dir_name;
             search_name = [dir_name,'/*.rsh'];
