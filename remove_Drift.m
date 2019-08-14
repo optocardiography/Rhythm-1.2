@@ -35,7 +35,7 @@ switch method_name
     
     case 'polynomial'
 
-        poly_order = method_params;
+        poly_order = method_params(1);
         data_slice_size = size(data(1, 1, :));
         time_linspace = 1 : size(data,3);
         time_linspace = reshape(time_linspace, data_slice_size);
@@ -51,13 +51,11 @@ switch method_name
             end
         end
         
-    case 'least squares'
+    case 'asLS'
 
-        % TODO: move to GUI
-        smoothness_param = 1e9;
-        asym_param = 5e-3;
-        
-        n_iter = method_params(1);
+        smoothness_param = method_params(1);
+        asym_param = method_params(2);
+        n_iter = method_params(3);
 
         data_slice_size = size(data(1, 1, :));
 
