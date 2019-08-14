@@ -1,4 +1,4 @@
-function [ output_table ]  = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t)
+function [ output_table ]  = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t, markers)
     Fs = handles.activeCamData.Fs;
     pacingCL = pacingCL_t*Fs/1000;
     truncateAfter = truncateAfter_t*Fs/1000;
@@ -9,8 +9,6 @@ function [ output_table ]  = ensembleAverage(handles, pacingCL_t, truncateAfter_
     offset = offset_t*Fs/1000;
     
     output_length = min(min(pacingCL, truncateAfter + 1), handles.maxFrame);
-    
-    markers = handles.activeCamData.markers;
     
     AP = squeeze(handles.activeCamData.cmosData(markers(1,2), markers(1,1), :));
         if startingTime_t == -1

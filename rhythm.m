@@ -850,7 +850,6 @@ end
         file = char(str(val));
         handles.filename = file;
     end
-
     
 %% Load selected files in filelist
     function loadfile_callback(~,~)
@@ -1009,9 +1008,10 @@ end
                 handles.timeScale = handles.time(end)/(handles.endtime - handles.starttime);
                 set(starttimemap_edit,'String',num2str(handles.starttime))
                 set(endtimemap_edit,'String',num2str(handles.endtime))
+                % Default values for ensemble averaging
                 set(pacingcl_edit,'String',num2str(min(500,handles.maxFrame*handles.activeCamData.Fs)));
                 set(truncateafter_edit,'String',num2str(min(500,handles.maxFrame*handles.activeCamData.Fs)));
-                set(startingTime_edit,'String','0');
+                % set(startingTime_edit,'String','0');
                 % Initialize movie slider to the first frame
                 if (firstLoad)
                     set(movie_slider,'Value',0)
@@ -1022,6 +1022,7 @@ end
                     drawFrame(handles.frame, handles.activeScreenNo, handles);
                     redrawWaveScreens(handles);
                 end
+                
                 
             end
         end
@@ -1459,14 +1460,33 @@ end
         end
         if handles.bounds(handles.activeScreenNo) == 0
             for x = 1:a
-                subplot('Position',[0.06 (120*(a-x)+70)/(120*a+80) 0.9 110/(120*a+80)]);
-                plot(handles.time(1:handles.activeCamData.maxFrame), ...
-                    squeeze(handles.activeCamData.cmosData(M(x,2),M(x,1),:)),'color',colax(x),'LineWidth',2)
-                xlim([handles.starttime handles.endtime]);
-                hold on
-                if x == a
+                if get(ensembleAverage_checkbox, 'Value')
+                    pacingCL_t = str2double(get(pacingcl_edit,'String'));
+                    truncateAfter_t = str2double(get(truncateafter_edit,'String'));
+                    if isempty(get(startingTime_edit, 'String'))
+                        startingTime_t = -1;
+                    else
+                        startingTime_t = str2double(get(startingTime_edit, 'String'));
+                    end
+                    output = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t, M);
+                    subplot('Position',[0.06 (120*(a-x)+70)/(120*a+80) 0.9 110/(120*a+80)]);
+                    plot(output.('t'), ...
+                        output.(char("m"+num2str(x)+"avg")),'color',colax(x),'LineWidth',2)
+                    hold on
+                    if x == a
+                    else
+                        set(gca,'XTick',[])
+                    end
                 else
-                    set(gca,'XTick',[])
+                    subplot('Position',[0.06 (120*(a-x)+70)/(120*a+80) 0.9 110/(120*a+80)]);
+                    plot(handles.time(1:handles.activeCamData.maxFrame), ...
+                        squeeze(handles.activeCamData.cmosData(M(x,2),M(x,1),:)),'color',colax(x),'LineWidth',2)
+                    xlim([handles.starttime handles.endtime]);
+                    hold on
+                    if x == a
+                    else
+                        set(gca,'XTick',[])
+                    end
                 end
             end
             set(signal_scrn5,'XLim',[min(handles.time) max(handles.time)])
@@ -1484,18 +1504,42 @@ end
                     number_of_bounds=number_of_bounds+1;
                 end
             end
-            for i_marker=1:msize
-                for i_cam = 1:4
-                    
-                    if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
-                        subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
-                        plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                            squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
-                            handles.markerColors(i_marker),'LineWidth',2)
-                        %hold on
-                        movegui(w,'center')
-                        set(w,'Visible','on')
-                        set(w, 'Position', get(0, 'Screensize'));
+            if get(ensembleAverage_checkbox, 'Value')
+                pacingCL_t = str2double(get(pacingcl_edit,'String'));
+                truncateAfter_t = str2double(get(truncateafter_edit,'String'));
+                if isempty(get(startingTime_edit, 'String'))
+                    startingTime_t = -1;
+                else
+                    startingTime_t = str2double(get(startingTime_edit, 'String'));
+                end
+                output = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t, M);
+                for i_marker=1:msize
+                    for i_cam = 1:4
+                        if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
+                            subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
+                            plot(output.('t'),...
+                                output.(char("m"+num2str(i_marker)+"avg")),...
+                                handles.markerColors(i_marker),'LineWidth',2)
+                            %hold on
+                            movegui(w,'center')
+                            set(w,'Visible','on')
+                            set(w, 'Position', get(0, 'Screensize'));
+                        end
+                    end
+                end
+            else
+                for i_marker=1:msize
+                    for i_cam = 1:4
+                        if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
+                            subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
+                            plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
+                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
+                                handles.markerColors(i_marker),'LineWidth',2)
+                            %hold on
+                            movegui(w,'center')
+                            set(w,'Visible','on')
+                            set(w, 'Position', get(0, 'Screensize'));
+                        end
                     end
                 end
             end
@@ -1553,23 +1597,40 @@ end
         if (st < 0)
             set(source,'String', str2double(-st));
         end
+        drawTimeLine(st);
     end
 
 %% Export signal waves to file
     function exptofile_button_callback(~,~)
         pacingCL_t = str2double(get(pacingcl_edit,'String'));
         truncateAfter_t = str2double(get(truncateafter_edit,'String'));
-        startingTime_t = str2double(get(startingTime_edit, 'String'));
+        if isempty(get(startingTime_edit, 'String'))
+            startingTime_t = -1;
+        else
+            startingTime_t = str2double(get(startingTime_edit, 'String'));
+        end
         ensembleAveragingEnabled = get(ensembleAverage_checkbox, 'Value');
-        %ensembleAverage = get(ensembleAverage_checkbox, "Value");
         if ensembleAveragingEnabled
-            output = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t);
+            output = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t, handles.activeCamData.markers);
         else
             output = APExport(handles);
         end
         [filename, path] = uiputfile('waveforms.txt');
         writetable(output,strcat(path,filename));
-        %dlmwrite(strcat(path,filename), output,'\t');
+    end
+
+%% Draw TimeLine for Ensemble Averaging Start Time
+    function drawTimeLine(val)
+        pointB = [0 1];
+        playTimeA = [(handles.time(handles.frame)-handles.starttime)*handles.timeScale (handles.time(handles.frame)-handles.starttime)*handles.timeScale];
+        startLineA = [(val/1000-handles.starttime)*handles.timeScale (val/1000-handles.starttime)*handles.timeScale];
+        set(f,'CurrentAxes',handles.sweepBar); cla;
+        plot(startLineA, pointB, 'm', 'Parent', handles.sweepBar)
+        hold on
+        axis([0 handles.time(end) 0 1])
+        plot(playTimeA, pointB, 'r', 'Parent', handles.sweepBar)
+        axis off
+        hold off
     end
 
 %% Checkbox for enabling ensemble averaging
@@ -1580,7 +1641,7 @@ end
 %     function invert_cmap_callback(~,~)
 %         % Function Description: The checkbox function like toggle button. 
 %         % There are only 2 options and since the box starts unchecked, 
-%         % checking it will invert the map, uncheckecking it will invert it 
+%         % checking it will invert the map, unchecking it will invert it 
 %         % back to its original state. As such no additional code is needed.
 %         
 %         % grab the current value of the colormap
