@@ -61,17 +61,17 @@ bg_thresh_slider = uicontrol('Parent',conditionParametersGroup,...
 
 %%
 pos_bottom = pos_bottom - element_height_small;
-pos_left = 0;
-element_width = 0.75;
+pos_left = 0.1;
+element_width = 0.65;
 removeIslandsCheckbox = uicontrol('Parent',conditionParametersGroup,'Style','checkbox',...
                           'FontSize',font_size_small,...
-                          'String','Remove Islands',...
+                          'String','remove islands',...
                           'Enable','off',...
                           'Units','normalized',...
                           'Position',[pos_left, pos_bottom, element_width, element_height_small],...
                           'Callback', {@removeBG_callback});
 
-pos_left = 0.75;
+pos_left = pos_left + element_width;
 element_width = 1 - pos_left;
 perc_ex_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
                          'FontSize',font_size_small,...
@@ -82,17 +82,43 @@ perc_ex_edit = uicontrol('Parent',conditionParametersGroup,'Style','edit',...
                          'Callback',@removeBG_callback);
 
 %%
-pos_left = 0;
+pos_left = 0.1;
 pos_bottom = pos_bottom - element_height_small;
-element_width = 1;
+element_width = 0.4;
 fillHoles_checkbox = uicontrol('Parent',conditionParametersGroup,...
                             'Style','checkbox','FontSize',font_size_small,...
-                            'String','Fill Holes',...
+                            'String','fill holes',...
                             'Units','normalized',...
                             'Enable','off',...
                             'Position',[pos_left, pos_bottom, element_width, element_height_small],...
                             'Callback',@removeBG_callback);
-        
+                                   
+upload_icon = imread('upload_pictogram.png');
+upload_icon = imresize(upload_icon, [15, 15]); 
+
+button_width = 2 * element_height;
+pos_left = 0.75;
+upload_button = uicontrol('Parent',conditionParametersGroup,...
+                          'Style','pushbutton',...
+                          'Units','normalized',...
+                          'Enable','off',...
+                          'Position',[pos_left, pos_bottom, button_width, element_height_small],...
+                          'Callback',@upload_button_callback);
+set(upload_button,'CData',upload_icon);   
+
+download_icon = imread('download_pictogram.png');
+download_icon = imresize(download_icon, [15, 15]); 
+
+button_width = 2 * element_height;
+pos_left = 0.875;
+download_button = uicontrol('Parent',conditionParametersGroup,...
+                          'Style','pushbutton',...
+                          'Units','normalized',...
+                          'Enable','off',...
+                          'Position',[pos_left, pos_bottom, button_width, element_height_small],...
+                          'Callback',@download_button_callback);
+set(download_button,'CData',download_icon); 
+                        
 %%
 pos_left = 0;
 pos_bottom = pos_bottom - element_height;
@@ -369,6 +395,8 @@ end
             set(removeIslandsCheckbox,'Enable','on');
             set(perc_ex_edit,'Enable','on');
             set(fillHoles_checkbox,'Enable','on');
+            set(download_button,'Enable','on');
+            set(upload_button,'Enable','on');
             brush_checkbox_callback();
         else
             set(brush_checkbox,'Enable','off');
@@ -376,8 +404,26 @@ end
             set(removeIslandsCheckbox,'Enable','off');
             set(perc_ex_edit,'Enable','off');
             set(fillHoles_checkbox,'Enable','off');  
+            set(download_button,'Enable','off');
+            set(upload_button,'Enable','off');
             handles.drawBrush = 0;
         end
+    end
+
+
+    function upload_button_callback(source,~)
+        [filename, path] = uigetfile('*.txt');
+        mask = load(strcat(path,filename));
+        mask = logical(mask);
+        handles.activeCamData.finalSegmentation = mask;
+        drawFrame(handles.frame ,handles.activeScreenNo, handles);
+    end
+
+
+    function download_button_callback(source,~)
+        [filename, path] = uiputfile('mask.txt');
+        mask = double(handles.activeCamData.finalSegmentation);
+        save(strcat(path,filename), 'mask', '-ascii', '-tabs');
     end
 
 
