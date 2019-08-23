@@ -170,9 +170,9 @@ if strcmp(oldfilename(end-2:end),'rsh')
     fdata = int32(reshape(fdata,12800,[]));
     fdata = reshape(fdata,128,100);
     bgimage = fdata(21:120,:)';
-    
+end
 %% GSD data %%
-else
+if strcmp(oldfilename(end-2:end),'gsd')
     % Open header file
     gsdFlag = 1;
     fid=fopen([dirname,oldfilename],'r','b');
@@ -235,7 +235,27 @@ else
            channel{n} = fread(fid,numFrames*nRate,'short');
     end    
 end
-
+%% Binary Data %%
+if strcmp(oldfilename(end-2:end),'bin')
+    file = dir(dirname+"/"+oldfilename);
+    numFrames = file.bytes/(2*128*128);
+    fileID = fopen([dirname,oldfilename],'r');
+    disp(['converting',oldfilename])
+    cmosData1 = fread(fileID,numFrames*128*128,'uint16');
+    outputID = fopen(dirname+"/output.txt",'r');
+    fps = fgetl(outputID);
+    frequency = str2double(fps);
+    fclose(outputID);
+    cmosData = reshape(cmosData1,[128 128 numFrames]);
+    bgimage = cmosData(:,:,1);
+    fstr='null';
+    channel = "null";
+    acqFreq = "null";
+    nRate = "null";
+    fclose(fileID);
+    dual = 0;
+end
+    
 %% Based on the assumption that the upstroke is downward, not upward.
 len = size(cmosData,3);
 thred = 2^16*3/4;
