@@ -65,7 +65,7 @@ classdef rhythmHandles < handle
         maxFrame=0;
         dispWaveClicked=0;
         
-        markerColors='bgykcm'
+        markerColors='bgrkcm'
         linked = 0;
         
         % bounds shows number of screen group: 0 for not linked, 1 or 2 for

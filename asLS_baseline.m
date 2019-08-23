@@ -9,6 +9,7 @@ function baseline = asLS_baseline(signal, smoothness_param, asym_param, n_iter)
 %     In any case one should vary smoothness_param on a grid that is approximately linear for log(smoothness_param).
 %     Often visualinspection is sufficient to get good parameter values.
 
+profile on;
 signal_length = length(signal);
 signal = signal(:);
 
@@ -22,8 +23,8 @@ for count = 1 : n_iter
     
     Weights = spdiags(penalty_vector, 0, signal_length, signal_length);
     
-    C = chol(Weights + (repmat(smoothness_matrix, signal_length, 1) .* difference_matrix') * difference_matrix);
-    
+    %C = chol(Weights + (repmat(smoothness_matrix, signal_length, 1) .* difference_matrix') * difference_matrix);
+    C = chol(Weights + (smoothness_param * difference_matrix') * difference_matrix);
     baseline = C \ (C' \ (penalty_vector .* signal));
     
     penalty_vector = (asym_param) .* (signal > baseline) + (1-asym_param) .* (signal < baseline);
