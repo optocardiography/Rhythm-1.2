@@ -16,7 +16,7 @@ function [data_binned] = binning(data, mask, kernel_size, kernel_name)
 % Email optocardiography@gmail.com for any questions or concerns.
 % Refer to efimovlab.org for more information.
 
-profile on;
+%profile on;
 
 switch kernel_name
     case 'uniform'
@@ -138,9 +138,8 @@ function kernel = kernel_gaussian(kernel_size, sigma, mu)
             kernel(i, (kernel_size + 1) - j) = kernel_element;
             kernel((kernel_size + 1) - i, (kernel_size + 1) - j) = kernel_element;
         end
-        
-    kernel = kernel / sum(sum(kernel));
-    
     end
+    
+    kernel = kernel / sum(sum(kernel));
     
 end

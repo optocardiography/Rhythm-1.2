@@ -13,11 +13,11 @@ close all; clc;
 % For any questions and suggestions, please email us at:
 % cgloschat@gmail.com or igor@wustl.edu
 %
-% Modification Log: 
-% 
+% Modification Log:
+%
 % 2018 -- GUI was strongly refactored since Rhythm 1.1 by Roman Pryamonosov, Roman
 % Syunyaev and Alexander Zolotarev. New features: multi view for signal
-% data (icluding zooming), multi view for signal waves data, movie screen 
+% data (icluding zooming), multi view for signal waves data, movie screen
 % synchronization. All data processing are in one popup menu. New
 % functional can be written with minimal interaction (see user guide).
 handles = rhythmHandles;
@@ -36,32 +36,52 @@ end
 
 %% Create GUI structure
 scrn_size = get(0,'ScreenSize');
-f = figure('Name','RHYTHM','Visible','off','Position',[scrn_size(3),scrn_size(4),1250,850],'NumberTitle','Off');
-handles.cmap = colormap('Jet'); 
+f = figure('Name','RHYTHM',...
+    'Visible','off',...
+    'Position',[scrn_size(3),scrn_size(4),1250,850],...
+    'NumberTitle','Off');
+handles.cmap = colormap('Jet');
+
+font_size = 10;
+font_size_small = font_size * 0.85;
 
 % Load Data
-p1 = uipanel('Title','Display Data','FontSize',12,'Position',[.01 .01 .98 .98]);
-filelist = uicontrol('Parent',p1,'Style','listbox','String','Files','Position',[10 660 150 150],'Callback',{@filelist_callback});
-selectdir = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,'String','Select Directory','Position',[10 630 150 30],'Callback',{@selectdir_callback});
-loadfile = uicontrol('Parent',p1,'Style','pushbutton','FontSize',12,'String','Load','Position',[10 600 150 30],'Callback',{@loadfile_callback});
+p1 = uipanel('Title','Display Data',...
+    'FontSize',font_size,...
+    'Position',[.01 .01 .98 .98]);
+filelist = uicontrol('Parent',p1,'Style','listbox',...
+    'FontSize',font_size_small,...
+    'String','Files','Position',[10 660 150 150],...
+    'Callback',{@filelist_callback});
+
+selectdir = uicontrol('Parent',p1,'Style','pushbutton',...
+    'FontSize',font_size_small,...
+    'String','Select Directory',...
+    'Position',[10 630 150 30],...
+    'Callback',{@selectdir_callback});
+loadfile = uicontrol('Parent',p1,'Style','pushbutton',...
+    'FontSize',font_size_small,...
+    'String','Load',...
+    'Position',[10 600 150 30],...
+    'Callback',{@loadfile_callback});
 
 % Movie Screens for Optical Data
 movieScreen1 = axes('Parent',p1,'Units','Pixels','YTick',[],'XTick',[],...
-                   'Units','normalized','Position',[0.14, 0.6, 0.25, 0.4],...
-                   'color', 'black','box','on', 'linewidth',2, ...
-                   'CameraUpVector',[0,1,1], 'YDir','reverse');
+    'Units','normalized','Position',[0.14, 0.6, 0.25, 0.4],...
+    'color', 'black','box','on', 'linewidth',2, ...
+    'CameraUpVector',[0,1,1], 'YDir','reverse');
 movieScreen2 = axes('Parent',p1,'Units','Pixels','YTick',[],'XTick',[],...
-                   'Units','normalized','Position',[0.4, 0.6, 0.25, 0.4],...
-                   'color', 'black','box','on', 'linewidth',2,...
-                   'CameraUpVector',[0,1,1], 'YDir','reverse');
+    'Units','normalized','Position',[0.4, 0.6, 0.25, 0.4],...
+    'color', 'black','box','on', 'linewidth',2,...
+    'CameraUpVector',[0,1,1], 'YDir','reverse');
 movieScreen3 = axes('Parent',p1,'Units','Pixels','YTick',[],'XTick',[],...
-                   'Units','normalized','Position',[0.14, 0.18, 0.25, 0.4],...
-                   'color', 'black','box','on', 'linewidth',2,...
-                   'CameraUpVector',[0,1,1], 'YDir','reverse');
+    'Units','normalized','Position',[0.14, 0.18, 0.25, 0.4],...
+    'color', 'black','box','on', 'linewidth',2,...
+    'CameraUpVector',[0,1,1], 'YDir','reverse');
 movieScreen4 = axes('Parent',p1,'Units','Pixels','YTick',[],'XTick',[],...
-                   'Units','normalized','Position',[0.4, 0.18, 0.25, 0.4],...
-                   'color', 'black','box','on', 'linewidth',2,...
-                   'CameraUpVector',[0,1,1], 'YDir','reverse');
+    'Units','normalized','Position',[0.4, 0.18, 0.25, 0.4],...
+    'color', 'black','box','on', 'linewidth',2,...
+    'CameraUpVector',[0,1,1], 'YDir','reverse');
 
 camHandles1 = cameraData;
 camHandles2 = cameraData;
@@ -85,12 +105,13 @@ handles.activeScreen = movieScreen1;
 handles.activeScreenNo = 1;
 handles.activeScreen.XColor = 'red';
 handles.activeScreen.YColor = 'red';
-    
+
 % Movie Slider for Controling Current Frame
-movie_slider = uicontrol('Parent',f, 'Style', 'slider', 'Units','normalized',...
-                         'Position',[0.15, 0.16, 0.5, 0.02],...
-                         'SliderStep',[.001 .01],...
-                         'Callback',{@movieslider_callback});
+movie_slider = uicontrol('Parent',f, 'Style', 'slider',...
+    'Units','normalized',...
+    'Position',[0.15, 0.16, 0.5, 0.02],...
+    'SliderStep',[.001 .01],...
+    'Callback',{@movieslider_callback});
 addlistener(movie_slider,'ContinuousValueChange',@movieslider_callback);
 
 % Mouse Listening Function
@@ -107,127 +128,153 @@ signal_scrn3 = axes('Parent',p1,'Units','Pixels','Color','w','XTick',[],'Positio
 signal_scrn4 = axes('Parent',p1,'Units','Pixels','Color','w','XTick',[],'Position',[860, 320,350,115]);
 signal_scrn5 = axes('Parent',p1,'Units','Pixels','Color','w','Position',[860, 195,350,115]);
 handles.signalScreens = [signal_scrn1, signal_scrn2, signal_scrn3,...
-                         signal_scrn4, signal_scrn5];
+    signal_scrn4, signal_scrn5];
 xlabel('Time (sec)');
 %% Waveform Export Group
 
-waveform_export = uibuttongroup('Parent',p1,'Title','Waveform Export','FontSize',10,'Units','normalized','Position',[0.67 0.01 .32 0.18]);
+waveform_export = uibuttongroup('Parent',p1,'Title','Waveform Export',...
+    'FontSize',font_size,'Units','normalized',...
+    'Position',[0.67 0.01 .32 0.18]);
 
-ensembleAveraging = uibuttongroup('Parent',p1,'Title','EnsembleAveraging','FontSize',10,'Units','normalized','Position',[0.68 0.01 .23 0.09]);
+ensembleAveraging = uibuttongroup('Parent',p1,'Title','EnsembleAveraging',...
+    'FontSize',font_size,'Units','normalized',...
+    'Position',[0.68 0.01 .23 0.09]);
 
+expwave_button = uicontrol('Parent',waveform_export,'Style','pushbutton',...
+    'FontSize',font_size_small,...
+    'String','Export OAPs','Units','normalized',...
+    'Position',[0.75 0.67 0.25 0.33],...
+    'Callback',{@expwave_button_callback});
+exptofile_button = uicontrol('Parent',waveform_export,'Style','pushbutton',...
+    'FontSize',font_size_small,...
+    'String','Export to file','Units','normalized',...
+    'Position',[0.75 0.20 0.25 0.33],...
+    'Callback',{@exptofile_button_callback});
+starttimemap_text = uicontrol('Parent',waveform_export,'Style','text',...
+    'FontSize',font_size_small,...
+    'String','Start Time (s)','Units','normalized',...
+    'Position',[0.03 0.67 0.17 0.33]);
+starttimemap_edit = uicontrol('Parent',waveform_export,'Style','edit',...
+    'FontSize',font_size_small,...
+    'Units','normalized',...
+    'Position',[0.21 0.67 0.17 0.27],...
+    'Callback',{@starttime_edit_callback});
+endtimemap_text = uicontrol('Parent',waveform_export,'Style','text',...
+    'FontSize',font_size_small,...
+    'String','End Time (s)','Units','normalized',...
+    'Position',[0.39 0.67 0.17 0.33]);
+endtimemap_edit = uicontrol('Parent',waveform_export,'Style','edit',...
+    'FontSize',font_size_small,...
+    'Units','normalized',...
+    'Position',[0.57 0.67 0.17 0.27],...
+    'Callback',{@endtime_edit_callback});
+pacingcl_edit = uicontrol('Parent',ensembleAveraging,'Style','edit',...
+    'FontSize',font_size_small,...
+    'Units','normalized','Position',[0.31 0.5 0.22 0.45],...
+    'Callback',{@pacingcl_edit_callback});
+startingTime_edit = uicontrol('Parent',ensembleAveraging,'Style','edit',...
+    'FontSize',font_size_small,...
+    'Units','normalized','Position',[0.77 0 0.22 0.45],...
+    'Callback',{@startingTime_edit_callback});
+startingTime_text = uicontrol('Parent',ensembleAveraging,'Style','text',...
+    'FontSize',font_size_small,...
+    'String','Starting time (ms)','Units','normalized',...
+    'Position',[0.3 0 0.45 0.4]);
 
-expwave_button = uicontrol('Parent',waveform_export,'Style','pushbutton','FontSize',12,...
-                            'String','Export OAPs','Units','normalized','Position',[0.75 0.67 0.25 0.33],...
-                            'Callback',{@expwave_button_callback});
-exptofile_button = uicontrol('Parent',waveform_export,'Style','pushbutton','FontSize',12,...
-                            'String','Export to file','Units','normalized','Position',[0.75 0.20 0.25 0.33],...
-                            'Callback',{@exptofile_button_callback});
-starttimemap_text = uicontrol('Parent',waveform_export,'Style','text','FontSize',10,...
-                            'String','Start Time (s)','Units','normalized','Position',[0.03 0.67 0.17 0.33]);
-starttimemap_edit = uicontrol('Parent',waveform_export,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.21 0.67 0.17 0.27],...
-                            'Callback',{@starttime_edit_callback});
-endtimemap_text = uicontrol('Parent',waveform_export,'Style','text','FontSize',10,...
-                            'String','End Time (s)','Units','normalized','Position',[0.39 0.67 0.17 0.33]);
-endtimemap_edit = uicontrol('Parent',waveform_export,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.57 0.67 0.17 0.27],...
-                            'Callback',{@endtime_edit_callback});
-pacingcl_edit = uicontrol('Parent',ensembleAveraging,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.31 0.5 0.22 0.45],...
-                            'Callback',{@pacingcl_edit_callback});
-startingTime_edit = uicontrol('Parent',ensembleAveraging,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.77 0 0.22 0.45],...
-                            'Callback',{@startingTime_edit_callback});
-startingTime_text = uicontrol('Parent',ensembleAveraging,'Style','text','FontSize',10,...
-                            'String','Starting time (ms)','Units','normalized','Position',[0.3 0 0.45 0.4]);
-
-pacingcl_text = uicontrol('Parent',ensembleAveraging,'Style','text','FontSize',10,...
-                            'String','Pacing CL (ms)','Units','normalized','Position',[0.03 0.35 0.28 0.65]);
-truncateafter_edit = uicontrol('Parent',ensembleAveraging,'Style','edit','FontSize',14,...
-                            'Units','normalized','Position',[0.77 0.5 0.22 0.45],...
-                            'Callback',{@truncateafter_edit_callback});
-truncateafter_text = uicontrol('Parent',ensembleAveraging,'Style','text','FontSize',9,...
-                            'String','Output length (ms)','Units','normalized','Position',[0.53 0.4 0.24 0.6]);
+pacingcl_text = uicontrol('Parent',ensembleAveraging,'Style','text',...
+    'FontSize',font_size_small,...
+    'String','Pacing CL (ms)','Units','normalized',...
+    'Position',[0.03 0.35 0.28 0.65]);
+truncateafter_edit = uicontrol('Parent',ensembleAveraging,'Style','edit',...
+    'FontSize',font_size_small,...
+    'Units','normalized',...
+    'Position',[0.77 0.5 0.22 0.45],...
+    'Callback',{@truncateafter_edit_callback});
+truncateafter_text = uicontrol('Parent',ensembleAveraging,'Style','text',...
+    'FontSize',font_size_small,...
+    'String','Output length (ms)','Units','normalized',...
+    'Position',[0.53 0.4 0.24 0.6]);
 
 ensembleAverage_checkbox = uicontrol('Parent',ensembleAveraging,...
-                             'Style','checkbox','FontSize',10,...
-                             'String','Enable',...
-                             'Units','normalized',...
-                             'Position',[0.03 0.01 0.25 0.3],...
-                             'Callback',{@ensembleAverage_checkbox_callback});
+    'Style','checkbox',...
+    'FontSize',font_size_small,...
+    'String','Enable',...
+    'Units','normalized',...
+    'Position',[0.03 0.01 0.25 0.3],...
+    'Callback',{@ensembleAverage_checkbox_callback});
 % Sweep Bar Display for Optical Action Potentials
 sweep_bar = axes ('Parent',p1,'Units','Pixels','Layer','top','Position', [860,195,350,625]);
 set(sweep_bar,'NextPlot','replacechildren','Visible','off')
 handles.sweepBar = sweep_bar;
 
 % Video Control Buttons and Optical Action Potential Display
-play_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
-                        'String','Play Movie','Units','normalized',...
-                        'Position',[0.23, 0.11, 0.08, 0.04],...
-                        'Callback',{@play_button_callback});
-stop_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
-                        'String','Stop Movie','Units','normalized',...
-                        'Position',[0.31, 0.11, 0.08, 0.04]...
-                        ,'Callback',{@stop_button_callback});
-dispwave_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
-                        'String','Display Wave','Units','normalized',...
-                        'Position',[0.4, 0.11, 0.08, 0.04],...
-                        'Callback',{@dispwave_button_callback});
-expmov_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',10,...
-                         'String','Export Movie','Units','normalized',...
-                         'Position',[0.48, 0.11, 0.08, 0.04],...
-                         'Callback',{@expmov_button_callback});
+play_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',font_size_small,...
+    'String','Play Movie','Units','normalized',...
+    'Position',[0.23, 0.11, 0.08, 0.04],...
+    'Callback',{@play_button_callback});
+stop_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',font_size_small,...
+    'String','Stop Movie','Units','normalized',...
+    'Position',[0.31, 0.11, 0.08, 0.04]...
+    ,'Callback',{@stop_button_callback});
+dispwave_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',font_size_small,...
+    'String','Display Wave','Units','normalized',...
+    'Position',[0.4, 0.11, 0.08, 0.04],...
+    'Callback',{@dispwave_button_callback});
+expmov_button = uicontrol('Parent',p1,'Style','pushbutton','FontSize',font_size_small,...
+    'String','Export Movie','Units','normalized',...
+    'Position',[0.48, 0.11, 0.08, 0.04],...
+    'Callback',{@expmov_button_callback});
 %% Statistical Results
 %create button group- will display results for both voltage and calcium
-results = uibuttongroup('Parent',p1,'Title','Statistics','FontSize',10,'Units','normalized','Position',[.15 .01 .5 .09]);
+results = uibuttongroup('Parent',p1,'Title','Statistics','FontSize',font_size,'Units','normalized','Position',[.15 .01 .5 .09]);
 % [0.01 0.01 .65 0.09]
-handles.meanresults = uicontrol('Parent',results,'Style','text','FontSize',10,'String','Mean:','Units','normalized',...
+handles.meanresults = uicontrol('Parent',results,'Style','text','FontSize',font_size_small,'String','Mean:','Units','normalized',...
     'Position',[0.01 0.01 .2 0.9],'HorizontalAlignment','Left','Visible','on');
-handles.medianresults = uicontrol('Parent',results,'Style','text','FontSize',10,'String','Median:','Units','normalized',...
+handles.medianresults = uicontrol('Parent',results,'Style','text','FontSize',font_size_small,'String','Median:','Units','normalized',...
     'Position',[0.2 0.01 .2 .9],'HorizontalAlignment','Left','Visible','on');
-handles.SDresults = uicontrol('Parent',results,'Style','text','FontSize',10,'String','S.D.:','Units','normalized',...
+handles.SDresults = uicontrol('Parent',results,'Style','text','FontSize',font_size_small,'String','S.D.:','Units','normalized',...
     'Position',[0.4 0.01 .2 .9],'HorizontalAlignment','Left','Visible','on');
-handles.num_members_results = uicontrol('Parent',results,'Style','text','FontSize',10,'String','#Members:','Units','normalized',...
+handles.num_members_results = uicontrol('Parent',results,'Style','text','FontSize',font_size_small,'String','#Members:','Units','normalized',...
     'Position',[0.6 0.01 .2 .9],'HorizontalAlignment','Left','Visible','on');
-handles.angleresults = uicontrol('Parent',results,'Style','text','FontSize',10,'String','Angle:','Units','normalized',...
+handles.angleresults = uicontrol('Parent',results,'Style','text','FontSize',font_size_small,'String','Angle:','Units','normalized',...
     'Position',[0.8 0.01 .2 .9],'HorizontalAlignment','Left','Visible','on');
-%Tau=uicontrol('Parent',results,'Style','text','FontSize',10,'String','Tau:','Units','normalized',...
+%Tau=uicontrol('Parent',results,'Style','text','FontSize',font_size_small,'String','Tau:','Units','normalized',...
 %    'Position',[0.75 0.01 .13 .9],'HorizontalAlignment','Left','Visible','on');
 
-          set(handles.meanresults,'String',handles.activeCamData.meanresults);
-          set(handles.medianresults,'String',handles.activeCamData.medianresults);
-          set(handles.SDresults,'String',handles.activeCamData.SDresults);
-          set(handles.num_members_results,'String',handles.activeCamData.num_membersresults);
-          set(handles.angleresults,'String',handles.activeCamData.angleresults);
-          %set(Tau,'String',handles.activeCamData.Tau);
-          
+set(handles.meanresults,'String',handles.activeCamData.meanresults);
+set(handles.medianresults,'String',handles.activeCamData.medianresults);
+set(handles.SDresults,'String',handles.activeCamData.SDresults);
+set(handles.num_members_results,'String',handles.activeCamData.num_membersresults);
+set(handles.angleresults,'String',handles.activeCamData.angleresults);
+%set(Tau,'String',handles.activeCamData.Tau);
+
 %% Optical Action Potential Analysis Button Group and Buttons
 % Create Button Group
-anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',12,'Position',[0.001 0.01 0.13 0.7]);
+anal_data = uibuttongroup('Parent',p1,'Title','Analyze Data','FontSize',font_size,'Position',[0.001 0.01 0.13 0.7]);
 % [0.001 0.12 0.13 0.59]
 
 % Invert Color Map Option
-%invert_cmap = uicontrol('Parent',anal_data,'Style','checkbox','FontSize',10,'String','Invert Colormaps','Position',[3 350 140 25],'Callback',{@invert_cmap_callback});
+%invert_cmap = uicontrol('Parent',anal_data,'Style','checkbox','FontSize',font_size_small,'String','Invert Colormaps','Position',[3 350 140 25],'Callback',{@invert_cmap_callback});
 
-map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',10,...
-                      'Units', 'normalized',...
-                      'String',{'Condition Parameters',...
-                                'CV map', 'Activation map',...
-                                'APD\CaT map', 'Rise Time',...
-                                'Calcium Decay',...
-                                'Alternance Map',...
-                                'Phase analysis'},...
-                      'Position',[0 0.95 1 0.05], ...
-                      'Callback',{@mapPopUp_callback}); % [0.005 0.940 0.99 0.05]
+map_popup = uicontrol('Parent',anal_data,'Style','popupmenu','FontSize',font_size_small,...
+    'Units', 'normalized',...
+    'String',{'Condition Parameters',...
+    'CV map', 'Activation map',...
+    'APD\CaT map', 'Rise Time',...
+    'Calcium Decay',...
+    'Alternance Map',...
+    'Phase analysis'},...
+    'Position',[0 0.95 1 0.05], ...
+    'Callback',{@mapPopUp_callback}); % [0.005 0.940 0.99 0.05]
 
 set(map_popup,'Value',1);
 set(map_popup,'Enable','off');
 
 map = uibuttongroup('Parent',anal_data,...
-                    'Position',[0 0 1 .95]);
+    'Position',[0 0 1 .95]);
 
 GUI_conditionParameters(map, handles); %Make signal condition default
-% syncBox = uicontrol('Parent',p1,'Style','checkbox','FontSize',10,...
+% syncBox = uicontrol('Parent',p1,'Style','checkbox','FontSize',font_size_small,...
 %     'String','ScreenSync','Units','normalized','Position',[0.9 0 0.1 0.1],...
 %     'Callback',{@syncBox_callback});
 
@@ -241,19 +288,19 @@ signalPanel = uipanel('Parent',p1,'Units','normalized','Position',[0.66 0.2 0.32
 handles.signalPanel = signalPanel;
 auxSignalPanel = uipanel('Parent',signalPanel,'Units','normalized','Position',[0 -3 1 4]);
 signalGroup = [signalPanelHandles, signalPanelHandles,...
-               signalPanelHandles,signalPanelHandles,signalPanelHandles];
+    signalPanelHandles,signalPanelHandles,signalPanelHandles];
 
 for ii=1:5
     signalGroup(ii).panel = uipanel('Title',strcat('Marker ',int2str(ii)),'Parent',auxSignalPanel, ...
         'Units','normalized','Position',[0, 1-0.2*ii, 1, 0.2], 'Visible','on');
-end 
+end
 
 % create four signal axes for each signal group
 for i_panel = 1:5
     signalGroup(i_panel).signalScreen = [axes('Parent',signalGroup(i_panel).panel,'Units','normalized','Color','w','Position',[0.13, 1.0-0.25*1, 0.85, 0.2]),...
-                                         axes('Parent',signalGroup(i_panel).panel,'Units','normalized','Color','w','Position',[0.13, 1.0-0.25*2, 0.85, 0.2]),...
-                                         axes('Parent',signalGroup(i_panel).panel,'Units','normalized','Color','w','Position',[0.13, 1.0-0.25*3, 0.85, 0.2]),...
-                                         axes('Parent',signalGroup(i_panel).panel,'Units','normalized','Color','w','Position',[0.13, 1.0-0.25*4, 0.85, 0.2])];
+        axes('Parent',signalGroup(i_panel).panel,'Units','normalized','Color','w','Position',[0.13, 1.0-0.25*2, 0.85, 0.2]),...
+        axes('Parent',signalGroup(i_panel).panel,'Units','normalized','Color','w','Position',[0.13, 1.0-0.25*3, 0.85, 0.2]),...
+        axes('Parent',signalGroup(i_panel).panel,'Units','normalized','Color','w','Position',[0.13, 1.0-0.25*4, 0.85, 0.2])];
     for i_scrn=1:4
         str = strcat('scrn ',num2str(i_scrn));
         ylabel(signalGroup(i_panel).signalScreen(i_scrn), str);
@@ -264,64 +311,58 @@ for i_panel = 1:5
 end
 
 
-
-
-
 handles.signalGroup = signalGroup;
 
 
 signalSlider = uicontrol('Style','Slider','Parent',p1,...
-      'Units','normalized','Position',[0.985 0.2 0.015 0.8],...
-      'Value',1,'Callback',{@slider_callback1,auxSignalPanel}, 'Visible','off');
+    'Units','normalized','Position',[0.985 0.2 0.015 0.8],...
+    'Value',1,'Callback',{@slider_callback1,auxSignalPanel}, 'Visible','off');
 handles.signalSlider = signalSlider;
-    
-  
-function sync_callback(src,eventdata,arg1)
-    val12 = get(sync12,'Value');
-    val13 = get(sync13,'Value');
-    val24 = get(sync24,'Value');
-    val34 = get(sync34,'Value');
-    if (val12 && val13 && val24 && val34)   handles.bounds = [1,1,1,1]; end
-    if (val12 && val13 && val24 && ~val34)  handles.bounds = [1,1,1,1]; end
-    if (val12 && val13 && ~val24 && val34) handles.bounds = [1,1,1,1]; end
-    if (val12 && val13 && ~val24 && ~val34) handles.bounds = [1,1,1,0]; end
-    
-    if (val12 && ~val13 && val24 && val34) handles.bounds = [1,1,1,1]; end
-    if (val12 && ~val13 && ~val24 && val34) handles.bounds = [1,1,2,2]; end
-    if (val12 && ~val13 && val24 && ~val34) handles.bounds = [1,1,0,1]; end
-    if (val12 && ~val13 && ~val24 && ~val34) handles.bounds = [1,1,0,0]; end
-    
-    if (~val12 && val13 && val24 && val34)   handles.bounds = [1,1,1,1]; end
-    if (~val12 && val13 && val24 && ~val34)  handles.bounds = [1,2,1,2]; end
-    if (~val12 && val13 && ~val24 && val34) handles.bounds = [1,0,1,1]; end
-    if (~val12 && val13 && ~val24 && ~val34) handles.bounds = [1,0,1,0]; end
-    
-    if (~val12 && ~val13 && val24 && val34) handles.bounds = [0,1,1,1]; end
-    if (~val12 && ~val13 && ~val24 && val34) handles.bounds = [0,0,1,1]; end
-    if (~val12 && ~val13 && val24 && ~val34) handles.bounds = [0,1,0,1]; end
-    if (~val12 && ~val13 && ~val24 && ~val34) handles.bounds = [0,0,0,0]; end
-    
-    anyLoads = 0;
-    for i_cam=1:4
-        if handles.allCamData(i_cam).isloaded
-            anyLoads = 1;
-            break;
+
+
+    function sync_callback(src,eventdata,arg1)
+        val12 = get(sync12,'Value');
+        val13 = get(sync13,'Value');
+        val24 = get(sync24,'Value');
+        val34 = get(sync34,'Value');
+        if (val12 && val13 && val24 && val34)   handles.bounds = [1,1,1,1]; end
+        if (val12 && val13 && val24 && ~val34)  handles.bounds = [1,1,1,1]; end
+        if (val12 && val13 && ~val24 && val34) handles.bounds = [1,1,1,1]; end
+        if (val12 && val13 && ~val24 && ~val34) handles.bounds = [1,1,1,0]; end
+        
+        if (val12 && ~val13 && val24 && val34) handles.bounds = [1,1,1,1]; end
+        if (val12 && ~val13 && ~val24 && val34) handles.bounds = [1,1,2,2]; end
+        if (val12 && ~val13 && val24 && ~val34) handles.bounds = [1,1,0,1]; end
+        if (val12 && ~val13 && ~val24 && ~val34) handles.bounds = [1,1,0,0]; end
+        
+        if (~val12 && val13 && val24 && val34)   handles.bounds = [1,1,1,1]; end
+        if (~val12 && val13 && val24 && ~val34)  handles.bounds = [1,2,1,2]; end
+        if (~val12 && val13 && ~val24 && val34) handles.bounds = [1,0,1,1]; end
+        if (~val12 && val13 && ~val24 && ~val34) handles.bounds = [1,0,1,0]; end
+        
+        if (~val12 && ~val13 && val24 && val34) handles.bounds = [0,1,1,1]; end
+        if (~val12 && ~val13 && ~val24 && val34) handles.bounds = [0,0,1,1]; end
+        if (~val12 && ~val13 && val24 && ~val34) handles.bounds = [0,1,0,1]; end
+        if (~val12 && ~val13 && ~val24 && ~val34) handles.bounds = [0,0,0,0]; end
+        
+        anyLoads = 0;
+        for i_cam=1:4
+            if handles.allCamData(i_cam).isloaded
+                anyLoads = 1;
+                break;
+            end
+        end
+        if anyLoads
+            movieslider_callback(movie_slider);
+            redrawWaveScreens(handles);
         end
     end
-    if anyLoads
-        movieslider_callback(movie_slider);
-        redrawWaveScreens(handles);
+
+
+    function slider_callback1(src,eventdata,arg1)
+        val = get(src,'Value');
+        set(arg1,'Position',[0, -val*3.0, 1, 4])
     end
-end
-
-
-    
-
-
-function slider_callback1(src,eventdata,arg1)
-    val = get(src,'Value');
-    set(arg1,'Position',[0, -val*3.0, 1, 4])
-end
 
 
 % function syncBox_callback(src,eventdata,arg1)
@@ -336,7 +377,7 @@ end
 %         movieslider_callback(movie_slider);
 %     else
 %         % unbound all screens
-% 
+%
 %         set([signalPanel, signalSlider, ], 'Visible','off');
 %         for i=1:5
 %             set(handles.signalScreens(i),'Visible','on');
@@ -384,54 +425,54 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
 %% All Callback functions
 
 % Callback for map menu
-function mapPopUp_callback(~,~)
-    map = uibuttongroup('Parent',anal_data,...
-                        'Position',[0 0 1 .95]);
-    handles.drawBrush = 0;
-    movieslider_callback(movie_slider);
-    %colormap(handles.activeScreen, jet);
-    switch get(map_popup,'Value')
-        case 1
-            % Conduction Velocity Map
-            GUI_conditionParameters(map, handles); 
-        case 2
-            %colormap(handles.activeScreen, bone);
-            colormap(handles.activeScreen, copper);
-            % New Conduction Velocity Map
-            GUI_NewConductionVelocity(map, handles, f);
-        case 3
-            %activationMap
-            GUI_ActivationMap(map, handles, f);
-        case 4
-            % APD Map
-            GUI_ActionPotentialDurationMap(map, handles, f);
-        case 5
-            % Rise Time Map
-            GUI_RiseTime(map, handles, f);
-        case 6
-            % Calcium Decay Map
-            GUI_CalciumDecay(map, handles, f);
-        case 7
-            % Alternance Map
-            GUI_AlternanceMap(map, handles, f);
-        case 8
-            % Phase Analyis
-            GUI_PhaseAnalysis(map, handles, f);
-    end 
-    
-    set(handles.meanresults,'String',handles.activeCamData.meanresults);
-    set(handles.medianresults,'String',handles.activeCamData.medianresults);
-    set(handles.SDresults,'String',handles.activeCamData.SDresults);
-    set(handles.num_members_results,'String',handles.activeCamData.num_membersresults);
-    set(handles.angleresults,'String',handles.activeCamData.angleresults);
-end
+    function mapPopUp_callback(~,~)
+        map = uibuttongroup('Parent',anal_data,...
+            'Position',[0 0 1 .95]);
+        handles.drawBrush = 0;
+        movieslider_callback(movie_slider);
+        %colormap(handles.activeScreen, jet);
+        switch get(map_popup,'Value')
+            case 1
+                % Conduction Velocity Map
+                GUI_conditionParameters(map, handles);
+            case 2
+                %colormap(handles.activeScreen, bone);
+                colormap(handles.activeScreen, copper);
+                % New Conduction Velocity Map
+                GUI_NewConductionVelocity(map, handles, f);
+            case 3
+                %activationMap
+                GUI_ActivationMap(map, handles, f);
+            case 4
+                % APD Map
+                GUI_ActionPotentialDurationMap(map, handles, f);
+            case 5
+                % Rise Time Map
+                GUI_RiseTime(map, handles, f);
+            case 6
+                % Calcium Decay Map
+                GUI_CalciumDecay(map, handles, f);
+            case 7
+                % Alternance Map
+                GUI_AlternanceMap(map, handles, f);
+            case 8
+                % Phase Analyis
+                GUI_PhaseAnalysis(map, handles, f);
+        end
+        
+        set(handles.meanresults,'String',handles.activeCamData.meanresults);
+        set(handles.medianresults,'String',handles.activeCamData.medianresults);
+        set(handles.SDresults,'String',handles.activeCamData.SDresults);
+        set(handles.num_members_results,'String',handles.activeCamData.num_membersresults);
+        set(handles.angleresults,'String',handles.activeCamData.angleresults);
+    end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% USER FUNCTIONALITY
 %% Listen for mouse clicks for the point-dragger
 % When mouse button is clicked and held find associated marker
     function [i_temp,j_temp] = button_down_function(obj,~)
-%         set(obj,'CurrentAxes',movieScreen1)
+        %         set(obj,'CurrentAxes',movieScreen1)
         ps = get(gca,'CurrentPoint');
         
         clickPosition = get(gca,'Position');
@@ -454,7 +495,7 @@ end
                 i_temp = round(ps(1,1));
                 j_temp = round(ps(2,2));
                 if i_temp<=size(handles.activeCamData.cmosData,1) && i_temp>1 && ...
-                      j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
+                        j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
                     
                     i = i_temp;
                     j = j_temp;
@@ -509,7 +550,7 @@ end
                     end
                 end
             end
-        end 
+        end
     end
 
     function [answer] = isPosInsideOfRectangle (pos, rectangle)
@@ -518,7 +559,7 @@ end
             answer = 0;
         end
         if pos(1)+pos(3) - rectangle(1) - rectangle(3) >1e-6 || ...
-           pos(2)+pos(4) - rectangle(2) - rectangle(4) >1e-6
+                pos(2)+pos(4) - rectangle(2) - rectangle(4) >1e-6
             answer = 0;
         end
     end
@@ -532,19 +573,19 @@ end
 
     function change_brush_size(src, evnt)
         %disp ('wheel');
-        if (evnt.VerticalScrollCount>0) 
-            % scroll down 
+        if (evnt.VerticalScrollCount>0)
+            % scroll down
             handles.brushSize = handles.brushSize-1;
             if handles.brushSize < 1
                 handles.brushSize = 1;
             end
-        else 
-            % scroll up 
+        else
+            % scroll up
             handles.brushSize = handles.brushSize+1;
             if handles.brushSize > 40
                 handles.brushSize = 40;
             end
-        end 
+        end
         brushSize = handles.brushSize;
         % Make a circle mask
         circleMask = zeros(1 + 2*ceil(brushSize), 1 + 2*ceil(brushSize));
@@ -559,14 +600,14 @@ end
         row = row - size(circleMask,2)/2 - 0.5;
         col = col - size(circleMask,2)/2 - 0.5;
         handles.brushMaskIndices = [row,col];
-    
+        
         if handles.drawBrush
             ps = get(handles.activeScreen,'CurrentPoint');
             i_temp = round(ps(1,1));
             j_temp = round(ps(2,2));
             if i_temp<=size(handles.activeCamData.cmosData,1) && i_temp>1 && ...
-                  j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
-
+                    j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
+                
                 i = i_temp;
                 j = j_temp;
                 
@@ -574,7 +615,7 @@ end
                 drawFrame(handles.frame, handles.activeScreenNo, handles);
                 hold (handles.activeScreen,'on');
                 center = [i,j];
-%                 viscircles(handles.activeScreen, center, handles.activeCamData.brushSize,'Color','b');
+                %                 viscircles(handles.activeScreen, center, handles.activeCamData.brushSize,'Color','b');
                 if verLessThan('matlab','9.0.0')
                     viscircles(handles.activeScreen, center, handles.brushSize,'EdgeColor','b');
                 else
@@ -586,146 +627,146 @@ end
         end
     end
 
-function selectWindow(clickedScreen)
-    persistent chk; % check if we already clicked
-    persistent screenSelected; % handle of previous clicked object
-
-    handles.activeScreen = clickedScreen;
-    handles.activeCamData = handles.allCamData(handles.activeScreenNo);
-    
-    for i=1:4
-        handles.allCamData(i).screen.XColor = 'black';
-        handles.allCamData(i).screen.YColor = 'black';
-    end
-    handles.activeScreen.XColor = 'red';
-    handles.activeScreen.YColor = 'red';
-    
-    %disp ("ChooseScreen_here");
-    
-    if(screenSelected ~= clickedScreen)
-        % case when two successive clicks were on different windows
-        % fast clicks on different windows are not double-clicks 
-        chk = [];
-        screenSelected = clickedScreen;
+    function selectWindow(clickedScreen)
+        persistent chk; % check if we already clicked
+        persistent screenSelected; % handle of previous clicked object
         
-        % redraw singal_screens for unbound screen
-        %if ~handles.linked
-        redrawWaveScreens(handles);    
-    end
-    if isempty(chk)
-        chk = 1;
-        screenSelected = clickedScreen;
+        handles.activeScreen = clickedScreen;
+        handles.activeCamData = handles.allCamData(handles.activeScreenNo);
         
-        ps = get(clickedScreen,'CurrentPoint');
-        
-        i_temp = round(ps(1,1));
-        j_temp = round(ps(2,2));
-        
-        % grab marker
-        %if handles.linked
-        if handles.bounds(handles.activeScreenNo) == 1
-            M = handles.markers1;
-        elseif handles.bounds(handles.activeScreenNo) == 2
-            M = handles.markers2;
-        else
-            M = handles.activeCamData.markers;
+        for i=1:4
+            handles.allCamData(i).screen.XColor = 'black';
+            handles.allCamData(i).screen.YColor = 'black';
         end
-        % if one of the markers on the movie screen is clicked
-        if i_temp<=size(handles.activeCamData.cmosData,1) ||...
-                j_temp<size(handles.activeCamData.cmosData,2) ||...
-                i_temp>1 || j_temp>1
-            if size(M,1) > 0
-                for i=1:size(M,1)
-                    if isPosInsideOfRectangle( [i_temp,j_temp,0.1,0.1], [M(i,1)-1, M(i,2)-1, 3, 3] )
-                        if handles.bounds(handles.activeScreenNo) > 0
-                            handles.grabbed = i;
-                        else
-                            handles.activeCamData.grabbed = i;
+        handles.activeScreen.XColor = 'red';
+        handles.activeScreen.YColor = 'red';
+        
+        %disp ("ChooseScreen_here");
+        
+        if(screenSelected ~= clickedScreen)
+            % case when two successive clicks were on different windows
+            % fast clicks on different windows are not double-clicks
+            chk = [];
+            screenSelected = clickedScreen;
+            
+            % redraw singal_screens for unbound screen
+            %if ~handles.linked
+            redrawWaveScreens(handles);
+        end
+        if isempty(chk)
+            chk = 1;
+            screenSelected = clickedScreen;
+            
+            ps = get(clickedScreen,'CurrentPoint');
+            
+            i_temp = round(ps(1,1));
+            j_temp = round(ps(2,2));
+            
+            % grab marker
+            %if handles.linked
+            if handles.bounds(handles.activeScreenNo) == 1
+                M = handles.markers1;
+            elseif handles.bounds(handles.activeScreenNo) == 2
+                M = handles.markers2;
+            else
+                M = handles.activeCamData.markers;
+            end
+            % if one of the markers on the movie screen is clicked
+            if i_temp<=size(handles.activeCamData.cmosData,1) ||...
+                    j_temp<size(handles.activeCamData.cmosData,2) ||...
+                    i_temp>1 || j_temp>1
+                if size(M,1) > 0
+                    for i=1:size(M,1)
+                        if isPosInsideOfRectangle( [i_temp,j_temp,0.1,0.1], [M(i,1)-1, M(i,2)-1, 3, 3] )
+                            if handles.bounds(handles.activeScreenNo) > 0
+                                handles.grabbed = i;
+                            else
+                                handles.activeCamData.grabbed = i;
+                            end
+                            break
                         end
-                        break
                     end
                 end
             end
-        end
-       
-        if (~handles.dispWaveClicked)
-            pause(0.5); %Add a delay to distinguish single click from a double click
-        end
-        if chk == 1
-            % end of single click case
+            
+            if (~handles.dispWaveClicked)
+                pause(0.5); %Add a delay to distinguish single click from a double click
+            end
+            if chk == 1
+                % end of single click case
+                chk = [];
+            end
+        else
+            % case of double-click
+            % disable all small screens
+            if handles.expandedScreen == 0
+                set([sync12,sync13,sync24,sync34], 'Visible', 'off');
+                for i=1:4
+                    handles.allCamData(i).isVisible=0;
+                    set(handles.allCamData(i).screen, 'Visible', 'off');
+                    if isempty(get(handles.allCamData(i).screen,'Children'))
+                        continue;
+                    elseif size(get(handles.allCamData(i).screen,'Children'),1) == 1
+                        set(get(handles.allCamData(i).screen,'Children'), 'Visible', 'off');
+                    elseif size(get(handles.allCamData(i).screen,'Children'),1)>1
+                        for j=1:size(get(handles.allCamData(i).screen,'Children'),1)
+                            child = get(handles.allCamData(i).screen,'Children');
+                            set(child(j), 'Visible', 'off');
+                        end
+                    end
+                end
+                
+                set(handles.activeCamData.screen,'Position',[0.14,0.18,0.51,0.82]);
+                set(handles.activeCamData.screen, 'Visible', 'on');
+                handles.activeCamData.isVisible=1;
+                if ~isempty(get(handles.activeCamData.screen,'Children'))
+                    if size(get(handles.activeCamData.screen,'Children'),1) == 1
+                        set(get(handles.activeCamData.screen,'Children'), 'Visible', 'on');
+                    else
+                        for j=1:size(get(handles.activeCamData.screen,'Children'),1)
+                            child = get(handles.activeCamData.screen,'Children');
+                            set(child(j), 'Visible', 'on');
+                        end
+                    end
+                end
+                
+                handles.expandedScreen = handles.activeScreenNo;
+            else
+                switch handles.expandedScreen
+                    case 1
+                        set(clickedScreen,'Position',[0.14, 0.6, 0.25, 0.4]);
+                    case 2
+                        set(clickedScreen,'Position',[0.4, 0.6, 0.25, 0.4]);
+                    case 3
+                        set(clickedScreen,'Position',[0.14, 0.18, 0.25, 0.4]);
+                    case 4
+                        set(clickedScreen,'Position',[0.4, 0.18, 0.25, 0.4]);
+                end
+                
+                set([sync12,sync13,sync24,sync34], 'Visible', 'on');
+                for i=1:4
+                    set(handles.allCamData(i).screen, 'Visible', 'on');
+                    handles.allCamData(i).isVisible=1;
+                    if isempty(get(handles.allCamData(i).screen,'Children'))
+                        continue;
+                    elseif size(get(handles.allCamData(i).screen,'Children'),1) == 1
+                        set(get(handles.allCamData(i).screen,'Children'), 'Visible', 'on');
+                    elseif size(get(handles.allCamData(i).screen,'Children'),1)>1
+                        for j=1:size(get(handles.allCamData(i).screen,'Children'),1)
+                            child = get(handles.allCamData(i).screen,'Children');
+                            set(child(j), 'Visible', 'on');
+                        end
+                    end
+                    movieslider_callback(movie_slider);
+                    %set(handles.allCamData(i).screen, 'Ydir','reverse');
+                    %drawFrame(handles.frame, handles.allCamData(i));
+                end
+                
+                handles.expandedScreen = 0;
+            end
             chk = [];
         end
-    else
-        % case of double-click
-        % disable all small screens
-        if handles.expandedScreen == 0
-            set([sync12,sync13,sync24,sync34], 'Visible', 'off');
-            for i=1:4
-                handles.allCamData(i).isVisible=0;
-                set(handles.allCamData(i).screen, 'Visible', 'off');
-                if isempty(get(handles.allCamData(i).screen,'Children'))
-                    continue;
-                elseif size(get(handles.allCamData(i).screen,'Children'),1) == 1
-                    set(get(handles.allCamData(i).screen,'Children'), 'Visible', 'off');
-                elseif size(get(handles.allCamData(i).screen,'Children'),1)>1
-                    for j=1:size(get(handles.allCamData(i).screen,'Children'),1)
-                        child = get(handles.allCamData(i).screen,'Children');
-                        set(child(j), 'Visible', 'off');            
-                    end
-                end
-            end
-            
-            set(handles.activeCamData.screen,'Position',[0.14,0.18,0.51,0.82]);
-            set(handles.activeCamData.screen, 'Visible', 'on');
-            handles.activeCamData.isVisible=1;
-            if ~isempty(get(handles.activeCamData.screen,'Children'))
-                if size(get(handles.activeCamData.screen,'Children'),1) == 1
-                    set(get(handles.activeCamData.screen,'Children'), 'Visible', 'on');
-                else
-                    for j=1:size(get(handles.activeCamData.screen,'Children'),1)
-                        child = get(handles.activeCamData.screen,'Children');
-                        set(child(j), 'Visible', 'on');            
-                    end
-                end
-            end
-        
-            handles.expandedScreen = handles.activeScreenNo;
-        else
-            switch handles.expandedScreen
-                case 1
-                    set(clickedScreen,'Position',[0.14, 0.6, 0.25, 0.4]);
-                case 2
-                    set(clickedScreen,'Position',[0.4, 0.6, 0.25, 0.4]);
-                case 3
-                    set(clickedScreen,'Position',[0.14, 0.18, 0.25, 0.4]);
-                case 4
-                    set(clickedScreen,'Position',[0.4, 0.18, 0.25, 0.4]);
-            end
-            
-            set([sync12,sync13,sync24,sync34], 'Visible', 'on');
-            for i=1:4
-                set(handles.allCamData(i).screen, 'Visible', 'on');
-                handles.allCamData(i).isVisible=1;
-                if isempty(get(handles.allCamData(i).screen,'Children'))
-                    continue;
-                elseif size(get(handles.allCamData(i).screen,'Children'),1) == 1
-                    set(get(handles.allCamData(i).screen,'Children'), 'Visible', 'on');
-                elseif size(get(handles.allCamData(i).screen,'Children'),1)>1
-                    for j=1:size(get(handles.allCamData(i).screen,'Children'),1)
-                        child = get(handles.allCamData(i).screen,'Children');
-                        set(child(j), 'Visible', 'on');            
-                    end
-                end
-                movieslider_callback(movie_slider);
-                %set(handles.allCamData(i).screen, 'Ydir','reverse');
-                %drawFrame(handles.frame, handles.allCamData(i));
-            end
-            
-            handles.expandedScreen = 0;
-        end
-        chk = [];
     end
-end
 
 
 %% Update appropriate screens or slider when mouse is moved
@@ -743,13 +784,13 @@ end
             i_temp = round(ps(1,1));
             j_temp = round(ps(2,2));
             if i_temp<=size(handles.activeCamData.cmosData,1) && i_temp>1 && ...
-                  j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
+                    j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
                 
                 i = i_temp;
                 j = j_temp;
-%                 disp([i,j]);
+                %                 disp([i,j]);
                 
-%                 if handles.linked
+                %                 if handles.linked
                 if handles.bounds(handles.activeScreenNo) == 1
                     handles.markers1(handles.grabbed,:) = [i_temp j_temp];
                     
@@ -769,11 +810,11 @@ end
                     end
                     
                     handles.markers1(handles.grabbed,:) = [i j];
-
+                    
                     cla
                     movieslider_callback(movie_slider);
                 elseif handles.bounds(handles.activeScreenNo) == 2
-                        handles.markers2(handles.grabbed,:) = [i_temp j_temp];
+                    handles.markers2(handles.grabbed,:) = [i_temp j_temp];
                     
                     % plot signals for all loaded screens and set markers
                     for i_cam = 1:4
@@ -783,7 +824,7 @@ end
                                 signal_current = squeeze(handles.allCamData(i_cam).cmosData(j,i,:));
                             else
                                 signal_current = squeeze(handles.allCamData(i_cam).cmosPhase(j,i,:));
-                            end 
+                            end
                             plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
                                 signal_current,...
                                 handles.markerColors(grabbed),'LineWidth',2,...
@@ -792,7 +833,7 @@ end
                     end
                     
                     handles.markers2(handles.grabbed,:) = [i j];
-
+                    
                     cla
                     movieslider_callback(movie_slider);
                 else
@@ -807,7 +848,7 @@ end
                         handles.markerColors(handles.activeCamData.grabbed),'LineWidth',2,...
                         'Parent',handles.signalScreens(handles.activeCamData.grabbed))
                     handles.activeCamData.markers(handles.activeCamData.grabbed,:) = [i j];
-
+                    
                     cla
                     drawFrame(handles.frame, handles.activeScreenNo, handles);
                 end
@@ -819,8 +860,8 @@ end
             i_temp = round(ps(1,1));
             j_temp = round(ps(2,2));
             if i_temp<=size(handles.activeCamData.cmosData,1) && i_temp>1 && ...
-                  j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
-
+                    j_temp<=size(handles.activeCamData.cmosData,2) && j_temp>1
+                
                 i = i_temp;
                 j = j_temp;
                 
@@ -833,7 +874,7 @@ end
                 else
                     viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
                 end
-%                 viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
+                %                 viscircles(handles.activeScreen, center, handles.brushSize,'Color','b');
                 set(handles.activeScreen,'YTick',[],'XTick',[]);
                 hold (handles.activeScreen,'off');
             end
@@ -850,7 +891,7 @@ end
         file = char(str(val));
         handles.filename = file;
     end
-    
+
 %% Load selected files in filelist
     function loadfile_callback(~,~)
         if isempty(handles.filename)
@@ -865,7 +906,7 @@ end
             end
             set(map_popup,'Enable','on');
             % Clear off all images from previous set of data
-            cla(handles.activeScreen); 
+            cla(handles.activeScreen);
             for i_cam=1:5
                 cla(handles.signalScreens(i_cam));
             end
@@ -932,9 +973,9 @@ end
                     % necessarily the ecg channel. Correspondes to analog1
                     % input to SciMedia box
                     %handles.ecg = Data.channel{1}(1:size(Data.channel{1},2)/2)*-1;
-                    %comment ecg 
-                     % Save out added analog temporal resolution
-%                     handles.nRate = Data.nRate;
+                    %comment ecg
+                    % Save out added analog temporal resolution
+                    %                     handles.nRate = Data.nRate;
                 else
                     % Load from single camera
                     handles.activeCamData.isloaded = 1;
@@ -953,21 +994,21 @@ end
                     handles.activeCamData.thresholdSegmentation = zeros(size(handles.activeCamData.bg));
                     % Save out pacing spike
                     %handles.activeCamData.ecg = Data.channel{1}(2:end)*-1;
-
+                    
                     % Save out added analog temporal resolution
                     % handles.activeCamData.nRate = Data.nRate;
                     % Save out frequency
                     handles.activeCamData.Fs = double(Data.frequency);
-                    % Save out analog 
+                    % Save out analog
                 end
-
-
+                
+                
                 handles.activeCamData.cmosRawData = handles.activeCamData.cmosData; % Save a variable to preserve  the raw cmos data
-                handles.activeCamData.bgRGB = real2rgb(handles.activeCamData.bg,'gray'); % Convert background to grayscale 
+                handles.activeCamData.bgRGB = real2rgb(handles.activeCamData.bg,'gray'); % Convert background to grayscale
                 %handles.activeCamData.bgRGB = handles.activeCamData.filt_data;
                 
                 handles.activeCamData.maxFrame = size(handles.activeCamData.cmosData,3);
-%                 disp( handles.activeCamData.maxFrame);
+                %                 disp( handles.activeCamData.maxFrame);
                 if (handles.maxFrame < handles.activeCamData.maxFrame)
                     handles.maxFrame = handles.activeCamData.maxFrame;
                 end
@@ -975,7 +1016,7 @@ end
                 handles.matrixMax = .9 * max(handles.activeCamData.cmosData(:));
                 % Initialize movie screen to the first frame
                 set(f,'CurrentAxes',handles.activeScreen)
-
+                
                 G = real2rgb (handles.activeCamData.bg, 'gray');
                 if handles.frame <= handles.activeCamData.maxFrame
                     Mframe = handles.activeCamData.cmosData(:,:,handles.frame);
@@ -986,7 +1027,7 @@ end
                 A = real2rgb(Mframe >= handles.normalizeMinVisible,'gray');
                 I = J .* A + G .* (1-A);
                 image(I,'Parent',handles.activeScreen);
-
+                
                 set(handles.activeScreen,'NextPlot','replacechildren','YLim',[0.5 size(I,1)+0.5],...
                     'YTick',[],'XLim',[0.5 size(I,2)+0.5],'XTick',[])
                 % Scale signal screens and sweep bar to appropriate time scale
@@ -1001,8 +1042,8 @@ end
                         set(signalGroup(i_signal_scrn).signalScreen(i_cam),'XLim',[min(handles.time) max(handles.time)])
                         set(signalGroup(i_signal_scrn).signalScreen(i_cam),'NextPlot','replacechildren')
                     end
-                end    
-
+                end
+                
                 % Fill times into activation map editable textboxes
                 handles.starttime = 0;
                 handles.endtime = max(handles.time);
@@ -1049,7 +1090,7 @@ end
 %% Movie Slider Functionality
     function movieslider_callback(source,~)
         val = get(source,'Value');
-%         i = round(val*size(handles.cmosData,3))+1;
+        %         i = round(val*size(handles.cmosData,3))+1;
         i = round(val*handles.maxFrame)+1;
         handles.frame = i;
         if handles.frame == handles.maxFrame + 1
@@ -1070,24 +1111,24 @@ end
         end
         
         % Update sweep bar
-         if (handles.bounds(handles.activeScreenNo) == 0)
+        if (handles.bounds(handles.activeScreenNo) == 0)
             set(f,'CurrentAxes',sweep_bar)
             a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale];b = [0 1]; cla
             plot(a,b,'r','Parent',sweep_bar)
             set(sweep_bar,'Layer','top');
-%             axis([handles.starttime handles.endtime 0 1])
+            %             axis([handles.starttime handles.endtime 0 1])
             axis([0 handles.time(end) 0 1])
             hold off; axis off;
-         else
-             for i_group=1:5
-                 set(f,'CurrentAxes',signalGroup(i_group).sweepBar);
-                 a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale];b = [0 1]; %cla
-                 plot(a,b,'r','Parent',signalGroup(i_group).sweepBar)
-                 %             axis([handles.starttime handles.endtime 0 1])
-                 axis([0 handles.time(end) 0 1])
-                 hold off;  axis off;
-             end
-         end
+        else
+            for i_group=1:5
+                set(f,'CurrentAxes',signalGroup(i_group).sweepBar);
+                a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale];b = [0 1]; %cla
+                plot(a,b,'r','Parent',signalGroup(i_group).sweepBar)
+                %             axis([handles.starttime handles.endtime 0 1])
+                axis([0 handles.time(end) 0 1])
+                hold off;  axis off;
+            end
+        end
     end
 
 
@@ -1109,7 +1150,7 @@ end
             for i = startframe:5:handles.maxFrame
                 if handles.playback == 1 % recheck if the PLAY button is clicked
                     for i_cam=1:4
-                        if handles.allCamData(i_cam).isloaded == 1 && handles.allCamData(i_cam).isVisible==1 
+                        if handles.allCamData(i_cam).isloaded == 1 && handles.allCamData(i_cam).isVisible==1
                             set(handles.allCamData(i_cam).screen,'NextPlot','replacechildren','YTick',[],'XTick',[]);
                             set(f,'CurrentAxes',handles.allCamData(i_cam).screen)
                             drawFrame(i, i_cam, handles);
@@ -1119,7 +1160,7 @@ end
                     pause(0.01)
                     % Update movie slider
                     set(movie_slider,'Value',(i-1)/handles.maxFrame)
-
+                    
                     % Update sweep bar
                     if (handles.bounds(handles.activeScreenNo) == 0)
                         set(f,'CurrentAxes',sweep_bar)
@@ -1128,18 +1169,18 @@ end
                         set(sweep_bar,'Layer','top');
                         %             axis([handles.starttime handles.endtime 0 1])
                         axis([0 handles.time(end) 0 1])
-
+                        
                         hold off; axis off;
                     else
                         for i_group=1:5
-                             set(f,'CurrentAxes',signalGroup(i_group).sweepBar);
-                             a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale]; b = [0 1]; %cla
-                             plot(a,b,'r','Parent',signalGroup(i_group).sweepBar)
-                             %             axis([handles.starttime handles.endtime 0 1])
-                             axis([0 handles.time(end) 0 1])
-
-                             hold off;  axis off;
-                         end
+                            set(f,'CurrentAxes',signalGroup(i_group).sweepBar);
+                            a = [(handles.time(i)-handles.starttime)*handles.timeScale (handles.time(i)-handles.starttime)*handles.timeScale]; b = [0 1]; %cla
+                            plot(a,b,'r','Parent',signalGroup(i_group).sweepBar)
+                            %             axis([handles.starttime handles.endtime 0 1])
+                            axis([0 handles.time(end) 0 1])
+                            
+                            hold off;  axis off;
+                        end
                     end
                     pause(0.01); pause(0.01)
                     
@@ -1147,7 +1188,7 @@ end
                     break
                 end
             end
-            handles.frame = min(handles.frame, handles.maxFrame);            
+            handles.frame = min(handles.frame, handles.maxFrame);
             for i_cam=1:4
                 if handles.allCamData(i_cam).isloaded == 1 && handles.allCamData(i_cam).isVisible == 1
                     set(handles.allCamData(i_cam).screen,'NextPlot','replacechildren','YTick',[],'XTick',[]);
@@ -1159,7 +1200,7 @@ end
             pause(0.01)
             % Update movie slider
             set(movie_slider,'Value',(i-1)/handles.maxFrame)
-
+            
             % Update sweep bar
             if (handles.bounds(handles.activeScreenNo) == 0)
                 set(f,'CurrentAxes',sweep_bar)
@@ -1168,7 +1209,7 @@ end
                 set(sweep_bar,'Layer','top');
                 %             axis([handles.starttime handles.endtime 0 1])
                 axis([0 handles.time(end) 0 1])
-
+                
                 hold off; axis off;
             else
                 for i_group=1:5
@@ -1177,7 +1218,7 @@ end
                     plot(a,b,'r','Parent',signalGroup(i_group).sweepBar)
                     %             axis([handles.starttime handles.endtime 0 1])
                     axis([0 handles.time(end) 0 1])
-
+                    
                     hold off;  axis off;
                 end
             end
@@ -1194,8 +1235,8 @@ end
         handles.dispWaveClicked = 1;
         %set input point
         for i=1:4
-             assert(strcmp(get(handles.allCamData(i).screen,'YDir'),'reverse'));  
-             handles.allCamData(i).drawMap=0;
+            assert(strcmp(get(handles.allCamData(i).screen,'YDir'),'reverse'));
+            handles.allCamData(i).drawMap=0;
         end
         
         axis ij
@@ -1203,7 +1244,7 @@ end
         handles.activeCamData.drawMap = 0;
         % call button_down_function to select movieScreen before marker adding
         button_down_function(handles.activeCamData.screen);
-    	
+        
         i = round(i_temp); j = round(j_temp);
         
         disp([i,j]);
@@ -1215,13 +1256,13 @@ end
             msgbox('Warning: Pixel Selection out of Boundary','Title','help')
         else
             % Find the correct wave window
-%             if (handles.linked)
+            %             if (handles.linked)
             if handles.bounds(handles.activeScreenNo) == 1
                 if handles.wave_window1 == 6
                     handles.wave_window1 = 1;
                 end
                 wave_window = handles.wave_window1;
-
+                
                 for i_cam = 1:4
                     if handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1
                         if handles.activeCamData.drawPhase == 0
@@ -1241,7 +1282,7 @@ end
                     handles.wave_window2 = 1;
                 end
                 wave_window = handles.wave_window2;
-
+                
                 for i_cam = 1:4
                     if handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 2
                         if handles.activeCamData.drawPhase == 0
@@ -1282,7 +1323,7 @@ end
         elseif handles.bounds(handles.activeScreenNo) == 2
             handles.wave_window2 = wave_window + 1;
             movieslider_callback(movie_slider);
-        
+            
         else
             handles.activeCamData.wave_window = wave_window + 1; % Dial up the wave window count
             movieslider_callback(movie_slider); %drawFrame(handles.frame,handles.activeScreenNo);
@@ -1292,7 +1333,7 @@ end
     end
 %% Export movie to .avi file
 %Construct a VideoWriter object and view its properties. Set the frame rate to 60 frames per second:
-    function expmov_button_callback(~,~)        
+    function expmov_button_callback(~,~)
         % Save the movie to the same directory as the cmos data
         % Request the directory for saving the file
         dir = uigetdir;
@@ -1312,7 +1353,7 @@ end
         filename = char(filename);
         % Create path to file
         movname = fullfile(dir,strcat(filename,'_movie.avi'));
-        % Create the figure to be filmed        
+        % Create the figure to be filmed
         fig=figure('Name',[filename ' movie'],'NextPlot','replacechildren','NumberTitle','off',...
             'Visible','off','OuterPosition',[170, 140, 556,715]);
         % Start writing the video
@@ -1329,7 +1370,7 @@ end
         
         % Grab start and stop time times and convert to index values by
         % multiplying by frequency, add one to shift from zero
-        start = str2double(get(starttimemap_edit,'String'))*handles.activeCamData.Fs+1;   
+        start = str2double(get(starttimemap_edit,'String'))*handles.activeCamData.Fs+1;
         fin = str2double(get(endtimemap_edit,'String'))*handles.activeCamData.Fs+1;
         % Designate the resolution of the video: ex. 5 = every fifth frame
         step = 2;
@@ -1357,7 +1398,7 @@ end
                 signal_current = squeeze(handles.activeCamData.cmosPhase(x_coord,y_coord,start:endtime));
             end
             plot(handles.time(start:endtime),signal_current, 'LineWidth',1.5);
-            % 
+            %
             axis([handles.time(start) handles.time(end) min(signal_current) max(signal_current)]);
             % Set the xick mark to start from zero
             xlabel('Time (sec)');hold on
@@ -1403,7 +1444,7 @@ end
             else
                 for iii=1:5
                     set(signalGroup(iii).sweepBar,'XLim',[val01 val02]);
-                end  
+                end
             end
         else
             error = 'The START TIME must be greater than %d and less than %.3f.';
@@ -1437,7 +1478,7 @@ end
             else
                 for iii=1:5
                     set(signalGroup(iii).sweepBar,'XLim',[val01 val02]);
-                end    
+                end
             end
         else
             error = 'The END TIME must be greater than %d and less than %.3f.';
@@ -1640,11 +1681,11 @@ end
 
 % INVERT COLORMAP: inverts the colormaps for all isochrone maps
 %     function invert_cmap_callback(~,~)
-%         % Function Description: The checkbox function like toggle button. 
-%         % There are only 2 options and since the box starts unchecked, 
-%         % checking it will invert the map, unchecking it will invert it 
+%         % Function Description: The checkbox function like toggle button.
+%         % There are only 2 options and since the box starts unchecked,
+%         % checking it will invert the map, unchecking it will invert it
 %         % back to its original state. As such no additional code is needed.
-%         
+%
 %         % grab the current value of the colormap
 %         cmap = handles.cmap;
 %         % invert the existing colormap values
