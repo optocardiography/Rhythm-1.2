@@ -23,7 +23,15 @@ function drawFrame(frame, camNo, handles)
             end
             
             J = real2rgb(Mframe, 'jet');
-            A = real2rgb(Mframe >= handles.normalizeMinVisible,'gray');
+            
+            A = (Mframe >= handles.normalizeMinVisible);  
+            if all(A(:))
+                A = real2rgb(A,'gray');
+                A = ones(size(A));
+            else
+                A = real2rgb(A,'gray');
+            end
+            
             I = J .* A + G .* (1 - A);
 
             if handles.activeScreenNo == camNo

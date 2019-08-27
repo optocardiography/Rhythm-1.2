@@ -874,6 +874,7 @@ end
                 cla(sweep_bar);
                 handles.frame = 1;% this handles indicate the current frame being displayed by the movie screen
                 handles.normflag = 0;% this handle indicates if normalize is clicked
+                handles.activeCamData.drawPhase = 0;
                 handles.activeCamData.markers = [];
                 handles.slide=-1;% this handle indicate if the movie slider is clicked
             end
