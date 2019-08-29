@@ -25,6 +25,7 @@ classdef rhythmHandles < handle
         cmap = []; %colormap('Jet'); %saves the default colormap values
         projectDir = '';
         dir='';
+        dir_output='';
         file_list=[];
         frame=1;% this handles indicate the current frame being displayed by the movie screen
         bg=[];

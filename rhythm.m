@@ -1654,11 +1654,18 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
         ensembleAveragingEnabled = get(ensembleAverage_checkbox, 'Value');
         if ensembleAveragingEnabled
             output = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t, handles.activeCamData.markers);
+            suffix = '_waveform_avg.txt';
         else
             output = APExport(handles);
+            suffix = '_waveform.txt';
         end
-        [filename, path] = uiputfile('waveforms.txt');
-        writetable(output,strcat(path,filename));
+        filename_default = strcat(handles.filename(1:end-4), suffix);
+        filename_default = strcat(handles.dir_output, filename_default);
+        [filename, path] = uiputfile('*.txt', 'Save mask', filename_default);
+        if ~isequal(filename, 0)
+            writetable(output,strcat(path,filename));
+            handles.dir_output = path;
+        end
     end
 
 %% Draw TimeLine for Ensemble Averaging Start Time

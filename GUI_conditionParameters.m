@@ -412,18 +412,23 @@ end
 
 
     function upload_button_callback(source,~)
-        [filename, path] = uigetfile('*.txt');
-        mask = load(strcat(path,filename));
-        mask = logical(mask);
-        handles.activeCamData.finalSegmentation = mask;
-        drawFrame(handles.frame ,handles.activeScreenNo, handles);
+        [filename, path] = uigetfile('*.txt', 'Load mask', handles.dir);
+        if ~isequal(filename, 0)
+            mask = load(strcat(path,filename));
+            mask = logical(mask);
+            handles.activeCamData.finalSegmentation = mask;
+            drawFrame(handles.frame ,handles.activeScreenNo, handles);
+        end
     end
 
 
     function download_button_callback(source,~)
-        [filename, path] = uiputfile('mask.txt');
-        mask = double(handles.activeCamData.finalSegmentation);
-        save(strcat(path,filename), 'mask', '-ascii', '-tabs');
+        filename_default = strcat(handles.dir,'/mask.txt');
+        [filename, path] = uiputfile('*.txt', 'Save mask', filename_default);
+        if ~isequal(filename, 0)
+            mask = double(handles.activeCamData.finalSegmentation);
+            save(strcat(path,filename), 'mask', '-ascii', '-tabs');
+        end
     end
 
 
