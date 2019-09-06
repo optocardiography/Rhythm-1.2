@@ -1065,6 +1065,7 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
                     redrawWaveScreens(handles);
                 end
                 
+                handles.filenames_loaded(handles.activeScreenNo) = handles.filename;
                 
             end
         end
@@ -1659,9 +1660,11 @@ handles.cmap = colormap('Jet'); %saves the default colormap values
             output = APExport(handles);
             suffix = '_waveform.txt';
         end
-        filename_default = strcat(handles.filename(1:end-4), suffix);
+        filename_active = handles.filenames_loaded(handles.activeScreenNo);
+        filename_active = char(filename_active);
+        filename_default = strcat(filename_active(1:end-4), suffix);
         filename_default = strcat(handles.dir_output, filename_default);
-        [filename, path] = uiputfile('*.txt', 'Save mask', filename_default);
+        [filename, path] = uiputfile('*.txt', 'Export waveform', filename_default);
         if ~isequal(filename, 0)
             writetable(output,strcat(path,filename));
             handles.dir_output = path;

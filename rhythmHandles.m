@@ -27,6 +27,7 @@ classdef rhythmHandles < handle
         dir='';
         dir_output='';
         file_list=[];
+        filenames_loaded = ["", "", "", ""]; % filenames loaded for each window (4 of them) 
         frame=1;% this handles indicate the current frame being displayed by the movie screen
         bg=[];
         ecg=[];
