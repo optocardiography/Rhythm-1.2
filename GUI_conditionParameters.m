@@ -119,6 +119,18 @@ download_button = uicontrol('Parent',conditionParametersGroup,...
                           'Callback',@download_button_callback);
 set(download_button,'CData',download_icon); 
                         
+
+%%
+pos_left = 0.1;
+pos_bottom = pos_bottom - element_height_small;
+element_width = 1 - pos_left;
+polygon_mask_button = uicontrol('Parent',conditionParametersGroup,...
+                         'Style','pushbutton','FontSize',font_size_small,...
+                         'String','draw polygon',...
+                         'Units','normalized',...
+                         'Enable','off',...
+                         'Position',[pos_left, pos_bottom, element_width, element_height_small],...
+                         'Callback',@polygon_mask_button_callback);
 %%
 pos_left = 0;
 pos_bottom = pos_bottom - element_height;
@@ -398,6 +410,7 @@ end
             set(download_button,'Enable','on');
             set(upload_button,'Enable','on');
             brush_checkbox_callback();
+            set(polygon_mask_button,'Enable','on');
         else
             set(brush_checkbox,'Enable','off');
             set(bg_thresh_slider,'Enable','off');
@@ -407,6 +420,7 @@ end
             set(download_button,'Enable','off');
             set(upload_button,'Enable','off');
             handles.drawBrush = 0;
+            set(polygon_mask_button,'Enable','off');
         end
     end
 
@@ -429,6 +443,17 @@ end
             mask = double(handles.activeCamData.finalSegmentation);
             save(strcat(path,filename), 'mask', '-ascii', '-tabs');
         end
+    end
+
+
+    function polygon_mask_button_callback(source,~)
+        [x, y] = getpts(handles.activeCamData.screen);
+        poly_indices = convhull(x, y);
+        mask = poly2mask(x(poly_indices), y(poly_indices),...
+                         size(handles.activeCamData.cmosData, 1),...
+                         size(handles.activeCamData.cmosData, 2));
+        handles.activeCamData.finalSegmentation = mask;
+        drawFrame(handles.frame ,handles.activeScreenNo, handles);
     end
 
 
