@@ -6,9 +6,9 @@ function cmosData = CMOSconverter(olddir,oldfilename)
 % INPUTS
 % olddir = directory where file is located
 % oldfilename = filename
-%
+% 
 % OUTPUT
-% cmosData = pertinent data as saved in this structure including:
+% cmosData = pertinent data as saved in this structure including: 
 %                + intensity = cmosData and cmosData2
 %                + analog channels = channel1 and channel2
 %                + time per frame = acqFrequency
@@ -19,7 +19,7 @@ function cmosData = CMOSconverter(olddir,oldfilename)
 % MODIFICATION LOG:
 %
 % January 15, 2016 - SciMedia has released a new camera system with
-% expanded capabilites. Part of this includes slight modifications to the
+% expanded capabilites. Part of this includes slight modifications to the 
 % established *.rsd format and the intorduction of the new *.gsd format. I
 % have updated the code for the *.rsd changes and added code to recognzie
 % and extract data from the *.gsd format.
@@ -112,7 +112,7 @@ if strcmp(oldfilename(end-2:end),'rsh')
     channel{2} = zeros(1,size(cmosData,3)*20);
     analogInd = 1:4:80;
     k=0;
-    %     k = 1;
+%     k = 1;
     for i = 2:num
         fpath = [dirname dataPaths{i}];
         fid=fopen(fpath,'r','l');       % use big-endian format
@@ -131,7 +131,7 @@ if strcmp(oldfilename(end-2:end),'rsh')
                 oneframe = fdata(:,j);  % one frame at certain time point
                 oneframe = reshape(oneframe,128,100);
                 cmosData(:,:,k*size(fdata,2)+j) = oneframe(21:120,:)';
-                %                 cmosData(:,:,k) = oneframe(21:120,:)';
+%                 cmosData(:,:,k) = oneframe(21:120,:)';
             else
                 newInd = (j+1)/2;
                 oneframe = fdata(:,j);
@@ -171,8 +171,8 @@ if strcmp(oldfilename(end-2:end),'rsh')
     fdata = reshape(fdata,128,100);
     bgimage = fdata(21:120,:)';
 end
-%% GSH data %%
-if strcmp(oldfilename(end-2:end),'gsh')
+%% GSD data %%
+if strcmp(oldfilename(end-2:end),'gsd')
     % Open header file
     gsdFlag = 1;
     fid=fopen([dirname,oldfilename],'r','b');
@@ -181,7 +181,7 @@ if strcmp(oldfilename(end-2:end),'gsh')
     
     camTypeFlag = strfind(fstr, 'Camera');
     camType = fstr(camTypeFlag:camTypeFlag+1);
-    if size(camType,2) == 0
+    if size(camType,2) == 0 
         % Grab header information
         ind = strfind(fstr,'Frame');
         numFrames = str2double(fstr(ind+13:ind+17));
@@ -228,34 +228,38 @@ if strcmp(oldfilename(end-2:end),'gsh')
         % For some reason images taken with D225 cameras need to be rotated
         cmosData = flip(rot90(cmosData,3),2);
     end
-    % Analog inputs
+    % Analog inputs 
     channel = cell(nChanum,1);
     status = fseek(fid,972+xPixels*yPixels*2*numFrames+25600,'bof');
     for n = 1:nChanum
-        channel{n} = fread(fid,numFrames*nRate,'short');
-    end
+           channel{n} = fread(fid,numFrames*nRate,'short');
+    end    
 end
 %% Binary Data %%
 if strcmp(oldfilename(end-2:end),'bin')
     file = dir(dirname+"/"+oldfilename);
-    numFrames = file.bytes/(2*128*128);
     fileID = fopen([dirname,oldfilename],'r');
     disp(['converting',oldfilename])
-    cmosData1 = fread(fileID,numFrames*128*128,'uint16');
-    outputID = fopen(dirname+"/output.txt",'r');
-    fps = fgetl(outputID);
-    frequency = str2double(fps);
-    fclose(outputID);
-    cmosData = reshape(cmosData1,[128 128 numFrames]);
+    width = fread(fileID,1,'int');
+    crutch = fread(fileID,1,'int');
+    height = fread(fileID,1,'int');
+    crutch = fread(fileID,1,'int');
+    fps = fread(fileID,1,'double');
+    numFrames = (file.bytes-24)/(2*width*height);
+    cmosData1 = fread(fileID,numFrames*width*height,'uint16');
+    %outputID = fopen(dirname+"/output.txt",'r');
+    frequency = fps;
+    %fclose(outputID);
+    cmosData = reshape(cmosData1,[width height numFrames]);
     bgimage = cmosData(:,:,1);
     fstr='null';
     channel = "null";
-    acqFreq = "null";
+    acqFreq = fps;
     nRate = "null";
     fclose(fileID);
     dual = 0;
 end
-
+    
 %% Based on the assumption that the upstroke is downward, not upward.
 len = size(cmosData,3);
 thred = 2^16*3/4;
@@ -307,4 +311,10 @@ if strcmp(fstr(3),'U')
 else
     save(newfilename,'cmosData','channel','acqFreq','nRate','frequency', 'bgimage','dual');
 end
+
+
+
+
+
+
 
