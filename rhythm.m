@@ -1532,11 +1532,13 @@ end
                 end
             else
                 for i_marker=1:msize
-                    for i_cam = 1:4
-                        if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
-                            subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
-                            plot(handles.time(1:handles.allCamData(i_cam).maxFrame),...
-                                squeeze(handles.allCamData(i_cam).cmosData(M(i_marker,2),M(i_marker,1),:)),...
+                    i_cam = 0;
+                    for i_cam_index = 1:4
+                        if (handles.allCamData(i_cam_index).isloaded && handles.bounds(i_cam_index) == 1)
+                            i_cam = i_cam + 1;
+                            subplot(msize, number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
+                            plot(handles.time(1:handles.allCamData(i_cam_index).maxFrame),...
+                                squeeze(handles.allCamData(i_cam_index).cmosData(M(i_marker,2),M(i_marker,1),:)),...
                                 handles.markerColors(i_marker),'LineWidth',2)
                             %hold on
                             movegui(w,'center')

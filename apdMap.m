@@ -101,9 +101,9 @@ APD_max = prctile(apdMap(isfinite(apdMap)),99);
 caxis(movie_scrn,[APD_min APD_max])
 
 %% Plot Histogram of APDMap
-%figure('Name','Histogram of APD')
-%hist(reshape(apdMap,[],1),floor(APD_max-APD_min))
-%xlim([APD_min APD_max])
+figure('Name','Histogram of APD')
+hist(reshape(apdMap,[],1),floor(APD_max-APD_min))
+xlim([APD_min APD_max])
 
 %% Calculating statistics
 apd_mean=nanmean(apdMap(:));

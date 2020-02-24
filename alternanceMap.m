@@ -92,6 +92,11 @@ alternance_min = -alternance_max;
 
 caxis(movie_scrn,[alternance_min alternance_max]);
 
+%% Plot Histogram of APDMap
+figure('Name','Histogram of Alternance')
+hist(reshape(alternanceMap,[],1),floor(alternance_max-alternance_min))
+xlim([alternance_min alternance_max])
+
 %% Calculating statistics
 alternance_mean=nanmean(alternanceMap(:));
 disp(['The average alternance in the region is ' num2str(alternance_mean) ' (ms).'])
