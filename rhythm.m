@@ -1474,7 +1474,7 @@ end
                     output = ensembleAverage(handles, pacingCL_t, truncateAfter_t, startingTime_t, M);
                     subplot('Position',[0.06 (120*(a-x)+70)/(120*a+80) 0.9 110/(120*a+80)]);
                     plot(output.('t'), ...
-                        output.(char("m"+num2str(x)+"avg")),'color',colax(x),'LineWidth',2)
+                        output.(char('m'+num2str(x)+'avg')),'color',colax(x),'LineWidth',2)
                     hold on
                     if x == a
                     else
@@ -1521,7 +1521,7 @@ end
                         if (handles.allCamData(i_cam).isloaded && handles.bounds(i_cam) == 1)
                             subplot(msize,number_of_bounds, i_cam+(i_marker-1)*number_of_bounds);
                             plot(output.('t'),...
-                                output.(char("m"+num2str(i_marker)+"avg")),...
+                                output.(char('m'+num2str(i_marker)+'avg')),...
                                 handles.markerColors(i_marker),'LineWidth',2)
                             %hold on
                             movegui(w,'center')
