@@ -250,7 +250,7 @@ if strcmp(oldfilename(end-2:end),'bin')
     %outputID = fopen(dirname+"/output.txt",'r');
     frequency = fps;
     %fclose(outputID);
-    cmosData = reshape(cmosData1,[width height numFrames]);
+    cmosData = permute(reshape(cmosData1,[width height numFrames]), [2,1,3]);
     bgimage = cmosData(:,:,1);
     fstr='null';
     channel = "null";
