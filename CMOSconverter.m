@@ -237,7 +237,7 @@ if strcmp(oldfilename(end-2:end),'gsd')
 end
 %% Binary Data %%
 if strcmp(oldfilename(end-2:end),'bin')
-    file = dir(dirname+"/"+oldfilename);
+    file = dir(strcat(dirname,'/',oldfilename));
     fileID = fopen([dirname,oldfilename],'r');
     disp(['converting',oldfilename])
     width = fread(fileID,1,'int');
@@ -246,11 +246,13 @@ if strcmp(oldfilename(end-2:end),'bin')
     crutch = fread(fileID,1,'int');
     fps = fread(fileID,1,'double');
     numFrames = (file.bytes-24)/(2*width*height);
+    %numFrames = 15000;
     cmosData1 = fread(fileID,numFrames*width*height,'uint16');
     %outputID = fopen(dirname+"/output.txt",'r');
     frequency = fps;
     %fclose(outputID);
     cmosData = permute(reshape(cmosData1,[width height numFrames]), [2,1,3]);
+    cmosData = cmosData(:,:,1:1930);
     bgimage = cmosData(:,:,1);
     fstr='null';
     channel = "null";
