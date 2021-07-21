@@ -252,7 +252,7 @@ if strcmp(oldfilename(end-2:end),'bin')
     frequency = fps;
     %fclose(outputID);
     cmosData = permute(reshape(cmosData1,[width height numFrames]), [2,1,3]);
-    cmosData = cmosData(:,:,1:1930);
+    %cmosData = cmosData(:,:,1:1930);
     bgimage = cmosData(:,:,1);
     fstr='null';
     channel = "null";
