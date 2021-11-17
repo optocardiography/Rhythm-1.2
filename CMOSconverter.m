@@ -261,6 +261,43 @@ if strcmp(oldfilename(end-2:end),'bin')
     fclose(fileID);
     dual = 0;
 end
+
+
+%% TIFF multi-image file%%
+
+if strcmp(oldfilename(end-2:end),'tif')
+    file = dir(strcat(dirname,'/',oldfilename));
+    tiffinfo=imfinfo(strcat(dirname,'/',oldfilename));
+    disp(['converting ',oldfilename])
+    numFrames=numel(tiffinfo);
+    width=tiffinfo.Width;
+    height=tiffinfo.Height;
+    
+    
+    %% No info on framerate at the moment. Have to use pop-up dialogue.
+    prompt = {'Please, enter framerate in fps'};
+    dlgtitle = 'Framerate';
+    answer = inputdlg(prompt,dlgtitle);
+    
+    
+    frequency=str2double(answer);
+    acqFreq=1000/frequency;
+
+    for iFrame = 1:numFrames
+       tmp=imread(strcat(dirname,'/',oldfilename),'Index',iFrame);
+       if(~strcmp(tiffinfo(1).ColorType,'grayscale'))   
+           tmp=rgb2gray(tmp);
+       end
+       cmosData(:,:,iFrame)=tmp;
+    end
+    nRate = "null";
+    cmosData=cast(cmosData,'int16');%in case initial recording was in 8-bit
+    bgimage = cmosData(:,:,1);
+    channel = "null";
+    dual = 0;
+    fstr='null';
+end
+
     
 %% Based on the assumption that the upstroke is downward, not upward.
 len = size(cmosData,3);

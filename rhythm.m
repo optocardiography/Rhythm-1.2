@@ -1038,6 +1038,7 @@ end
             search_nameNew = [dir_name,'/*.gsh'];
             search_nameMat = [dir_name,'/*.mat'];
             search_nameBin = [dir_name,'/*.bin'];
+            search_nameBin = [dir_name,'/*.tif'];%Double f is a potential issue. Have to fix that.
             files = struct2cell(dir(search_name));
             filesNew = struct2cell(dir(search_nameNew));
             filesMat = struct2cell(dir(search_nameMat));
@@ -1211,8 +1212,8 @@ end
         disp([i,j]);
         %make sure pixel selected is within movieScreen
         assignin('base', 'DataFromwave', handles.activeCamData.cmosData(:,:,1));
-        if i_temp>size(handles.activeCamData.cmosData,1) ||...
-                j_temp>size(handles.activeCamData.cmosData,2) ||...
+        if i_temp>size(handles.activeCamData.cmosData,2) ||...
+                j_temp>size(handles.activeCamData.cmosData,1) ||...
                 i_temp<=1 || j_temp<=1
             msgbox('Warning: Pixel Selection out of Boundary','Title','help')
         else
