@@ -64,6 +64,11 @@ movieScreen4 = axes('Parent',p1,'Units','Pixels','YTick',[],'XTick',[],...
                    'color', 'black','box','on', 'linewidth',2,...
                    'CameraUpVector',[0,1,1], 'YDir','reverse');
 
+movieScreen1.Toolbar.Visible = 'off';
+movieScreen2.Toolbar.Visible = 'off';
+movieScreen3.Toolbar.Visible = 'off';
+movieScreen4.Toolbar.Visible = 'off';
+
 camHandles1 = cameraData;
 camHandles2 = cameraData;
 camHandles3 = cameraData;
@@ -942,11 +947,21 @@ end
                         handles.activeCamData.cmosData = double(Data.cmosData(:,:,2:end));
                     elseif isfield(Data,'filt_data')
                         handles.activeCamData.cmosData = double(Data.filt_data(:,:,2:end));
+                    elseif isfield(Data, 'cmosData1')
+                        handles.activeCamData.cmosData = double(Data.cmosData1(:,:,2:end));
                     end
-                    if length(size(Data.bgimage)) == 3
-                        handles.activeCamData.bg = double(rgb2gray(Data.bgimage));
+                    if isfield(Data, 'bgimage')
+                        if length(size(Data.bgimage)) == 3
+                            handles.activeCamData.bg = double(rgb2gray(Data.bgimage));
+                        else
+                            handles.activeCamData.bg = double(Data.bgimage);
+                        end
                     else
-                        handles.activeCamData.bg = double(Data.bgimage);
+                        if length(size(Data.bgImage1)) == 3
+                            handles.activeCamData.bg = double(rgb2gray(Data.bgImage1));
+                        else
+                            handles.activeCamData.bg = double(Data.bgImage1);
+                        end
                     end
                     handles.activeCamData.finalSegmentation = zeros(size(handles.activeCamData.bg));
                     handles.activeCamData.brushSegmentation = zeros(size(handles.activeCamData.bg));
@@ -1038,13 +1053,15 @@ end
             search_nameNew = [dir_name,'/*.gsh'];
             search_nameMat = [dir_name,'/*.mat'];
             search_nameBin = [dir_name,'/*.bin'];
-            search_nameBin = [dir_name,'/*.tif'];%Double f is a potential issue. Have to fix that.
+            search_nameTiff = [dir_name,'/*.tif'];%Double f is a potential issue. Have to fix that.
             files = struct2cell(dir(search_name));
             filesNew = struct2cell(dir(search_nameNew));
             filesMat = struct2cell(dir(search_nameMat));
             filesBin = struct2cell(dir(search_nameBin));
-            handles.file_list = [files(1,:)'; filesNew(1,:)';filesMat(1,:)';filesBin(1,:)'];
+            filesTiff = struct2cell(dir(search_nameTiff));
+            handles.file_list = [files(1,:)'; filesNew(1,:)';filesMat(1,:)';filesBin(1,:)';filesTiff(1,:)];
             set(filelist,'String',handles.file_list)
+            set(filelist,'Value',1);
             handles.filename = char(handles.file_list(1));
         end
     end

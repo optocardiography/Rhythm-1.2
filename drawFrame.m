@@ -33,7 +33,7 @@ function drawFrame(frame, camNo, handles)
             end
             
             I = J .* A + G .* (1 - A);
-
+            %I = J .* A;
             if handles.activeScreenNo == camNo
                 if (handles.drawSegmentation)
                     mask = handles.activeCamData.finalSegmentation;

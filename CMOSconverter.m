@@ -256,7 +256,7 @@ if strcmp(oldfilename(end-2:end),'bin')
     bgimage = cmosData(:,:,1);
     fstr='null';
     channel = "null";
-    acqFreq = fps;
+    acqFreq = 1000/fps;
     nRate = "null";
     fclose(fileID);
     dual = 0;

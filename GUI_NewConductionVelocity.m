@@ -197,8 +197,9 @@ numOfLevels_callback(numOfLevels_edit);
         
         handles.activeCamData.xres = str2double(get(xdist_edit,'String'));
         handles.activeCamData.yres = str2double(get(ydist_edit,'String'));
-        set(f,'CurrentAxes',handles.activeScreen);        
-        axis([1 100 1 100]);
+        set(f,'CurrentAxes',handles.activeScreen);
+        camsize = size(handles.activeCamData.bg);
+        axis([1 camsize(1) 1 camsize(2)]);
         %axis ij;
         rect = getrect(handles.activeScreen);
         gg=msgbox('Building Conduction Velocity Map...');
@@ -216,7 +217,8 @@ end
     function draw_line_callback(~,~)
         Line = [];
         set(f,'CurrentAxes',handles.activeScreen);        
-        axis([1 100 1 100]);
+        camsize = size(handles.activeCamData.bg);
+        axis([1 camsize(1) 1 camsize(2)]);
         Line=getline(handles.activeScreen);
         handles.Line = Line;
     end
@@ -325,9 +327,9 @@ end
        drawFrame(handles.frame ,handles.activeScreenNo, handles);
        
        set( handles.activeScreen,'YDir','reverse');
-    
-       xlim(handles.activeScreen,[1 100]);
-       ylim(handles.activeScreen,[1 100]);
+       camsize = size(handles.activeCamData.bg);
+       xlim(handles.activeScreen,[1 camsize(1)]);
+       ylim(handles.activeScreen,[1 camsize(2)]);
        
 %        axis (handles.activeScreen,'off')
        

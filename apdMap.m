@@ -55,7 +55,7 @@ APD_max_rescaled = maxapd * Fs / 1000;
 
 AP_level = 1.0 - percentAPD / 100;
 
-area_coords = int8(area_coords);
+area_coords = int16(area_coords);
 j_min = 1 + area_coords(1);
 i_min = 1 + area_coords(2);
 j_max = area_coords(1) + area_coords(3);

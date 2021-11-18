@@ -5,7 +5,7 @@ function data_averaged = ensembleAverageFull(data, CL, Fs)
     
     [Y, X, T] = size(data);
     
-    m = CL * Fs;                    % number of points in one cycle
+    m = round(CL * Fs);                    % number of points in one cycle
     n = floor(T / m);               % number of whole cycles
     tail_length = T - n * m;        % length of tail
     

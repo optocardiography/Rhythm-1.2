@@ -352,7 +352,7 @@ apply_button = uicontrol('Parent',conditionParametersGroup,...
                          'Units','normalized',...
                          'Position',[pos_left, pos_bottom, element_width, element_height],...
                          'Callback',@cond_sig_selcbk);
-
+                     
 %%
 guidata(conditionParametersGroup, handles);
 if (handles.activeCamData.isloaded)
@@ -449,7 +449,7 @@ end
     function polygon_mask_button_callback(source,~)
         [x, y] = getpts(handles.activeCamData.screen);
         poly_indices = convhull(x, y);
-        mask = poly2mask(x(poly_indices), y(poly_indices),...
+        mask = poly2mask(x, y,...
                          size(handles.activeCamData.cmosData, 1),...
                          size(handles.activeCamData.cmosData, 2));
         handles.activeCamData.finalSegmentation = mask;
@@ -563,6 +563,8 @@ end
         
     end
 
+%% Save Signals callback
+        
 
 %% Condition Signals Selection Change Callback
     function cond_sig_selcbk(hObject,~)

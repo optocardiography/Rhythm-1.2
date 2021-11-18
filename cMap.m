@@ -57,6 +57,7 @@ function [cMap] = cMap(data,stat,endp,Fs,bg,rect, f, movie_scrn, handles)
 % Refer to efimovlab.org for more information.
 
 %% Code
+
 %% Find Activation Times for Polynomial Surface
 stat=round(stat*Fs)+1;
 endp=round(endp*Fs)+1;
@@ -134,13 +135,14 @@ if use_window
             resi    = sqrt(sum((t-fit*coefs).^2)/sum(t.^2));
             resilin = sqrt(sum((t-fit(:,1:3)*coefs(1:3)).^2)/sum(t.^2));
             XYT(i,:)= [xyt(i,:),coefs',resi,len,cond(fit),resilin];
-        end
+       end
     end
             
-    cropped = dataCroppedInTime(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3),1);
-    croppedResized = reshape(cropped,[],1);
+    cropped = max(dataCroppedInTime(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3),:), [], 3);
+    %cropped = dataCroppedInTime(rect(2):rect(2)+rect(4),rect(1):rect(1)+rect(3),1);
+    croppedResized = reshape(cropped, [], 1);
     
-    was_fitted=find( (XYT(:,1)~=0) & (XYT(:,2)~=0) & ( croppedResized(:) > 0) ); % if XYT was not filled or point not inside of segmented region
+    was_fitted=find( (XYT(:,1)~=0) & (XYT(:,2)~=0) & (croppedResized(:) > 0)); % if XYT was not filled or point not inside of segmented region
     XYT=XYT(was_fitted,:);
     
     % coef_x / (coef_x^2 + coef_y^2) * TODO multiplier????
