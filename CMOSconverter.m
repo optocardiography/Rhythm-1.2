@@ -172,7 +172,7 @@ if strcmp(oldfilename(end-2:end),'rsh')
     bgimage = fdata(21:120,:)';
 end
 %% GSD data %%
-if strcmp(oldfilename(end-2:end),'gsd')
+if strcmp(oldfilename(end-2:end),'gsh')
     % Open header file
     gsdFlag = 1;
     fid=fopen([dirname,oldfilename],'r','b');
@@ -194,7 +194,8 @@ if strcmp(oldfilename(end-2:end),'gsd')
         ind = strfind(fstr,'frames');
         numFrames = str2double(fstr(ind+9:ind+13));
         ind = strfind(fstr,'Exposure');
-        acqFreq = str2double(fstr(ind+21:ind+22)); % in msec
+        newl=strfind(fstr(ind:end),char(10))+ind-1;
+        acqFreq = str2double(fstr(ind+21:newl(1))); % in msec
         frequency = 1000/acqFreq;
         dual = 0;
     end
@@ -348,7 +349,7 @@ if strcmp(fstr(3),'U')
         save(newfilename,'cmosData','cmosData2','channel','acqFreq','frequency','bgimage','bgimage2','dual');
     end
 else
-    save(newfilename,'cmosData','channel','acqFreq','nRate','frequency', 'bgimage','dual');
+    save(newfilename,'cmosData','channel','acqFreq','nRate','frequency', 'bgimage','dual','-v7.3');
 end
 
 

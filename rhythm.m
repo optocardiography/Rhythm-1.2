@@ -64,10 +64,12 @@ movieScreen4 = axes('Parent',p1,'Units','Pixels','YTick',[],'XTick',[],...
                    'color', 'black','box','on', 'linewidth',2,...
                    'CameraUpVector',[0,1,1], 'YDir','reverse');
 
-movieScreen1.Toolbar.Visible = 'off';
-movieScreen2.Toolbar.Visible = 'off';
-movieScreen3.Toolbar.Visible = 'off';
-movieScreen4.Toolbar.Visible = 'off';
+% The following 4 lines of code were added for some reason, but don't work
+% on Matlab 2017
+%movieScreen1.Toolbar.Visible = 'off';
+%movieScreen2.Toolbar.Visible = 'off';
+%movieScreen3.Toolbar.Visible = 'off';
+%movieScreen4.Toolbar.Visible = 'off';
 
 camHandles1 = cameraData;
 camHandles2 = cameraData;
